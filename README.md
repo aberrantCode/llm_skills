@@ -8,10 +8,10 @@ Consolidated archive of custom agents, commands, and skills for Claude Code, Ope
 llm_skills/
 ├── claude/
 │   ├── agents/     # 15 sub-agents invoked via the Task tool
-│   ├── commands/   # 18 slash commands
-│   └── skills/     # 64 domain-specific knowledge modules
+│   ├── commands/   # 24 slash commands
+│   └── skills/     # 65 domain-specific knowledge modules
 ├── codex/
-│   └── skills/     # 1 domain-specific knowledge module
+│   └── skills/     # 2 domain-specific knowledge modules
 └── gemini/         # Google Gemini CLI skills (future)
 ```
 
@@ -79,6 +79,12 @@ Slash commands available globally in Claude Code. Most delegate to a specialized
 | [`/update-code-index`](claude/commands/update-code-index.md) | Regenerate `CODE_INDEX.md` — scans for all functions, classes, hooks, and components |
 | [`/update-codemaps`](claude/commands/update-codemaps.md) | Analyze codebase structure and regenerate architecture documentation in `docs/CODEMAPS/` |
 | [`/update-docs`](claude/commands/update-docs.md) | Sync documentation from source-of-truth: package.json scripts, JSDoc/TSDoc, API signatures |
+| [`/diff-review`](claude/commands/diff-review.md) | Visual HTML diff review — before/after architecture comparison, code review analysis, decision log |
+| [`/fact-check`](claude/commands/fact-check.md) | Verify factual accuracy of a review page or plan doc against actual code — corrects inaccuracies in place |
+| [`/generate-slides`](claude/commands/generate-slides.md) | Generate a magazine-quality slide deck as a self-contained HTML page |
+| [`/generate-web-diagram`](claude/commands/generate-web-diagram.md) | Generate a beautiful standalone HTML diagram and open it in the browser |
+| [`/plan-review`](claude/commands/plan-review.md) | Visual HTML plan review — current codebase vs. proposed plan with risk assessment |
+| [`/project-recap`](claude/commands/project-recap.md) | Visual HTML project recap — architecture snapshot, decision log, and cognitive debt hotspots |
 
 ---
 
@@ -152,6 +158,7 @@ Domain-specific knowledge modules loaded into AI context. Claude skills live in 
 | [`project-tooling`](claude/skills/project-tooling/) | Tooling & DevOps | gh, vercel, supabase, render CLI and deployment platform setup | ✓ | | |
 | [`workspace`](claude/skills/workspace/) | Tooling & DevOps | Multi-repo and monorepo awareness — topology analysis, API contract tracking, cross-repo context | ✓ | | |
 | [`youtube-prd-forensics`](claude/skills/youtube-prd-forensics/) | Research & OSINT | Create or update a detailed PRD from a YouTube demo video using evidence-first analysis — timestamps, keyframes, transcript, and embedded screenshots | ✓ | ✓ | |
+| [`visual-explainer`](claude/skills/visual-explainer/) | UI & Design | Generate beautiful self-contained HTML pages for diagrams, architecture overviews, diff reviews, plan reviews, project recaps, and data tables — never falls back to ASCII art | ✓ | ✓ | |
 
 ---
 
@@ -160,8 +167,8 @@ Domain-specific knowledge modules loaded into AI context. Claude skills live in 
 | Type | Count |
 |------|-------|
 | Agents | 15 |
-| Commands | 18 |
-| Skills (Claude) | 64 |
-| Skills (Codex) | 1 |
+| Commands | 24 |
+| Skills (Claude) | 65 |
+| Skills (Codex) | 2 |
 | Skills (Gemini) | 0 |
-| **Total Skills** | **65** |
+| **Total Skills** | **67** |
