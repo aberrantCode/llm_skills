@@ -11,7 +11,7 @@ llm_skills/
 │   ├── commands/   # 24 slash commands
 │   └── skills/     # 65 domain-specific knowledge modules
 ├── codex/
-│   └── skills/     # 2 domain-specific knowledge modules
+│   └── skills/     # 65 domain-specific knowledge modules
 └── gemini/         # Google Gemini CLI skills (future)
 ```
 
@@ -90,73 +90,73 @@ Slash commands available globally in Claude Code. Most delegate to a specialized
 
 ## Skills
 
-Domain-specific knowledge modules loaded into AI context. Claude skills live in `claude/skills/<name>/`, Gemini skills in `gemini/skills/<name>/`.
+Domain-specific knowledge modules loaded into AI context. Claude skills live in `claude/skills/<name>/`, Codex skills in `codex/skills/<name>/`, Gemini skills in `gemini/skills/<name>/`.
 
 | Skill | Subsection | Description | Claude | Codex | Gemini |
 |-------|------------|-------------|:------:|:-----:|:------:|
-| [`base`](claude/skills/base/) | Foundations & Workflow | Universal coding patterns, constraints, TDD workflow, and atomic todos | ✓ | | |
-| [`iterative-development`](claude/skills/iterative-development/) | Foundations & Workflow | Self-referential TDD iteration (Ralph Wiggum loops) — cycles until tests pass | ✓ | | |
-| [`session-management`](claude/skills/session-management/) | Foundations & Workflow | Context preservation, tiered summarization, and resumability across long sessions | ✓ | | |
-| [`team-coordination`](claude/skills/team-coordination/) | Foundations & Workflow | Multi-person projects — shared state, todo claiming, and handoffs | ✓ | | |
-| [`existing-repo`](claude/skills/existing-repo/) | Foundations & Workflow | Analyze existing repositories, maintain their structure, setup guardrails | ✓ | | |
-| [`subagent-driven-development`](claude/skills/subagent-driven-development/) | Foundations & Workflow | Parallel task execution using sub-agents for independent implementation steps | ✓ | | |
-| [`create-feature-spec`](claude/skills/create-feature-spec/) | Foundations & Workflow | Create a comprehensive feature specification from a single sentence description | ✓ | | |
-| [`finishing-a-development-branch`](claude/skills/finishing-a-development-branch/) | Foundations & Workflow | Guides branch completion — presents options: merge, PR, squash, or cleanup | ✓ | | |
-| [`using-git-worktrees`](claude/skills/using-git-worktrees/) | Foundations & Workflow | Isolated git worktrees for feature work — smart directory selection and safety verification | ✓ | | |
-| [`requesting-code-review`](claude/skills/requesting-code-review/) | Foundations & Workflow | Use when completing tasks or before merging to verify work meets requirements | ✓ | | |
-| [`ship-to-dev`](claude/skills/ship-to-dev/) | Foundations & Workflow | Automated flow: commit → push → PR to dev → merge → branch cleanup | ✓ | | |
-| [`commit-hygiene`](claude/skills/commit-hygiene/) | Foundations & Workflow | Atomic commits, PR size limits, commit thresholds, stacked PRs | ✓ | | |
-| [`typescript`](claude/skills/typescript/) | Languages & Runtimes | TypeScript strict mode with eslint and jest | ✓ | | |
-| [`python`](claude/skills/python/) | Languages & Runtimes | Python development with ruff, mypy, pytest — TDD and type safety | ✓ | | |
-| [`nodejs-backend`](claude/skills/nodejs-backend/) | Languages & Runtimes | Node.js backend patterns with Express/Fastify, repository pattern | ✓ | | |
-| [`react-web`](claude/skills/react-web/) | Frontend Frameworks | React web development with hooks, React Query, Zustand | ✓ | | |
-| [`react-native`](claude/skills/react-native/) | Frontend Frameworks | React Native mobile patterns, platform-specific code | ✓ | | |
-| [`flutter`](claude/skills/flutter/) | Frontend Frameworks | Flutter with Riverpod, Freezed, go_router, and mocktail testing | ✓ | | |
-| [`pwa-development`](claude/skills/pwa-development/) | Frontend Frameworks | Progressive Web Apps — service workers, caching strategies, offline support, Workbox | ✓ | | |
-| [`android-java`](claude/skills/android-java/) | Mobile (Native) | Android Java development with MVVM, ViewBinding, and Espresso testing | ✓ | | |
-| [`android-kotlin`](claude/skills/android-kotlin/) | Mobile (Native) | Android Kotlin with Coroutines, Jetpack Compose, Hilt, and MockK testing | ✓ | | |
-| [`ui-mobile`](claude/skills/ui-mobile/) | Mobile (Native) | Mobile UI patterns — React Native, iOS/Android, touch targets | ✓ | | |
-| [`ui-web`](claude/skills/ui-web/) | UI & Design | Web UI — glassmorphism, Tailwind, dark mode, accessibility | ✓ | | |
-| [`ui-testing`](claude/skills/ui-testing/) | UI & Design | Visual testing — catch invisible buttons, broken layouts, contrast issues | ✓ | | |
-| [`design-taste-frontend`](claude/skills/design-taste-frontend/) | UI & Design | Senior UI/UX guidance — metric-based rules, CSS hardware acceleration, balanced design engineering | ✓ | | |
-| [`frontend-design`](claude/skills/frontend-design/) | UI & Design | Production-grade frontend interfaces — polished, distinctive, avoiding generic AI aesthetics | ✓ | | |
-| [`user-journeys`](claude/skills/user-journeys/) | UI & Design | UX flows — journey mapping, UX validation, error recovery | ✓ | | |
-| [`doc-coauthoring`](claude/skills/doc-coauthoring/) | UI & Design | Structured co-authoring workflow for documentation, proposals, and technical specs | ✓ | | |
-| [`explain-code`](claude/skills/explain-code/) | UI & Design | Explains code with visual diagrams and analogies | ✓ | | |
-| [`supabase`](claude/skills/supabase/) | Databases & Storage | Core Supabase CLI, migrations, RLS, Edge Functions | ✓ | | |
-| [`supabase-nextjs`](claude/skills/supabase-nextjs/) | Databases & Storage | Next.js with Supabase and Drizzle ORM | ✓ | | |
-| [`supabase-node`](claude/skills/supabase-node/) | Databases & Storage | Express/Hono with Supabase and Drizzle ORM | ✓ | | |
-| [`supabase-python`](claude/skills/supabase-python/) | Databases & Storage | FastAPI with Supabase and SQLAlchemy/SQLModel | ✓ | | |
-| [`firebase`](claude/skills/firebase/) | Databases & Storage | Firebase Firestore, Auth, Storage, real-time listeners, security rules | ✓ | | |
-| [`aws-aurora`](claude/skills/aws-aurora/) | Databases & Storage | AWS Aurora Serverless v2, RDS Proxy, Data API, connection pooling | ✓ | | |
-| [`aws-dynamodb`](claude/skills/aws-dynamodb/) | Databases & Storage | AWS DynamoDB single-table design, GSI patterns, SDK v3 TypeScript/Python | ✓ | | |
-| [`azure-cosmosdb`](claude/skills/azure-cosmosdb/) | Databases & Storage | Azure Cosmos DB partition keys, consistency levels, change feed, SDK patterns | ✓ | | |
-| [`cloudflare-d1`](claude/skills/cloudflare-d1/) | Databases & Storage | Cloudflare D1 SQLite database with Workers, Drizzle ORM, migrations | ✓ | | |
-| [`database-schema`](claude/skills/database-schema/) | Databases & Storage | Schema awareness — read before coding, type generation, prevent column errors | ✓ | | |
-| [`code-review`](claude/skills/code-review/) | Code Quality | Mandatory code reviews via `/code-review` before commits and deploys | ✓ | | |
-| [`code-deduplication`](claude/skills/code-deduplication/) | Code Quality | Prevent semantic code duplication with capability index and check-before-write | ✓ | | |
-| [`codex-review`](claude/skills/codex-review/) | Code Quality | OpenAI Codex CLI code review with GPT-5.2-Codex, CI/CD integration | ✓ | | |
-| [`gemini-review`](claude/skills/gemini-review/) | Code Quality | Google Gemini CLI code review with Gemini 2.5 Pro and 1M token context | ✓ | | |
-| [`playwright-testing`](claude/skills/playwright-testing/) | Code Quality | E2E testing with Playwright — Page Objects, cross-browser, CI/CD integration | ✓ | | |
-| [`security`](claude/skills/security/) | Security & Credentials | OWASP security patterns, secrets management, security testing | ✓ | | |
-| [`credentials`](claude/skills/credentials/) | Security & Credentials | Centralized API key management from Access.txt | ✓ | | |
-| [`agentic-development`](claude/skills/agentic-development/) | AI & LLM | Build AI agents with Pydantic AI (Python) and Claude SDK (Node.js) | ✓ | | |
-| [`llm-patterns`](claude/skills/llm-patterns/) | AI & LLM | AI-first application patterns, LLM testing, prompt management | ✓ | | |
-| [`ai-models`](claude/skills/ai-models/) | AI & LLM | Latest AI models reference — Claude, OpenAI, Gemini, Eleven Labs, Replicate | ✓ | | |
-| [`shopify-apps`](claude/skills/shopify-apps/) | Commerce & Payments | Shopify app development — Remix, Admin API, checkout extensions | ✓ | | |
-| [`woocommerce`](claude/skills/woocommerce/) | Commerce & Payments | WooCommerce REST API — products, orders, customers, webhooks | ✓ | | |
-| [`medusa`](claude/skills/medusa/) | Commerce & Payments | Medusa headless commerce — modules, workflows, API routes, admin UI | ✓ | | |
-| [`web-payments`](claude/skills/web-payments/) | Commerce & Payments | Stripe Checkout, subscriptions, webhooks, customer portal | ✓ | | |
-| [`klaviyo`](claude/skills/klaviyo/) | Third-Party Integrations | Klaviyo email/SMS marketing — profiles, events, flows, segmentation | ✓ | | |
-| [`reddit-api`](claude/skills/reddit-api/) | Third-Party Integrations | Reddit API with PRAW (Python) and Snoowrap (Node.js) | ✓ | | |
-| [`reddit-ads`](claude/skills/reddit-ads/) | Third-Party Integrations | Reddit Ads API — campaigns, targeting, conversions, agentic optimization | ✓ | | |
-| [`ms-teams-apps`](claude/skills/ms-teams-apps/) | Third-Party Integrations | Microsoft Teams bots and AI agents — Claude/OpenAI, Adaptive Cards, Graph API | ✓ | | |
-| [`posthog-analytics`](claude/skills/posthog-analytics/) | Third-Party Integrations | PostHog analytics, event tracking, feature flags, dashboards | ✓ | | |
-| [`site-architecture`](claude/skills/site-architecture/) | SEO & Web Presence | Technical SEO — robots.txt, sitemap, meta tags, Core Web Vitals | ✓ | | |
-| [`web-content`](claude/skills/web-content/) | SEO & Web Presence | SEO and AI discovery (GEO) — schema, ChatGPT/Perplexity optimization | ✓ | | |
-| [`aeo-optimization`](claude/skills/aeo-optimization/) | SEO & Web Presence | AI Engine Optimization — semantic triples, page templates, content clusters for AI citations | ✓ | | |
-| [`project-tooling`](claude/skills/project-tooling/) | Tooling & DevOps | gh, vercel, supabase, render CLI and deployment platform setup | ✓ | | |
-| [`workspace`](claude/skills/workspace/) | Tooling & DevOps | Multi-repo and monorepo awareness — topology analysis, API contract tracking, cross-repo context | ✓ | | |
+| [`base`](claude/skills/base/) | Foundations & Workflow | Universal coding patterns, constraints, TDD workflow, and atomic todos | ✓ | ✓ | |
+| [`iterative-development`](claude/skills/iterative-development/) | Foundations & Workflow | Self-referential TDD iteration (Ralph Wiggum loops) — cycles until tests pass | ✓ | ✓ | |
+| [`session-management`](claude/skills/session-management/) | Foundations & Workflow | Context preservation, tiered summarization, and resumability across long sessions | ✓ | ✓ | |
+| [`team-coordination`](claude/skills/team-coordination/) | Foundations & Workflow | Multi-person projects — shared state, todo claiming, and handoffs | ✓ | ✓ | |
+| [`existing-repo`](claude/skills/existing-repo/) | Foundations & Workflow | Analyze existing repositories, maintain their structure, setup guardrails | ✓ | ✓ | |
+| [`subagent-driven-development`](claude/skills/subagent-driven-development/) | Foundations & Workflow | Parallel task execution using sub-agents for independent implementation steps | ✓ | ✓ | |
+| [`create-feature-spec`](claude/skills/create-feature-spec/) | Foundations & Workflow | Create a comprehensive feature specification from a single sentence description | ✓ | ✓ | |
+| [`finishing-a-development-branch`](claude/skills/finishing-a-development-branch/) | Foundations & Workflow | Guides branch completion — presents options: merge, PR, squash, or cleanup | ✓ | ✓ | |
+| [`using-git-worktrees`](claude/skills/using-git-worktrees/) | Foundations & Workflow | Isolated git worktrees for feature work — smart directory selection and safety verification | ✓ | ✓ | |
+| [`requesting-code-review`](claude/skills/requesting-code-review/) | Foundations & Workflow | Use when completing tasks or before merging to verify work meets requirements | ✓ | ✓ | |
+| [`ship-to-dev`](claude/skills/ship-to-dev/) | Foundations & Workflow | Automated flow: commit → push → PR to dev → merge → branch cleanup | ✓ | ✓ | |
+| [`commit-hygiene`](claude/skills/commit-hygiene/) | Foundations & Workflow | Atomic commits, PR size limits, commit thresholds, stacked PRs | ✓ | ✓ | |
+| [`typescript`](claude/skills/typescript/) | Languages & Runtimes | TypeScript strict mode with eslint and jest | ✓ | ✓ | |
+| [`python`](claude/skills/python/) | Languages & Runtimes | Python development with ruff, mypy, pytest — TDD and type safety | ✓ | ✓ | |
+| [`nodejs-backend`](claude/skills/nodejs-backend/) | Languages & Runtimes | Node.js backend patterns with Express/Fastify, repository pattern | ✓ | ✓ | |
+| [`react-web`](claude/skills/react-web/) | Frontend Frameworks | React web development with hooks, React Query, Zustand | ✓ | ✓ | |
+| [`react-native`](claude/skills/react-native/) | Frontend Frameworks | React Native mobile patterns, platform-specific code | ✓ | ✓ | |
+| [`flutter`](claude/skills/flutter/) | Frontend Frameworks | Flutter with Riverpod, Freezed, go_router, and mocktail testing | ✓ | ✓ | |
+| [`pwa-development`](claude/skills/pwa-development/) | Frontend Frameworks | Progressive Web Apps — service workers, caching strategies, offline support, Workbox | ✓ | ✓ | |
+| [`android-java`](claude/skills/android-java/) | Mobile (Native) | Android Java development with MVVM, ViewBinding, and Espresso testing | ✓ | ✓ | |
+| [`android-kotlin`](claude/skills/android-kotlin/) | Mobile (Native) | Android Kotlin with Coroutines, Jetpack Compose, Hilt, and MockK testing | ✓ | ✓ | |
+| [`ui-mobile`](claude/skills/ui-mobile/) | Mobile (Native) | Mobile UI patterns — React Native, iOS/Android, touch targets | ✓ | ✓ | |
+| [`ui-web`](claude/skills/ui-web/) | UI & Design | Web UI — glassmorphism, Tailwind, dark mode, accessibility | ✓ | ✓ | |
+| [`ui-testing`](claude/skills/ui-testing/) | UI & Design | Visual testing — catch invisible buttons, broken layouts, contrast issues | ✓ | ✓ | |
+| [`design-taste-frontend`](claude/skills/design-taste-frontend/) | UI & Design | Senior UI/UX guidance — metric-based rules, CSS hardware acceleration, balanced design engineering | ✓ | ✓ | |
+| [`frontend-design`](claude/skills/frontend-design/) | UI & Design | Production-grade frontend interfaces — polished, distinctive, avoiding generic AI aesthetics | ✓ | ✓ | |
+| [`user-journeys`](claude/skills/user-journeys/) | UI & Design | UX flows — journey mapping, UX validation, error recovery | ✓ | ✓ | |
+| [`doc-coauthoring`](claude/skills/doc-coauthoring/) | UI & Design | Structured co-authoring workflow for documentation, proposals, and technical specs | ✓ | ✓ | |
+| [`explain-code`](claude/skills/explain-code/) | UI & Design | Explains code with visual diagrams and analogies | ✓ | ✓ | |
+| [`supabase`](claude/skills/supabase/) | Databases & Storage | Core Supabase CLI, migrations, RLS, Edge Functions | ✓ | ✓ | |
+| [`supabase-nextjs`](claude/skills/supabase-nextjs/) | Databases & Storage | Next.js with Supabase and Drizzle ORM | ✓ | ✓ | |
+| [`supabase-node`](claude/skills/supabase-node/) | Databases & Storage | Express/Hono with Supabase and Drizzle ORM | ✓ | ✓ | |
+| [`supabase-python`](claude/skills/supabase-python/) | Databases & Storage | FastAPI with Supabase and SQLAlchemy/SQLModel | ✓ | ✓ | |
+| [`firebase`](claude/skills/firebase/) | Databases & Storage | Firebase Firestore, Auth, Storage, real-time listeners, security rules | ✓ | ✓ | |
+| [`aws-aurora`](claude/skills/aws-aurora/) | Databases & Storage | AWS Aurora Serverless v2, RDS Proxy, Data API, connection pooling | ✓ | ✓ | |
+| [`aws-dynamodb`](claude/skills/aws-dynamodb/) | Databases & Storage | AWS DynamoDB single-table design, GSI patterns, SDK v3 TypeScript/Python | ✓ | ✓ | |
+| [`azure-cosmosdb`](claude/skills/azure-cosmosdb/) | Databases & Storage | Azure Cosmos DB partition keys, consistency levels, change feed, SDK patterns | ✓ | ✓ | |
+| [`cloudflare-d1`](claude/skills/cloudflare-d1/) | Databases & Storage | Cloudflare D1 SQLite database with Workers, Drizzle ORM, migrations | ✓ | ✓ | |
+| [`database-schema`](claude/skills/database-schema/) | Databases & Storage | Schema awareness — read before coding, type generation, prevent column errors | ✓ | ✓ | |
+| [`code-review`](claude/skills/code-review/) | Code Quality | Mandatory code reviews via `/code-review` before commits and deploys | ✓ | ✓ | |
+| [`code-deduplication`](claude/skills/code-deduplication/) | Code Quality | Prevent semantic code duplication with capability index and check-before-write | ✓ | ✓ | |
+| [`codex-review`](claude/skills/codex-review/) | Code Quality | OpenAI Codex CLI code review with GPT-5.2-Codex, CI/CD integration | ✓ | ✓ | |
+| [`gemini-review`](claude/skills/gemini-review/) | Code Quality | Google Gemini CLI code review with Gemini 2.5 Pro and 1M token context | ✓ | ✓ | |
+| [`playwright-testing`](claude/skills/playwright-testing/) | Code Quality | E2E testing with Playwright — Page Objects, cross-browser, CI/CD integration | ✓ | ✓ | |
+| [`security`](claude/skills/security/) | Security & Credentials | OWASP security patterns, secrets management, security testing | ✓ | ✓ | |
+| [`credentials`](claude/skills/credentials/) | Security & Credentials | Centralized API key management from Access.txt | ✓ | ✓ | |
+| [`agentic-development`](claude/skills/agentic-development/) | AI & LLM | Build AI agents with Pydantic AI (Python) and Claude SDK (Node.js) | ✓ | ✓ | |
+| [`llm-patterns`](claude/skills/llm-patterns/) | AI & LLM | AI-first application patterns, LLM testing, prompt management | ✓ | ✓ | |
+| [`ai-models`](claude/skills/ai-models/) | AI & LLM | Latest AI models reference — Claude, OpenAI, Gemini, Eleven Labs, Replicate | ✓ | ✓ | |
+| [`shopify-apps`](claude/skills/shopify-apps/) | Commerce & Payments | Shopify app development — Remix, Admin API, checkout extensions | ✓ | ✓ | |
+| [`woocommerce`](claude/skills/woocommerce/) | Commerce & Payments | WooCommerce REST API — products, orders, customers, webhooks | ✓ | ✓ | |
+| [`medusa`](claude/skills/medusa/) | Commerce & Payments | Medusa headless commerce — modules, workflows, API routes, admin UI | ✓ | ✓ | |
+| [`web-payments`](claude/skills/web-payments/) | Commerce & Payments | Stripe Checkout, subscriptions, webhooks, customer portal | ✓ | ✓ | |
+| [`klaviyo`](claude/skills/klaviyo/) | Third-Party Integrations | Klaviyo email/SMS marketing — profiles, events, flows, segmentation | ✓ | ✓ | |
+| [`reddit-api`](claude/skills/reddit-api/) | Third-Party Integrations | Reddit API with PRAW (Python) and Snoowrap (Node.js) | ✓ | ✓ | |
+| [`reddit-ads`](claude/skills/reddit-ads/) | Third-Party Integrations | Reddit Ads API — campaigns, targeting, conversions, agentic optimization | ✓ | ✓ | |
+| [`ms-teams-apps`](claude/skills/ms-teams-apps/) | Third-Party Integrations | Microsoft Teams bots and AI agents — Claude/OpenAI, Adaptive Cards, Graph API | ✓ | ✓ | |
+| [`posthog-analytics`](claude/skills/posthog-analytics/) | Third-Party Integrations | PostHog analytics, event tracking, feature flags, dashboards | ✓ | ✓ | |
+| [`site-architecture`](claude/skills/site-architecture/) | SEO & Web Presence | Technical SEO — robots.txt, sitemap, meta tags, Core Web Vitals | ✓ | ✓ | |
+| [`web-content`](claude/skills/web-content/) | SEO & Web Presence | SEO and AI discovery (GEO) — schema, ChatGPT/Perplexity optimization | ✓ | ✓ | |
+| [`aeo-optimization`](claude/skills/aeo-optimization/) | SEO & Web Presence | AI Engine Optimization — semantic triples, page templates, content clusters for AI citations | ✓ | ✓ | |
+| [`project-tooling`](claude/skills/project-tooling/) | Tooling & DevOps | gh, vercel, supabase, render CLI and deployment platform setup | ✓ | ✓ | |
+| [`workspace`](claude/skills/workspace/) | Tooling & DevOps | Multi-repo and monorepo awareness — topology analysis, API contract tracking, cross-repo context | ✓ | ✓ | |
 | [`youtube-prd-forensics`](claude/skills/youtube-prd-forensics/) | Research & OSINT | Create or update a detailed PRD from a YouTube demo video using evidence-first analysis — timestamps, keyframes, transcript, and embedded screenshots | ✓ | ✓ | |
 | [`visual-explainer`](claude/skills/visual-explainer/) | UI & Design | Generate beautiful self-contained HTML pages for diagrams, architecture overviews, diff reviews, plan reviews, project recaps, and data tables — never falls back to ASCII art | ✓ | ✓ | |
 
@@ -169,6 +169,6 @@ Domain-specific knowledge modules loaded into AI context. Claude skills live in 
 | Agents | 15 |
 | Commands | 24 |
 | Skills (Claude) | 65 |
-| Skills (Codex) | 2 |
+| Skills (Codex) | 65 |
 | Skills (Gemini) | 0 |
-| **Total Skills** | **67** |
+| **Total Skills** | **130** |
