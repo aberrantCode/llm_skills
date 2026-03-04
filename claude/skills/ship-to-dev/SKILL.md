@@ -36,30 +36,55 @@ Follow every step in order. Do not skip steps, do not reorder them.
 
 ### Step 1 — Ask the user for a branch name and commit message
 
-Before touching git, collect:
+Before touching git, collect `$BRANCH` and `$MSG`.
 
-| Input | Format | Example |
-|---|---|---|
-| **Feature branch name** | `feature/<short-slug>` | `feature/add-versioning` |
-| **Commit message** | Conventional commit | `feat: embed version number in build artifact` |
+If the user has already provided both in their message, use those values directly — do not ask again.
 
-If the user does not supply these, ask:
+Otherwise, infer up to two suggested values each from the staged/unstaged diff and recent commits, then use **AskUserQuestion** with those suggestions as options (the tool automatically appends an "Other" option for free-text input):
+
 ```
-What should the feature branch be called? (e.g. feature/my-change)
-What is the commit message? (e.g. feat: describe the change)
+AskUserQuestion(
+  questions: [
+    {
+      question: "What should the feature branch be called?",
+      header: "Branch name",
+      options: [
+        { label: "fix/autologon-reboot-privacy-screen", description: "Inferred from changes" },
+        { label: "feat/my-feature", description: "Alternative suggestion" }
+      ]
+    },
+    {
+      question: "What is the commit message?",
+      header: "Commit msg",
+      options: [
+        { label: "fix: reboot instead of logoff and suppress OOBE privacy screen", description: "Inferred from changes" },
+        { label: "feat: describe the change", description: "Alternative suggestion" }
+      ]
+    }
+  ]
+)
 ```
 
-Store them as `$BRANCH` and `$MSG` for the rest of the steps.
+Branch format: `<type>/<short-slug>` — types mirror conventional commits (`feat`, `fix`, `refactor`, `docs`, `chore`).
+Commit format: conventional commit (`feat:`, `fix:`, `refactor:`, etc.).
+
+Store answers as `$BRANCH` and `$MSG` for the rest of the steps.
 
 ---
 
-### Step 2 — Pull latest on the current branch
+### Step 2 — Pull latest on the current branch (only if behind)
+
+First fetch and check whether the current branch is behind its remote — skip the pull entirely if there is nothing to integrate:
 
 ```bash
-git pull --rebase
+git fetch origin
+BEHIND=$(git rev-list HEAD..origin/$(git branch --show-current) --count 2>/dev/null || echo 0)
+echo "Commits behind remote: $BEHIND"
 ```
 
-If git refuses with `cannot pull with rebase: You have unstaged changes`, the working-tree changes block the rebase. Stash them first, pull, then restore — the changes will be staged in Step 3:
+**If `$BEHIND` is 0** — nothing to pull. Skip the rest of this step and continue to Step 3.
+
+**If `$BEHIND` > 0** — stash everything (tracked and untracked), pull, then restore:
 
 ```bash
 git stash --include-untracked
@@ -69,9 +94,21 @@ git stash pop
 
 If rebase produces conflicts after the pull:
 1. Show the conflicting files with `git status`.
-2. Ask the user to resolve them, or resolve obvious ones (whitespace, generated files) yourself.
+2. Resolve obvious ones (whitespace, generated files) yourself. For non-obvious conflicts, use **AskUserQuestion**:
+   ```
+   AskUserQuestion(
+     questions: [{
+       question: "There are merge conflicts in <files>. How would you like to proceed?",
+       header: "Conflicts",
+       options: [
+         { label: "I'll resolve manually", description: "Pause here — you fix the files, then tell me to continue" },
+         { label: "Abort the rebase", description: "Run git rebase --abort and stop the workflow" }
+       ]
+     }]
+   )
+   ```
 3. After resolution: `git add <resolved-files>` then `git rebase --continue`.
-4. If the rebase is unresolvable, abort with `git rebase --abort` and stop — report the conflict to the user.
+4. If the rebase is unresolvable, abort with `git rebase --abort` and stop.
 
 ---
 
@@ -158,31 +195,25 @@ gh pr view $BRANCH --json state --jq '.state'
 
 ---
 
-### Step 8 — Delete the local feature branch
+### Steps 8 & 9 — Cleanup and sync DEV
+
+`gh pr merge --squash` switches the local working tree to `dev` and deletes the local feature branch as a side-effect of the merge. Both operations must therefore be **conditional** to avoid errors when they've already occurred:
 
 ```bash
-git checkout main
-git branch -d $BRANCH
-```
+# Switch to dev only if not already there
+CURRENT=$(git branch --show-current)
+[ "$CURRENT" != "dev" ] && git checkout dev
 
-If `git branch -d` reports the branch is not found, `gh pr merge` already removed it during the merge checkout — this is not an error, continue to Step 9.
+# Delete local branch only if it still exists
+git branch --list "$BRANCH" | grep -q . && git branch -d "$BRANCH"
 
-If `-d` refuses with "not fully merged", use `-D` only after confirming the remote merge state in Step 7 returned `"MERGED"`.
-
----
-
-### Step 9 — Switch to DEV and pull
-
-```bash
-git checkout dev
+# Pull to ensure dev is up to date
 git pull origin dev
-```
 
-Show the final state:
-
-```bash
 git log --oneline -5
 ```
+
+If `-d` refuses with "not fully merged", use `-D` only after confirming the remote PR state in Step 7 returned `"MERGED"`.
 
 ---
 
@@ -190,14 +221,13 @@ git log --oneline -5
 
 ```
 1. Ensure DEV exists on remote (create from main if missing)
-2. Pull latest + resolve conflicts          git pull --rebase
+2. Fetch + pull only if behind             git fetch origin && [check BEHIND count] && git stash / pull / pop
 3. Stage all changes                        git add --all
 4. Create feature branch + commit           git checkout -b $BRANCH && git commit
 5. Push                                     git push -u origin $BRANCH
 6. Open PR into DEV                         gh pr create --base dev
 7. Merge PR (squash) + delete remote        gh pr merge --squash --delete-branch
-8. Delete local branch                      git branch -d $BRANCH
-9. Switch to DEV and pull                   git checkout dev && git pull
+8 & 9. Conditional cleanup + sync DEV       [if not on dev] checkout dev; [if branch exists] branch -d; git pull
 ```
 
 ---
@@ -210,4 +240,4 @@ git log --oneline -5
 | Push rejected (non-fast-forward) | `git pull --rebase origin $BRANCH` then retry push |
 | PR merge fails (status checks) | Show failure reason with `gh pr checks $BRANCH` — do not force merge |
 | `gh` not authenticated | `gh auth login` — pause workflow until authenticated |
-| Feature branch already exists | Ask user whether to reuse it or choose a different name |
+| Feature branch already exists | Use **AskUserQuestion**: options "Reuse existing branch" / "Choose a different name" — if "different name", loop back to Step 1 |

@@ -8,8 +8,8 @@ Consolidated archive of custom agents, commands, and skills for Claude Code, Ope
 llm_skills/
 ├── claude/
 │   ├── agents/     # 15 sub-agents invoked via the Task tool
-│   ├── commands/   # 24 slash commands
-│   └── skills/     # 65 domain-specific knowledge modules
+│   ├── commands/   # 25 slash commands
+│   └── skills/     # 76 domain-specific knowledge modules
 ├── codex/
 │   └── skills/     # 65 domain-specific knowledge modules
 └── gemini/         # Google Gemini CLI skills (future)
@@ -85,6 +85,7 @@ Slash commands available globally in Claude Code. Most delegate to a specialized
 | [`/generate-web-diagram`](claude/commands/generate-web-diagram.md) | Generate a beautiful standalone HTML diagram and open it in the browser |
 | [`/plan-review`](claude/commands/plan-review.md) | Visual HTML plan review — current codebase vs. proposed plan with risk assessment |
 | [`/project-recap`](claude/commands/project-recap.md) | Visual HTML project recap — architecture snapshot, decision log, and cognitive debt hotspots |
+| [`/sync-skills`](claude/commands/sync-skills.md) | Scan the Claude profile and all `C:\development` projects for new/changed skills, copy them into the archive, update this README, and print a change summary |
 
 ---
 
@@ -105,6 +106,7 @@ Domain-specific knowledge modules loaded into AI context. Claude skills live in 
 | [`using-git-worktrees`](claude/skills/using-git-worktrees/) | Foundations & Workflow | Isolated git worktrees for feature work — smart directory selection and safety verification | ✓ | ✓ | |
 | [`requesting-code-review`](claude/skills/requesting-code-review/) | Foundations & Workflow | Use when completing tasks or before merging to verify work meets requirements | ✓ | ✓ | |
 | [`ship-to-dev`](claude/skills/ship-to-dev/) | Foundations & Workflow | Automated flow: commit → push → PR to dev → merge → branch cleanup | ✓ | ✓ | |
+| [`release-to-main`](claude/skills/release-to-main/) | Foundations & Workflow | Merge dev into main for a production release — rebasing, semantic versioning from conventional commits, release tagging, and syncing dev back | ✓ | | |
 | [`commit-hygiene`](claude/skills/commit-hygiene/) | Foundations & Workflow | Atomic commits, PR size limits, commit thresholds, stacked PRs | ✓ | ✓ | |
 | [`typescript`](claude/skills/typescript/) | Languages & Runtimes | TypeScript strict mode with eslint and jest | ✓ | ✓ | |
 | [`python`](claude/skills/python/) | Languages & Runtimes | Python development with ruff, mypy, pytest — TDD and type safety | ✓ | ✓ | |
@@ -113,6 +115,9 @@ Domain-specific knowledge modules loaded into AI context. Claude skills live in 
 | [`react-native`](claude/skills/react-native/) | Frontend Frameworks | React Native mobile patterns, platform-specific code | ✓ | ✓ | |
 | [`flutter`](claude/skills/flutter/) | Frontend Frameworks | Flutter with Riverpod, Freezed, go_router, and mocktail testing | ✓ | ✓ | |
 | [`pwa-development`](claude/skills/pwa-development/) | Frontend Frameworks | Progressive Web Apps — service workers, caching strategies, offline support, Workbox | ✓ | ✓ | |
+| [`composition-patterns`](claude/skills/composition-patterns/) | Frontend Frameworks | React composition patterns that scale — for refactoring components with boolean prop proliferation and building flexible component libraries | ✓ | | |
+| [`react-best-practices`](claude/skills/react-best-practices/) | Frontend Frameworks | React and Next.js performance optimization guidelines from Vercel Engineering — components, data fetching, bundle optimization | ✓ | | |
+| [`react-native-skills`](claude/skills/react-native-skills/) | Frontend Frameworks | React Native and Expo best practices for performant mobile apps — list performance, rendering patterns | ✓ | | |
 | [`android-java`](claude/skills/android-java/) | Mobile (Native) | Android Java development with MVVM, ViewBinding, and Espresso testing | ✓ | ✓ | |
 | [`android-kotlin`](claude/skills/android-kotlin/) | Mobile (Native) | Android Kotlin with Coroutines, Jetpack Compose, Hilt, and MockK testing | ✓ | ✓ | |
 | [`ui-mobile`](claude/skills/ui-mobile/) | Mobile (Native) | Mobile UI patterns — React Native, iOS/Android, touch targets | ✓ | ✓ | |
@@ -121,6 +126,7 @@ Domain-specific knowledge modules loaded into AI context. Claude skills live in 
 | [`design-taste-frontend`](claude/skills/design-taste-frontend/) | UI & Design | Senior UI/UX guidance — metric-based rules, CSS hardware acceleration, balanced design engineering | ✓ | ✓ | |
 | [`frontend-design`](claude/skills/frontend-design/) | UI & Design | Production-grade frontend interfaces — polished, distinctive, avoiding generic AI aesthetics | ✓ | ✓ | |
 | [`user-journeys`](claude/skills/user-journeys/) | UI & Design | UX flows — journey mapping, UX validation, error recovery | ✓ | ✓ | |
+| [`web-design-guidelines`](claude/skills/web-design-guidelines/) | UI & Design | Review UI code for Web Interface Guidelines compliance — accessibility, UX audits, best practices | ✓ | | |
 | [`doc-coauthoring`](claude/skills/doc-coauthoring/) | UI & Design | Structured co-authoring workflow for documentation, proposals, and technical specs | ✓ | ✓ | |
 | [`explain-code`](claude/skills/explain-code/) | UI & Design | Explains code with visual diagrams and analogies | ✓ | ✓ | |
 | [`supabase`](claude/skills/supabase/) | Databases & Storage | Core Supabase CLI, migrations, RLS, Edge Functions | ✓ | ✓ | |
@@ -138,8 +144,10 @@ Domain-specific knowledge modules loaded into AI context. Claude skills live in 
 | [`codex-review`](claude/skills/codex-review/) | Code Quality | OpenAI Codex CLI code review with GPT-5.2-Codex, CI/CD integration | ✓ | ✓ | |
 | [`gemini-review`](claude/skills/gemini-review/) | Code Quality | Google Gemini CLI code review with Gemini 2.5 Pro and 1M token context | ✓ | ✓ | |
 | [`playwright-testing`](claude/skills/playwright-testing/) | Code Quality | E2E testing with Playwright — Page Objects, cross-browser, CI/CD integration | ✓ | ✓ | |
+| [`tdd-workflow`](claude/skills/tdd-workflow/) | Code Quality | Enforce TDD when writing features, fixing bugs, or refactoring — Red/Green/Refactor with 80%+ coverage including unit, integration, and E2E | ✓ | | |
 | [`security`](claude/skills/security/) | Security & Credentials | OWASP security patterns, secrets management, security testing | ✓ | ✓ | |
 | [`credentials`](claude/skills/credentials/) | Security & Credentials | Centralized API key management from Access.txt | ✓ | ✓ | |
+| [`security-review`](claude/skills/security-review/) | Security & Credentials | Comprehensive security checklist when adding auth, handling user input, working with secrets, API endpoints, or payments | ✓ | | |
 | [`agentic-development`](claude/skills/agentic-development/) | AI & LLM | Build AI agents with Pydantic AI (Python) and Claude SDK (Node.js) | ✓ | ✓ | |
 | [`llm-patterns`](claude/skills/llm-patterns/) | AI & LLM | AI-first application patterns, LLM testing, prompt management | ✓ | ✓ | |
 | [`ai-models`](claude/skills/ai-models/) | AI & LLM | Latest AI models reference — Claude, OpenAI, Gemini, Eleven Labs, Replicate | ✓ | ✓ | |
@@ -157,7 +165,11 @@ Domain-specific knowledge modules loaded into AI context. Claude skills live in 
 | [`aeo-optimization`](claude/skills/aeo-optimization/) | SEO & Web Presence | AI Engine Optimization — semantic triples, page templates, content clusters for AI citations | ✓ | ✓ | |
 | [`project-tooling`](claude/skills/project-tooling/) | Tooling & DevOps | gh, vercel, supabase, render CLI and deployment platform setup | ✓ | ✓ | |
 | [`workspace`](claude/skills/workspace/) | Tooling & DevOps | Multi-repo and monorepo awareness — topology analysis, API contract tracking, cross-repo context | ✓ | ✓ | |
+| [`vercel-deploy-claimable`](claude/skills/vercel-deploy-claimable/) | Tooling & DevOps | Deploy applications to Vercel — preview URLs and claimable deployment links, no authentication required | ✓ | | |
+| [`sync-skills`](claude/skills/sync-skills/) | Tooling & DevOps | Domain expertise for maintaining the LLM Skills Archive — source discovery, conflict resolution, README classification, and archive invariants | ✓ | | |
 | [`youtube-prd-forensics`](claude/skills/youtube-prd-forensics/) | Research & OSINT | Create or update a detailed PRD from a YouTube demo video using evidence-first analysis — timestamps, keyframes, transcript, and embedded screenshots | ✓ | ✓ | |
+| [`worldview-layer-scaffold`](claude/skills/worldview-layer-scaffold/) | Research & OSINT | Scaffold a new real-time data layer for the WorldView GEOINT dashboard — DATA LAYERS panel row, health/freshness tracking, CesiumJS rendering | ✓ | | |
+| [`worldview-shader-preset`](claude/skills/worldview-shader-preset/) | Research & OSINT | Scaffold a new post-processing visual style preset for the WorldView GEOINT dashboard — STYLE PRESETS toolbar, adjustable parameters, scene sequencer integration | ✓ | | |
 | [`visual-explainer`](claude/skills/visual-explainer/) | UI & Design | Generate beautiful self-contained HTML pages for diagrams, architecture overviews, diff reviews, plan reviews, project recaps, and data tables — never falls back to ASCII art | ✓ | ✓ | |
 
 ---
@@ -167,8 +179,8 @@ Domain-specific knowledge modules loaded into AI context. Claude skills live in 
 | Type | Count |
 |------|-------|
 | Agents | 15 |
-| Commands | 24 |
-| Skills (Claude) | 65 |
+| Commands | 25 |
+| Skills (Claude) | 76 |
 | Skills (Codex) | 65 |
 | Skills (Gemini) | 0 |
-| **Total Skills** | **130** |
+| **Total Skills** | **141** |
