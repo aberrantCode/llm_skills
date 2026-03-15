@@ -213,7 +213,7 @@ git push origin main
 
 ---
 
-### Step 6 — Tag the release
+### Step 6 — Tag and publish the release
 
 ```bash
 git tag "$VERSION"
@@ -224,6 +224,31 @@ Confirm the tag is visible:
 
 ```bash
 git tag --list "$VERSION"
+```
+
+Then **publish a GitHub Release** from the tag. This is required for any repo using
+`/releases/latest` API (e.g. install.ps1 remote installers). A bare git tag is NOT
+sufficient — the API returns 404 until a Release is published.
+
+Summarise commits since the previous tag to generate release notes:
+
+```bash
+PREV_TAG=$(git describe --tags --abbrev=0 "$VERSION^" 2>/dev/null || echo "")
+NOTES=$(git log "${PREV_TAG:+$PREV_TAG..}$VERSION" --format="- %s" 2>/dev/null)
+```
+
+Create the release:
+
+```bash
+gh release create "$VERSION" \
+  --title "$VERSION" \
+  --notes "$NOTES"
+```
+
+Confirm:
+
+```bash
+gh release view "$VERSION" --json tagName,publishedAt --jq '"Released: \(.tagName) at \(.publishedAt)"'
 ```
 
 ---

@@ -8,8 +8,8 @@ Consolidated archive of custom agents, commands, and skills for Claude Code, Ope
 llm_skills/
 ├── claude/
 │   ├── agents/     # 15 sub-agents invoked via the Task tool
-│   ├── commands/   # 25 slash commands
-│   └── skills/     # 76 domain-specific knowledge modules
+│   ├── commands/   # 26 slash commands
+│   └── skills/     # 80 domain-specific knowledge modules
 ├── codex/
 │   └── skills/     # 65 domain-specific knowledge modules
 └── gemini/         # Google Gemini CLI skills (future)
@@ -72,6 +72,7 @@ Slash commands available globally in Claude Code. Most delegate to a specialized
 | [`/initialize-project`](claude/commands/initialize-project.md) | Full project setup with Claude coding guardrails — idempotent, safe to re-run anytime |
 | [`/new-action`](claude/commands/new-action.md) | Guided creator for OSM profile action JSON files (RegistryAction, IOAction, MethodAction, ScheduledTaskAction) |
 | [`/plan`](claude/commands/plan.md) | Restate requirements, assess risks, create step-by-step plan — waits for user confirmation before touching code |
+| [`/publish-github`](claude/commands/publish-github.md) | End-to-end workflow to publish a local project as a new GitHub repo with gitleaks secrets detection, .gitignore/.gitattributes, main/dev branches, and branch protection rules |
 | [`/refactor-clean`](claude/commands/refactor-clean.md) | Safely identify and remove dead code with test verification after each batch |
 | [`/sync-contracts`](claude/commands/sync-contracts.md) | Lightweight incremental update of workspace contracts without a full re-analysis |
 | [`/tdd`](claude/commands/tdd.md) | Enforce TDD workflow — scaffold interfaces, generate tests first, implement minimal code, ensure 80%+ coverage |
@@ -115,6 +116,7 @@ Domain-specific knowledge modules loaded into AI context. Claude skills live in 
 | [`react-native`](claude/skills/react-native/) | Frontend Frameworks | React Native mobile patterns, platform-specific code | ✓ | ✓ | |
 | [`flutter`](claude/skills/flutter/) | Frontend Frameworks | Flutter with Riverpod, Freezed, go_router, and mocktail testing | ✓ | ✓ | |
 | [`pwa-development`](claude/skills/pwa-development/) | Frontend Frameworks | Progressive Web Apps — service workers, caching strategies, offline support, Workbox | ✓ | ✓ | |
+| [`chrome-extension-builder`](claude/skills/chrome-extension-builder/) | Frontend Frameworks | Scaffold production-ready Chrome MV3 extensions using WXT + React + TypeScript + shadcn-UI — content scripts, background service workers, side panels, popups, native messaging, and Google Docs/Overleaf integrations | ✓ | | |
 | [`composition-patterns`](claude/skills/composition-patterns/) | Frontend Frameworks | React composition patterns that scale — for refactoring components with boolean prop proliferation and building flexible component libraries | ✓ | | |
 | [`react-best-practices`](claude/skills/react-best-practices/) | Frontend Frameworks | React and Next.js performance optimization guidelines from Vercel Engineering — components, data fetching, bundle optimization | ✓ | | |
 | [`react-native-skills`](claude/skills/react-native-skills/) | Frontend Frameworks | React Native and Expo best practices for performant mobile apps — list performance, rendering patterns | ✓ | | |
@@ -165,8 +167,11 @@ Domain-specific knowledge modules loaded into AI context. Claude skills live in 
 | [`aeo-optimization`](claude/skills/aeo-optimization/) | SEO & Web Presence | AI Engine Optimization — semantic triples, page templates, content clusters for AI citations | ✓ | ✓ | |
 | [`project-tooling`](claude/skills/project-tooling/) | Tooling & DevOps | gh, vercel, supabase, render CLI and deployment platform setup | ✓ | ✓ | |
 | [`workspace`](claude/skills/workspace/) | Tooling & DevOps | Multi-repo and monorepo awareness — topology analysis, API contract tracking, cross-repo context | ✓ | ✓ | |
-| [`vercel-deploy-claimable`](claude/skills/vercel-deploy-claimable/) | Tooling & DevOps | Deploy applications to Vercel — preview URLs and claimable deployment links, no authentication required | ✓ | | |
+| [`add-remote-installer`](claude/skills/add-remote-installer/) | Tooling & DevOps | Add a remote install script (install.ps1) and self-update capability to a PowerShell repository — detects GitHub remote, locates primary app script, applies remote-installer skill | ✓ | | |
+| [`publish-github`](claude/skills/publish-github/) | Tooling & DevOps | End-to-end workflow for publishing a local project as a new GitHub repository — gitleaks secrets-detection hook, .gitignore/.gitattributes, main/dev branch setup, and branch protection rules | ✓ | | |
+| [`remote-installer`](claude/skills/remote-installer/) | Tooling & DevOps | Domain expertise for implementing a remote PowerShell install script and self-update check — auto-elevation, GitHub Releases API version resolution, safe download ordering, .env backup/merge | ✓ | | |
 | [`sync-skills`](claude/skills/sync-skills/) | Tooling & DevOps | Domain expertise for maintaining the LLM Skills Archive — source discovery, conflict resolution, README classification, and archive invariants | ✓ | | |
+| [`vercel-deploy-claimable`](claude/skills/vercel-deploy-claimable/) | Tooling & DevOps | Deploy applications to Vercel — preview URLs and claimable deployment links, no authentication required | ✓ | | |
 | [`youtube-prd-forensics`](claude/skills/youtube-prd-forensics/) | Research & OSINT | Create or update a detailed PRD from a YouTube demo video using evidence-first analysis — timestamps, keyframes, transcript, and embedded screenshots | ✓ | ✓ | |
 | [`worldview-layer-scaffold`](claude/skills/worldview-layer-scaffold/) | Research & OSINT | Scaffold a new real-time data layer for the WorldView GEOINT dashboard — DATA LAYERS panel row, health/freshness tracking, CesiumJS rendering | ✓ | | |
 | [`worldview-shader-preset`](claude/skills/worldview-shader-preset/) | Research & OSINT | Scaffold a new post-processing visual style preset for the WorldView GEOINT dashboard — STYLE PRESETS toolbar, adjustable parameters, scene sequencer integration | ✓ | | |
@@ -179,8 +184,8 @@ Domain-specific knowledge modules loaded into AI context. Claude skills live in 
 | Type | Count |
 |------|-------|
 | Agents | 15 |
-| Commands | 25 |
-| Skills (Claude) | 76 |
+| Commands | 26 |
+| Skills (Claude) | 80 |
 | Skills (Codex) | 65 |
 | Skills (Gemini) | 0 |
-| **Total Skills** | **141** |
+| **Total Skills** | **145** |
