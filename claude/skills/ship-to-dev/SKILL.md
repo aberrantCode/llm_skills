@@ -195,8 +195,10 @@ git push -u origin $BRANCH
 
 ### Step 6 — Create a PR targeting DEV
 
+Capture both stdout and stderr so we can detect "already exists" gracefully:
+
 ```bash
-gh pr create \
+PR_OUTPUT=$(gh pr create \
   --base dev \
   --head $BRANCH \
   --title "$MSG" \
@@ -210,23 +212,61 @@ See commit diff for details.
 ## Test plan
 - [ ] Smoke-tested locally before shipping
 EOF
-)"
+)" 2>&1)
+PR_EXIT=$?
+
+if [ $PR_EXIT -eq 0 ]; then
+  PR_URL="$PR_OUTPUT"
+  echo "PR created: $PR_URL"
+elif echo "$PR_OUTPUT" | grep -qi "already exists"; then
+  # Extract the URL from the error message:
+  #   "a pull request for branch ... already exists: https://github.com/..."
+  PR_URL=$(echo "$PR_OUTPUT" | grep -oE 'https://github\.com[^[:space:]]+')
+  echo "PR already exists — reusing: $PR_URL"
+else
+  echo "PR creation failed:"
+  echo "$PR_OUTPUT"
+  exit 1
+fi
 ```
 
-Capture and display the PR URL from the output.
+`$PR_URL` is now set either way. Display it to the user and continue.
 
 ---
 
 ### Step 7 — Merge the PR (squash merge)
 
 **Important:** `gh pr merge` will attempt to switch the local working tree to `dev`
-after merging. If `dev` is already checked out in a primary worktree and you are
-running from a secondary worktree, this will fail with
-`fatal: 'dev' is already used by worktree`. Always run this command from
-`$REPO_ROOT` (the primary checkout), not from a worktree subdirectory:
+after merging. Two things can block that checkout:
+1. If `dev` is already checked out in a primary worktree and you are running from a
+   secondary worktree, you get `fatal: 'dev' is already used by worktree`.
+2. If any post-commit hooks (e.g. Prettier, TypeScript checker) modified files after
+   the commit, those uncommitted changes cause `error: Your local changes would be
+   overwritten by checkout`. The PR merges on GitHub but the local switch fails,
+   leaving the working tree on the feature branch with a dirty state.
+
+Always run this command from `$REPO_ROOT` and **always stash the working tree first**:
 
 ```bash
 cd "$REPO_ROOT"
+
+# Stash any working-tree changes (e.g. from post-commit hooks) so the branch
+# switch after merge is not blocked by "local changes would be overwritten".
+STASH_NEEDED=false
+if ! git diff --quiet || ! git diff --cached --quiet; then
+  git stash --include-untracked
+  STASH_NEEDED=true
+fi
+
+# If the feature branch is checked out in a secondary worktree, gh pr merge
+# --delete-branch will fail with "cannot delete branch '…' used by worktree".
+# Remove the worktree NOW — before the merge — so the deletion succeeds.
+if [ "$IN_WORKTREE" = "true" ]; then
+  git worktree prune
+  [ -d "$WORKTREE_PATH" ] && rm -rf "$WORKTREE_PATH" && echo "Worktree removed ahead of merge: $WORKTREE_PATH"
+  IN_WORKTREE=false   # mark handled so Steps 8 & 9 skip the block
+fi
+
 gh pr merge $BRANCH \
   --squash \
   --delete-branch \
@@ -283,6 +323,14 @@ git pull origin dev
 git log --oneline -5
 ```
 
+**Restore stashed changes** — if working-tree changes were stashed in Step 7, pop them now:
+
+```bash
+if [ "$STASH_NEEDED" = "true" ]; then
+  git stash pop
+fi
+```
+
 ---
 
 ## Quick Reference
@@ -295,10 +343,10 @@ git log --oneline -5
 4. Create feature branch + commit           git checkout -b $BRANCH && git commit
 5. Push                                     git push -u origin $BRANCH
 6. Open PR into DEV                         gh pr create --base dev
-7. Merge PR (squash) from REPO_ROOT         cd $REPO_ROOT && gh pr merge --squash --delete-branch
+7. Merge PR (squash) from REPO_ROOT         cd $REPO_ROOT; [stash if dirty]; gh pr merge --squash --delete-branch
 8 & 9. Conditional cleanup + sync DEV       [if not on dev] checkout dev; [if branch exists] branch -d;
                                             [if worktree] git worktree prune && rm -rf $WORKTREE_PATH;
-                                            git pull origin dev
+                                            git pull origin dev; [if stashed] git stash pop
 ```
 
 ---
@@ -313,5 +361,7 @@ git log --oneline -5
 | `gh` not authenticated | `gh auth login` — pause workflow until authenticated |
 | Feature branch already exists | Use **AskUserQuestion**: options "Reuse existing branch" / "Choose a different name" — if "different name", loop back to Step 1 |
 | `fatal: 'dev' is already used by worktree` | `cd $REPO_ROOT` before running `gh pr merge` — never merge from inside a secondary worktree |
-| `cannot delete branch '…' used by worktree` | Remove the worktree first: `git worktree prune && rm -rf $WORKTREE_PATH`, then `git branch -d $BRANCH` |
+| `cannot delete branch '…' used by worktree` | Step 7 now removes the worktree automatically before `gh pr merge --delete-branch`. If the error still occurs, run manually: `git worktree prune && rm -rf $WORKTREE_PATH && git branch -d $BRANCH` |
+| `local changes would be overwritten by checkout` | Stash before `gh pr merge` (Step 7 now does this automatically); the PR may have already merged on GitHub even if the command errored — check with `gh pr view` before retrying |
 | PR already merged (second `gh pr merge` attempt) | Verify with `gh pr view $BRANCH --json state --jq '.state'`; if `"MERGED"`, skip to cleanup |
+| `gh pr create` exits 1: "already exists" | Step 6 detects this automatically, extracts the existing PR URL, and continues to Step 7 — no manual intervention needed |
