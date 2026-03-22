@@ -9,7 +9,7 @@ llm_skills/
 ├── claude/
 │   ├── agents/     # 15 sub-agents invoked via the Task tool
 │   ├── commands/   # 26 slash commands
-│   └── skills/     # 80 domain-specific knowledge modules
+│   └── skills/     # 82 domain-specific knowledge modules
 ├── codex/
 │   └── skills/     # 65 domain-specific knowledge modules
 └── gemini/         # Google Gemini CLI skills (future)
@@ -109,6 +109,8 @@ Domain-specific knowledge modules loaded into AI context. Claude skills live in 
 | [`ship-to-dev`](claude/skills/ship-to-dev/) | Foundations & Workflow | Automated flow: commit → push → PR to dev → merge → branch cleanup | ✓ | ✓ | |
 | [`release-to-main`](claude/skills/release-to-main/) | Foundations & Workflow | Merge dev into main for a production release — rebasing, semantic versioning from conventional commits, release tagging, and syncing dev back | ✓ | | |
 | [`commit-hygiene`](claude/skills/commit-hygiene/) | Foundations & Workflow | Atomic commits, PR size limits, commit thresholds, stacked PRs | ✓ | ✓ | |
+| [`git-cleanup`](claude/skills/git-cleanup/) | Foundations & Workflow | Audits and removes stale git worktrees and branches (local + remote origin) that have been merged into `dev` — squash-merge aware, dirty-check protected | ✓ | | |
+| [`guide-assistant`](claude/skills/guide-assistant/) | Foundations & Workflow | Personal assistant for walking the user step-by-step through any markdown file, manual, guide, runbook, or instruction document | ✓ | | |
 | [`typescript`](claude/skills/typescript/) | Languages & Runtimes | TypeScript strict mode with eslint and jest | ✓ | ✓ | |
 | [`python`](claude/skills/python/) | Languages & Runtimes | Python development with ruff, mypy, pytest — TDD and type safety | ✓ | ✓ | |
 | [`nodejs-backend`](claude/skills/nodejs-backend/) | Languages & Runtimes | Node.js backend patterns with Express/Fastify, repository pattern | ✓ | ✓ | |
@@ -127,6 +129,7 @@ Domain-specific knowledge modules loaded into AI context. Claude skills live in 
 | [`ui-testing`](claude/skills/ui-testing/) | UI & Design | Visual testing — catch invisible buttons, broken layouts, contrast issues | ✓ | ✓ | |
 | [`design-taste-frontend`](claude/skills/design-taste-frontend/) | UI & Design | Senior UI/UX guidance — metric-based rules, CSS hardware acceleration, balanced design engineering | ✓ | ✓ | |
 | [`frontend-design`](claude/skills/frontend-design/) | UI & Design | Production-grade frontend interfaces — polished, distinctive, avoiding generic AI aesthetics | ✓ | ✓ | |
+| [`logo-restylizer`](claude/skills/logo-restylizer/) | UI & Design | Restylize, retheme, or transform an existing logo or icon into a new visual variant — dark/light/neon/flat versions, color changes, style shifts | ✓ | | |
 | [`user-journeys`](claude/skills/user-journeys/) | UI & Design | UX flows — journey mapping, UX validation, error recovery | ✓ | ✓ | |
 | [`web-design-guidelines`](claude/skills/web-design-guidelines/) | UI & Design | Review UI code for Web Interface Guidelines compliance — accessibility, UX audits, best practices | ✓ | | |
 | [`doc-coauthoring`](claude/skills/doc-coauthoring/) | UI & Design | Structured co-authoring workflow for documentation, proposals, and technical specs | ✓ | ✓ | |
@@ -185,7 +188,7 @@ Domain-specific knowledge modules loaded into AI context. Claude skills live in 
 |------|-------|
 | Agents | 15 |
 | Commands | 26 |
-| Skills (Claude) | 80 |
+| Skills (Claude) | 83 |
 | Skills (Codex) | 65 |
 | Skills (Gemini) | 0 |
-| **Total Skills** | **145** |
+| **Total Skills** | **148** |
