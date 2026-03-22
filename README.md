@@ -129,6 +129,7 @@ Domain-specific knowledge modules loaded into AI context. Claude skills live in 
 | [`ui-testing`](claude/skills/ui-testing/) | UI & Design | Visual testing — catch invisible buttons, broken layouts, contrast issues | ✓ | ✓ | |
 | [`design-taste-frontend`](claude/skills/design-taste-frontend/) | UI & Design | Senior UI/UX guidance — metric-based rules, CSS hardware acceleration, balanced design engineering | ✓ | ✓ | |
 | [`frontend-design`](claude/skills/frontend-design/) | UI & Design | Production-grade frontend interfaces — polished, distinctive, avoiding generic AI aesthetics | ✓ | ✓ | |
+| [`logo-restylizer`](claude/skills/logo-restylizer/) | UI & Design | Restylize, retheme, or transform an existing logo or icon into a new visual variant — dark/light/neon/flat versions, color changes, style shifts | ✓ | | |
 | [`user-journeys`](claude/skills/user-journeys/) | UI & Design | UX flows — journey mapping, UX validation, error recovery | ✓ | ✓ | |
 | [`web-design-guidelines`](claude/skills/web-design-guidelines/) | UI & Design | Review UI code for Web Interface Guidelines compliance — accessibility, UX audits, best practices | ✓ | | |
 | [`doc-coauthoring`](claude/skills/doc-coauthoring/) | UI & Design | Structured co-authoring workflow for documentation, proposals, and technical specs | ✓ | ✓ | |
@@ -187,7 +188,7 @@ Domain-specific knowledge modules loaded into AI context. Claude skills live in 
 |------|-------|
 | Agents | 15 |
 | Commands | 26 |
-| Skills (Claude) | 82 |
+| Skills (Claude) | 83 |
 | Skills (Codex) | 65 |
 | Skills (Gemini) | 0 |
-| **Total Skills** | **147** |
+| **Total Skills** | **148** |
