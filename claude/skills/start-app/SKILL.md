@@ -1,0 +1,828 @@
+---
+name: start-app
+description: Start any type of modern application — web apps, APIs, full-stack projects, Docker-based stacks, microservices, and more. Use this skill whenever the user wants to run, launch, start, execute, or spin up an application or service. Trigger it even when the user says "start the app", "run it", "boot it up", "kick it off", "get it running", "spin it up", or any similar phrase. Also trigger when the user asks how to run the project, which command starts the UI, how to get the dev environment going, or when a prompt includes a technology name alongside a run/start intent (e.g. "start the Next.js app", "run the FastAPI server", "launch the Docker stack").
+---
+
+# Start App
+
+Provides the end-to-end workflow for discovering, selecting, and executing the correct startup procedure for any modern application — then validating success and recovering from failures.
+
+---
+
+## Step 1 — Discover Existing Scripts
+
+Search the repository's `scripts/` directory (relative to the repo root, or `./scripts` from the current working directory) for any file whose name begins with `start`, `run`, `execute`, or `launch` (case-insensitive).
+
+```bash
+# Repo root
+REPO_ROOT=$(git rev-parse --show-toplevel 2>/dev/null || pwd)
+
+# Find all candidates
+find "$REPO_ROOT/scripts" -maxdepth 2 \( -name "start*" -o -name "run*" -o -name "execute*" -o -name "launch*" \) 2>/dev/null | sort
+```
+
+Also check for common top-level files that serve as launchers:
+- `docker-compose.yml` / `docker-compose.yaml`
+- `Makefile` (look for `start`, `dev`, `run`, `up` targets)
+- `package.json` (look for `start`, `dev`, `serve` scripts)
+- `Procfile`
+
+Collect everything found into a **candidate list**.
+
+---
+
+## Step 2 — Match Candidates to the User's Intent
+
+If the user provided a prompt (e.g. `/start-app run the backend API`), use it to narrow the candidates:
+- Parse for technology names (Next.js, FastAPI, Django, Docker, .NET, Go, etc.)
+- Parse for component names (frontend, backend, API, UI, worker, db)
+- Filter the candidate list to those whose name or content implies the target
+
+### Case A — No relevant scripts found
+
+No candidates match (or the `scripts/` directory does not exist).
+
+Use `AskUserQuestion` to ask two things:
+
+```
+AskUserQuestion(
+  questions: [
+    {
+      question: "No startup script was found. Should I create one?",
+      header: "Create startup script?",
+      options: [
+        { label: "Yes, create a script for me", description: "I'll detect the stack and generate one" },
+        { label: "No, just run the app directly", description: "I'll infer the start command from the project" },
+        { label: "Let me specify the command manually", description: "Tell me what to run" }
+      ]
+    }
+  ]
+)
+```
+
+If "Yes, create a script":
+- Ask which directory/project is the **UI** (if the repo is monorepo-style)
+- Detect the full stack (see **Stack Detection** below) and generate a startup script in `scripts/` that:
+  1. Starts all required infrastructure (databases, message queues, cache layers)
+  2. Starts backend/API services
+  3. Starts the UI/frontend last
+- Save the script as `scripts/Start-App.ps1` (Windows/cross-platform) or `scripts/start-app.sh` (Unix)
+- Then proceed to execute it
+
+If "No, just run directly":
+- Detect the stack and run the appropriate start command directly (see **Stack Detection**)
+
+If "Let me specify manually":
+- Accept the command from the user and execute it
+
+### Case B — Exactly one relevant script found
+
+Execute it directly, but first:
+1. Read the script to understand what it does and what parameters it accepts
+2. Check whether the user's prompt implies any parameter overrides (e.g. "start app in production mode")
+3. If parameters are needed, pass them; otherwise run as-is
+
+```bash
+# Example: PowerShell script
+pwsh -NonInteractive -File "$SCRIPT_PATH" [params]
+
+# Example: Bash script
+bash "$SCRIPT_PATH" [params]
+```
+
+### Case C — Multiple relevant scripts found
+
+Use `AskUserQuestion` to present the options:
+
+```
+AskUserQuestion(
+  questions: [
+    {
+      question: "Multiple startup scripts were found. Which one should I run?",
+      header: "Select script",
+      options: [
+        { label: "<script-name-1>", description: "<one-line summary of what it does>" },
+        { label: "<script-name-2>", description: "<one-line summary of what it does>" }
+        // ... one per candidate
+      ]
+    }
+  ]
+)
+```
+
+After the user selects one, read the script to identify its parameters. Then ask:
+
+```
+AskUserQuestion(
+  questions: [
+    {
+      question: "Run with default settings, or customize parameters?",
+      header: "Parameters",
+      options: [
+        { label: "Run as-is (defaults)", description: "No extra parameters" },
+        { label: "Customize parameters", description: "I'll show you the available options" }
+      ]
+    }
+  ]
+)
+```
+
+If "Customize": list each detected parameter with its type, default, and purpose, then collect the user's choices and construct the final command.
+
+---
+
+## Step 3 — Execute and Inspect Results
+
+Run the chosen command. Capture both stdout and stderr. For long-running processes (dev servers), let output stream for 10–20 seconds and then evaluate the tail.
+
+```bash
+# Capture output to a temp file while also streaming to terminal
+OUTFILE=$(mktemp)
+<command> 2>&1 | tee "$OUTFILE" &
+APP_PID=$!
+sleep 15  # wait for startup
+```
+
+### Success indicators (stop here — Step 3b)
+
+The app started successfully if the output contains any of:
+- `Listening on`, `Running on`, `started`, `ready`, `compiled`, `serving`
+- An accessible port number (e.g. `http://localhost:3000`)
+- `✓`, `✔`, `SUCCESS`, `ready in`
+- Docker: `Started`, `healthy`, container IDs listed without errors
+- .NET: `Now listening on:`
+- Django/Flask: `Development server is running`
+- Go: `Listening and serving`
+
+### Failure indicators (go to Step 3a)
+
+Treat the startup as failed if:
+- Process exits with non-zero code before 15 seconds
+- Output contains `Error`, `error:`, `EADDRINUSE`, `failed`, `Cannot find`, `ModuleNotFoundError`, `command not found`, `port already in use`, `connection refused`
+- Docker: `exited with code`, `unhealthy`
+- Any stack trace or exception output
+
+### Step 3a — Failure Recovery
+
+Analyze the error output to determine the root cause. Common patterns:
+
+| Error Pattern | Likely Cause | Suggested Fix |
+|---|---|---|
+| `EADDRINUSE` / `port already in use` | Port occupied by another process | Kill the process on that port or use a different port |
+| `ModuleNotFoundError` / `Cannot find module` | Missing dependencies | Run `npm install` / `pip install -r requirements.txt` / `uv sync` / etc. |
+| `command not found` | Missing tool (node, python, docker, etc.) | Install the required runtime |
+| `connection refused` / DB connection error | Database/service not running | Start the required dependency first |
+| `.env` not found / missing env var | Missing environment config | Create `.env` from `.env.example` or set the missing variable |
+| `permission denied` | Script not executable | `chmod +x <script>` |
+| Docker: `Cannot connect to Docker daemon` | Docker not running | Start Docker Desktop |
+
+Present your analysis to the user:
+
+```
+AskUserQuestion(
+  questions: [
+    {
+      question: "The app failed to start. Here's what I found:\n\n<analysis>\n\nShould I attempt to fix this?",
+      header: "Startup failure",
+      options: [
+        { label: "Yes, fix it automatically", description: "Apply the suggested fix and retry" },
+        { label: "Show me the full error output", description: "I'll investigate myself" },
+        { label: "No, leave it for now", description: "Stop here" }
+      ]
+    }
+  ]
+)
+```
+
+If the user approves: apply the fix and re-run from Step 3. Limit auto-fix retries to 3 attempts to avoid looping forever.
+
+### Step 3b — Successful Start
+
+Report the success clearly:
+- Which URL/port the app is running on
+- Which services/processes were started
+- Any relevant next steps (e.g. open browser, run migrations first, available API docs)
+
+Exit gracefully — do not keep polling or output anything further unless the user asks.
+
+---
+
+## Stack Detection Reference
+
+When no script exists, use this reference to detect and start the appropriate stack.
+
+### Node.js / JavaScript / TypeScript
+
+```bash
+# Detect package manager
+[ -f pnpm-lock.yaml ] && PM="pnpm" || ([ -f yarn.lock ] && PM="yarn" || PM="npm")
+
+# Read package.json for available scripts
+cat package.json | python -c "import sys,json; s=json.load(sys.stdin).get('scripts',{}); [print(k,':',v) for k,v in s.items()]"
+```
+
+Priority: `dev` > `start` > `serve`
+
+| Framework | Command |
+|---|---|
+| Next.js | `npm run dev` (or `next dev`) |
+| Vite / React | `npm run dev` |
+| Express / Fastify | `npm run dev` or `node src/index.js` |
+| Remix | `npm run dev` |
+| Astro | `npm run dev` |
+| NestJS | `npm run start:dev` |
+
+### Python
+
+```bash
+# Detect environment manager
+[ -f pyproject.toml ] && grep -q "uv" pyproject.toml && PM="uv run" || PM="python"
+[ -f requirements.txt ] && PM="python"
+```
+
+| Framework | Command |
+|---|---|
+| FastAPI | `uv run uvicorn main:app --reload` or `uvicorn app.main:app --reload` |
+| Flask | `flask run` or `python app.py` |
+| Django | `python manage.py runserver` |
+| Streamlit | `streamlit run app.py` |
+| Gradio | `python app.py` |
+
+### Docker / Docker Compose
+
+```bash
+# Check for compose file
+[ -f docker-compose.yml ] || [ -f docker-compose.yaml ] && docker compose up
+# With build if first time or images changed:
+docker compose up --build
+```
+
+For detached + logs: `docker compose up -d && docker compose logs -f`
+
+### .NET
+
+```bash
+# Find the main project
+find . -name "*.csproj" -not -path "*/obj/*" | head -5
+
+dotnet run --project <ProjectName>
+# or for hot-reload:
+dotnet watch run --project <ProjectName>
+```
+
+### Go
+
+```bash
+go run ./cmd/...
+# or
+go run main.go
+```
+
+### Ruby on Rails
+
+```bash
+bundle exec rails server
+# or: bin/rails s
+```
+
+### PHP / Laravel
+
+```bash
+php artisan serve
+```
+
+### Rust
+
+```bash
+cargo run
+# or for web services:
+cargo watch -x run
+```
+
+### Java / Spring Boot
+
+```bash
+./mvnw spring-boot:run
+# or Gradle:
+./gradlew bootRun
+```
+
+### Monorepo / Full-Stack Stacks
+
+When a project has multiple services (frontend + backend + DB), the right approach is to start them in dependency order:
+
+1. Infrastructure (Postgres, Redis, etc.) — use Docker Compose services if available
+2. Backend / API
+3. Frontend / UI
+
+Ask the user which component is the "UI" if ambiguous, then build or run a script that handles all layers.
+
+---
+
+## Script Generation Template
+
+When creating a new `scripts/Start-App.ps1`, follow the patterns below exactly — they are drawn from a production-quality startup script and represent the expected structure for all new scripts.
+
+### How to fill in the template
+
+Before writing a single line of the script, gather this information from the project:
+
+| Question | Where to find it |
+|---|---|
+| What services does the stack have? | `docker-compose.yml` services block, or directory structure |
+| What are the source dirs that feed each Docker image? | Dockerfile `COPY` / `ADD` instructions |
+| What port does the API health endpoint live on? | API router or `.env` / config files |
+| What port does the web frontend serve on? | `package.json` dev script, nginx config, or `.env` |
+| Is there a setup script (first-time only)? | `scripts/setup*` or `scripts/init*` |
+| What env vars must be non-empty / non-placeholder? | `.env.example` or docs |
+| Is there a Chrome extension? | Look for `extension/` or `chrome-extension/` directory |
+| What Docker Compose profiles exist? | `docker-compose.yml` `profiles:` keys |
+
+Use this information to replace every `<PLACEHOLDER>` in the template below.
+
+---
+
+### Full PowerShell template (`scripts/Start-App.ps1`)
+
+```powershell
+#Requires -Version 5.1
+<#
+.SYNOPSIS
+    Starts the <PROJECT_NAME> application stack.
+
+.DESCRIPTION
+    1. Runs <SETUP_SCRIPT> automatically if first-time setup is needed
+       (.env is missing/unconfigured, or Docker images have not been built yet).
+    2. Detects whether service images are older than their source files and
+       rebuilds automatically if so.
+    3. Starts Docker Compose services (<LIST_OF_SERVICES>).
+    4. Waits for the API and web dashboard to become healthy.
+    [5. Builds the Chrome extension if dist/ is missing or -BuildExtension is set.]  ← include only if extension/ dir exists
+    [6. Launches Chrome with the unpacked extension and opens the dashboard.]         ← include only if extension/ dir exists
+
+.PARAMETER NoBrowser
+    Start backend services only — do not launch Chrome.           ← include only if extension/ dir exists
+
+.PARAMETER BuildExtension
+    Force a rebuild of the extension even if dist/ already exists. ← include only if extension/ dir exists
+
+.PARAMETER Rebuild
+    Force a rebuild of Docker images even if they appear current.
+
+.PARAMETER Dev
+    Start the Vite dev server (<DEV_PORT>) instead of the production
+    container (<PROD_PORT>). Enables hot-module replacement.
+
+.PARAMETER ChromeProfile
+    Path to use as Chrome's --user-data-dir. Defaults to a "<PROJECT_SLUG>-dev"  ← include only if extension/ dir exists
+    folder inside $env:TEMP so it is isolated from your main profile.
+
+.EXAMPLE
+    .\scripts\Start-App.ps1                   # dev mode (HMR) — default
+    .\scripts\Start-App.ps1 -Dev:$false       # production build
+    .\scripts\Start-App.ps1 -NoBrowser        ← include only if extension/ dir exists
+    .\scripts\Start-App.ps1 -BuildExtension   ← include only if extension/ dir exists
+    .\scripts\Start-App.ps1 -Rebuild
+#>
+
+param(
+    [switch]$NoBrowser,                                                        # ← include only if extension/ dir exists
+    [switch]$BuildExtension,                                                   # ← include only if extension/ dir exists
+    [switch]$Dev = $true,
+    [switch]$Rebuild,
+    [string]$ChromeProfile = (Join-Path $env:TEMP '<PROJECT_SLUG>-dev')        # ← include only if extension/ dir exists
+)
+
+Set-StrictMode -Version Latest
+$ErrorActionPreference = 'Stop'
+
+# ---------------------------------------------------------------------------
+# Helpers
+# ---------------------------------------------------------------------------
+
+function Write-Step([string]$Message) {
+    Write-Host ""
+    Write-Host "==> $Message" -ForegroundColor Cyan
+}
+
+function Write-Ok([string]$Message) {
+    Write-Host "    [OK] $Message" -ForegroundColor Green
+}
+
+function Write-Warn([string]$Message) {
+    Write-Host "    [WARN] $Message" -ForegroundColor Yellow
+}
+
+function Write-Fail([string]$Message) {
+    Write-Host ""
+    Write-Host "    [FAIL] $Message" -ForegroundColor Red
+}
+
+# Helper: returns $true if node_modules is missing or older than package.json / package-lock.json
+# Use this before any `npm install` call to avoid redundant installs.
+function Test-NpmInstallNeeded([string]$Dir) {
+    $nodeModules = Join-Path $Dir 'node_modules'
+    if (-not (Test-Path $nodeModules)) { return $true }
+
+    $installedTime = (Get-Item $nodeModules).LastWriteTime
+    foreach ($manifest in @('package.json', 'package-lock.json')) {
+        $file = Join-Path $Dir $manifest
+        if ((Test-Path $file) -and (Get-Item $file).LastWriteTime -gt $installedTime) {
+            Write-Warn "$manifest is newer than node_modules — running npm install"
+            return $true
+        }
+    }
+    return $false
+}
+
+$ProjectRoot = Split-Path $PSScriptRoot -Parent
+Set-Location $ProjectRoot
+
+# ---------------------------------------------------------------------------
+# 1. Detect Docker Compose
+# ---------------------------------------------------------------------------
+
+Write-Step "Detecting Docker Compose"
+
+if (-not (Get-Command 'docker' -ErrorAction SilentlyContinue)) {
+    Write-Fail "docker not found. Install Docker Desktop and re-run."
+    exit 1
+}
+
+$ComposeCmd = if (& docker compose version 2>&1 | Select-String 'version') { 'docker compose' } else { 'docker-compose' }
+Write-Ok "Using: $ComposeCmd"
+
+# ---------------------------------------------------------------------------
+# 2. First-time setup detection
+# Run <SETUP_SCRIPT> automatically when:
+#   A) .env is missing or has unconfigured placeholder values
+#   B) Docker images for key services have never been built
+# ---------------------------------------------------------------------------
+
+function Test-SetupRequired {
+    # Condition A — .env exists and all required secrets are filled in
+    $envFile = Join-Path $ProjectRoot '.env'
+    if (-not (Test-Path $envFile)) { return $true }
+
+    $content = Get-Content $envFile -Raw
+    # <REQUIRED_ENV_VARS>: list the secret keys that must have real values (not blank, not "changeme")
+    foreach ($key in @('<SECRET_KEY_1>', '<SECRET_KEY_2>', '<SECRET_KEY_3>')) {
+        if ($content -notmatch "(?m)^${key}\s*=\s*[^`r`n]+") { return $true }
+        if ($content -match  "(?m)^${key}\s*=\s*changeme")    { return $true }
+    }
+
+    # Condition B — Docker images for key services exist
+    # Docker Compose prefixes image names with the lowercased project directory name.
+    $projectName = (Split-Path $ProjectRoot -Leaf).ToLower()
+    # <KEY_SERVICES>: list service names whose images must exist (e.g. 'api', 'worker')
+    $builtImages = & docker images --format '{{.Repository}}' 2>&1 |
+                   Where-Object { $_ -match "${projectName}.+(<KEY_SERVICE_1>|<KEY_SERVICE_2>)" }
+    if (-not $builtImages) { return $true }
+
+    return $false
+}
+
+Write-Step "Checking setup state"
+
+if (Test-SetupRequired) {
+    Write-Warn "First-time setup required — launching <SETUP_SCRIPT>"
+    Write-Host ""
+
+    $setupScript = Join-Path $PSScriptRoot '<SETUP_SCRIPT>'   # e.g. 'setup-backend.ps1'
+    & $setupScript
+    if ($LASTEXITCODE -ne 0) {
+        Write-Fail "<SETUP_SCRIPT> exited with code $LASTEXITCODE — aborting."
+        exit 1
+    }
+
+    Write-Host ""
+    Write-Step "Resuming Start-App after setup"
+} else {
+    Write-Ok "Environment configured and images exist — skipping setup"
+}
+
+# ---------------------------------------------------------------------------
+# 3. Stale image detection + service startup
+# Compare each service image's creation timestamp against the source files
+# that feed it (Dockerfile, source dirs, dependency manifests).
+# Rebuild automatically if anything is newer than the image.
+# ---------------------------------------------------------------------------
+
+Write-Step "Starting backend services"
+
+function Test-ImageStale([string]$ServiceName, [string[]]$SourceDirs) {
+    # Image name format: <project_dir_lowercase>-<service>   (Docker Compose default)
+    $projectName = (Split-Path $ProjectRoot -Leaf).ToLower()
+    $imageCreated = & docker inspect --format '{{.Created}}' "${projectName}-${ServiceName}" 2>$null
+    if (-not $imageCreated) { return $true }   # image doesn't exist yet
+    try { $imageTime = [datetime]::Parse($imageCreated) } catch { return $true }
+
+    foreach ($dir in $SourceDirs) {
+        $fullDir = Join-Path $ProjectRoot $dir
+        if (-not (Test-Path $fullDir)) { continue }
+        $newer = Get-ChildItem -Path $fullDir -Recurse -File -ErrorAction SilentlyContinue |
+                 Where-Object { $_.LastWriteTime -gt $imageTime } |
+                 Select-Object -First 1
+        if ($newer) {
+            Write-Warn "Image '$ServiceName' is stale — $($newer.FullName) is newer"
+            return $true
+        }
+    }
+    return $false
+}
+
+# <STALE_CHECKS>: one line per service that has a built image.
+# List the source dirs/files that, if changed, mean the image needs rebuilding.
+# Example pattern — replace service names and source paths for this project:
+#   $<SERVICE>Stale = Test-ImageStale '<service>' @('<src_dir>', '<Dockerfile>', '<schema_file>')
+$<SERVICE_1>Stale = Test-ImageStale '<service_1>' @('<service_1_src>', '<service_1_dockerfile>')
+$<SERVICE_2>Stale = Test-ImageStale '<service_2>' @('<service_2_src>', '<service_2_dockerfile>')
+
+$needsRebuild = $Rebuild -or $<SERVICE_1>Stale -or $<SERVICE_2>Stale
+$buildFlag    = if ($needsRebuild) { '--build' } else { '' }
+if ($needsRebuild) {
+    Write-Host "    [REBUILD] Rebuilding stale Docker images" -ForegroundColor Magenta
+}
+
+# ---------------------------------------------------------------------------
+# Dev-mode: detect if the web dev container needs force-recreating because
+# its package manifests changed since the container last started.
+# Only needed when a long-lived dev container manages its own npm install.
+# ---------------------------------------------------------------------------
+
+function Test-WebDevRecreateNeeded {
+    $containerName = '<PROJECT_SLUG>-<WEB_DEV_SERVICE>-1'   # e.g. 'myapp-web-dev-1'
+    $containerStarted = & docker inspect --format '{{.State.StartedAt}}' $containerName 2>$null
+    if (-not $containerStarted) { return $false }
+    try { $startedTime = [datetime]::Parse($containerStarted) } catch { return $false }
+
+    $webDir = Join-Path $ProjectRoot '<WEB_DIR>'   # e.g. 'web'
+    foreach ($manifest in @('package.json', 'package-lock.json')) {
+        $file = Join-Path $webDir $manifest
+        if ((Test-Path $file) -and (Get-Item $file).LastWriteTime -gt $startedTime) {
+            Write-Warn "$manifest is newer than $containerName — will force-recreate"
+            return $true
+        }
+    }
+    return $false
+}
+
+if ($Dev) {
+    Write-Host "    [DEV] Starting with hot-reload dev server on port <DEV_PORT>" -ForegroundColor Magenta
+    $webDevFlag = if (Test-WebDevRecreateNeeded) { '--force-recreate' } else { '' }
+    # Start all services using the 'dev' profile; the production web container is excluded.
+    # Replace service names and profile name to match docker-compose.yml.
+    Invoke-Expression "$ComposeCmd --profile dev up -d --remove-orphans $buildFlag $webDevFlag <INFRA_SERVICES> <API_SERVICES> <WEB_DEV_SERVICE>"
+} else {
+    Invoke-Expression "$ComposeCmd up -d --remove-orphans $buildFlag"
+}
+
+if ($LASTEXITCODE -ne 0) {
+    Write-Fail "docker compose up failed — check output above"
+    exit 1
+}
+
+Write-Ok "Containers started (or already running)"
+
+# ---------------------------------------------------------------------------
+# 4. Wait for API health endpoint
+# Poll until the API reports healthy or the deadline expires.
+# ---------------------------------------------------------------------------
+
+Write-Step "Waiting for API to become ready"
+
+$apiReady = $false
+$deadline  = (Get-Date).AddSeconds(150)   # adjust if your API starts slowly
+
+# <API_HEALTH_URL>: the full URL of a health/readiness endpoint, e.g. http://127.0.0.1:8000/health
+Write-Host "    Polling <API_HEALTH_URL>" -NoNewline
+
+while ((Get-Date) -lt $deadline) {
+    try {
+        $resp = Invoke-WebRequest -Uri '<API_HEALTH_URL>' `
+                    -UseBasicParsing -TimeoutSec 2 -ErrorAction Stop
+        if ($resp -and $resp.StatusCode -eq 200) {
+            $apiReady = $true
+            Write-Host " ready" -ForegroundColor Green
+            break
+        }
+    } catch { }
+    Write-Host '.' -NoNewline
+    Start-Sleep -Seconds 2
+}
+
+if (-not $apiReady) {
+    Write-Host ""
+    Write-Warn "API did not respond within 150 s — it may still be starting up."
+    Write-Host "    Check logs with: $ComposeCmd logs -f <API_SERVICE>" -ForegroundColor Yellow
+}
+
+# ---------------------------------------------------------------------------
+# 5. [CHROME EXTENSION] Build extension if needed
+# Include this entire section only when an extension/ directory exists in
+# the project. Delete it otherwise.
+# ---------------------------------------------------------------------------
+
+$ExtDir  = Join-Path $ProjectRoot 'extension'   # adjust path if needed
+$DistDir = Join-Path $ExtDir 'dist'
+
+$buildMarker = Join-Path $DistDir 'manifest.json'
+$needsBuild  = $BuildExtension -or
+              (-not (Test-Path $DistDir)) -or
+              (-not (Test-Path $buildMarker))
+
+if (-not $needsBuild) {
+    $markerTime = (Get-Item $buildMarker).LastWriteTime
+    $newerFile  = Get-ChildItem -Path (Join-Path $ExtDir 'src') -Recurse -File |
+                  Where-Object { $_.LastWriteTime -gt $markerTime } |
+                  Select-Object -First 1
+    if ($newerFile) {
+        Write-Warn "Extension source newer than last build: $($newerFile.FullName)"
+        $needsBuild = $true
+    }
+}
+
+if ($needsBuild) {
+    Write-Step "Building Chrome extension"
+
+    if (-not (Get-Command 'npm' -ErrorAction SilentlyContinue)) {
+        Write-Fail "npm not found. Install Node.js 20+ from https://nodejs.org/"
+        exit 1
+    }
+
+    Push-Location $ExtDir
+    try {
+        if (Test-NpmInstallNeeded $ExtDir) {
+            Write-Host "    Installing npm dependencies..."
+            npm install --silent
+            if ($LASTEXITCODE -ne 0) { throw "npm install failed" }
+        }
+        Write-Host "    Running build..."
+        npm run build
+        if ($LASTEXITCODE -ne 0) { throw "npm run build failed" }
+    } catch {
+        Write-Fail $_.Exception.Message
+        Pop-Location
+        exit 1
+    } finally {
+        Pop-Location
+    }
+
+    Write-Ok "Extension built -> $DistDir"
+} else {
+    Write-Ok "Extension dist/ is up to date — skipping build (use -BuildExtension to force)"
+}
+
+# ---------------------------------------------------------------------------
+# 6. [CHROME LAUNCH] Find Chrome and open the dashboard
+# Include this section only when an extension/ directory exists.
+# ---------------------------------------------------------------------------
+
+if (-not $NoBrowser) {
+
+    Write-Step "Locating Chrome"
+
+    $chromeCandidates = @(
+        "$env:ProgramFiles\Google\Chrome\Application\chrome.exe",
+        "${env:ProgramFiles(x86)}\Google\Chrome\Application\chrome.exe",
+        "$env:LocalAppData\Google\Chrome\Application\chrome.exe",
+        "$env:ProgramFiles\Chromium\Application\chrome.exe",
+        "$env:LocalAppData\Chromium\Application\chrome.exe"
+    )
+
+    $chromePath = $chromeCandidates | Where-Object { Test-Path $_ } | Select-Object -First 1
+
+    if (-not $chromePath) {
+        Write-Fail "Chrome not found. Install Google Chrome or set the path manually."
+        exit 1
+    }
+
+    Write-Ok "Found: $chromePath"
+
+    # Wait for web dashboard before opening browser
+    Write-Step "Waiting for web dashboard to become ready"
+
+    $webPort    = if ($Dev) { <DEV_PORT> } else { <PROD_PORT> }
+    $webLogSvc  = if ($Dev) { '<WEB_DEV_SERVICE>' } else { '<WEB_PROD_SERVICE>' }
+    $webTimeout = if ($Dev) { 120 } else { 60 }   # dev server installs deps first
+    $webReady   = $false
+    $webDeadline = (Get-Date).AddSeconds($webTimeout)
+
+    Write-Host "    Polling http://127.0.0.1:$webPort" -NoNewline
+
+    while ((Get-Date) -lt $webDeadline) {
+        try {
+            $resp = Invoke-WebRequest -Uri "http://127.0.0.1:$webPort" `
+                        -UseBasicParsing -TimeoutSec 2 -ErrorAction Stop
+            if ($resp -and $resp.StatusCode -eq 200) {
+                $webReady = $true
+                Write-Host " ready" -ForegroundColor Green
+                break
+            }
+        } catch { }
+        Write-Host '.' -NoNewline
+        Start-Sleep -Seconds 2
+    }
+
+    if (-not $webReady) {
+        Write-Host ""
+        Write-Warn "Web dashboard did not respond within ${webTimeout} s — it may still be starting."
+        Write-Host "    Check logs with: $ComposeCmd logs -f $webLogSvc" -ForegroundColor Yellow
+    }
+
+    # Launch Chrome with isolated profile + loaded extension
+    $webUrl = if ($Dev) { 'http://localhost:<DEV_PORT>' } else { 'http://localhost:<PROD_PORT>' }
+
+    if (-not (Test-Path $ChromeProfile)) {
+        New-Item -ItemType Directory -Path $ChromeProfile | Out-Null
+    }
+
+    $chromeArgs = @(
+        "--user-data-dir=`"$ChromeProfile`""
+        "--load-extension=`"$DistDir`""
+        "--no-first-run"
+        "--no-default-browser-check"
+        $webUrl
+        # Add any additional URLs to open (e.g. API docs):
+        # "<API_DOCS_URL>"
+    )
+
+    Write-Host "    Profile  : $ChromeProfile"
+    Write-Host "    Extension: $DistDir"
+    Write-Host "    Opening  : $webUrl"
+
+    Start-Process -FilePath $chromePath -ArgumentList $chromeArgs
+    Write-Ok "Chrome launched"
+    Write-Warn "Extension ID differs from production — expected for unpacked extensions."
+}
+
+# ---------------------------------------------------------------------------
+# [NATIVE PROCESS VARIANT] Use this block INSTEAD of the Docker Compose blocks
+# above when the project has no docker-compose.yml. Start each service as a
+# background PowerShell job, then run the UI in the foreground.
+#
+# Only include if the project does not use Docker Compose.
+# ---------------------------------------------------------------------------
+#
+# Write-Step "Starting infrastructure"
+# # e.g. start Postgres if not managed by Docker
+# Start-Job -Name "db" -ScriptBlock { pg_ctl start -D "$env:PGDATA" }
+#
+# Write-Step "Starting API"
+# $apiJob = Start-Job -Name "api" -ScriptBlock {
+#     Set-Location "<REPO_ROOT>\<API_DIR>"
+#     uv run uvicorn <module>:app --reload --port <API_PORT>
+# }
+#
+# Write-Step "Starting web (foreground)"
+# Set-Location "<REPO_ROOT>\<WEB_DIR>"
+# npm run dev   # foreground — script blocks here until user Ctrl-C
+
+# ---------------------------------------------------------------------------
+# 7. Summary
+# Always include. Print every service URL and the most useful operational
+# commands so the developer can orient quickly after the script completes.
+# ---------------------------------------------------------------------------
+
+Write-Host ""
+Write-Host "===========================================" -ForegroundColor Cyan
+Write-Host "  <PROJECT_NAME> is running" -ForegroundColor Green
+if ($Dev) { Write-Host "  (hot-reload dev mode)" -ForegroundColor Magenta }
+Write-Host "===========================================" -ForegroundColor Cyan
+
+# <SERVICE_URLS>: one line per exposed endpoint
+if ($Dev) {
+    Write-Host "  Web:    http://localhost:<DEV_PORT>  (Vite HMR)"
+} else {
+    Write-Host "  Web:    http://localhost:<PROD_PORT>"
+}
+Write-Host "  API:    http://localhost:<API_PORT>"
+Write-Host "  Docs:   http://localhost:<API_PORT>/docs"   # remove if no API docs
+
+Write-Host ""
+Write-Host "  Useful commands:"
+if ($Dev) {
+    Write-Host "    $ComposeCmd logs -f <WEB_DEV_SERVICE>   # stream dev server logs"
+} else {
+    Write-Host "    $ComposeCmd logs -f <WEB_PROD_SERVICE>  # stream web logs"
+}
+Write-Host "    $ComposeCmd logs -f <API_SERVICE>         # stream API logs"
+Write-Host "    $ComposeCmd ps                            # service status"
+Write-Host "    $ComposeCmd down                          # stop everything"
+Write-Host ""
+```
+
+### Checklist before saving the generated script
+
+- [ ] All `<PLACEHOLDER>` tokens replaced with real values
+- [ ] Extension section removed if no `extension/` directory exists
+- [ ] `Test-SetupRequired` secret key list matches actual `.env.example` keys
+- [ ] `Test-ImageStale` source dirs match the project's Dockerfile `COPY` paths
+- [ ] API health URL confirmed to return 200 when healthy
+- [ ] Web port numbers correct for dev and prod modes
+- [ ] Summary block lists all exposed service URLs
+- [ ] Script saved to `scripts/Start-App.ps1` and tested with a dry run
+
+### When to use native processes instead of Docker Compose
+
+If `docker-compose.yml` does not exist in the project root, replace the Docker Compose blocks with native process management (see the commented `NATIVE PROCESS VARIANT` section in the template above). Use `Start-Job` for background services and run the UI in the foreground so `Ctrl-C` is the natural stop mechanism.
