@@ -60,7 +60,7 @@ echo "In secondary worktree: $IN_WORKTREE"
 ```
 
 **Detect pre-committed branch** — if the current branch already has commits ahead of `dev`
-and is not `dev` itself, the work is already committed. Skip Steps 1–4 and jump to Step 5:
+and is not `dev` itself, the work is already committed. Skip Steps 1–4 (Ask for branch/commit info, Pull latest if behind, Stage all changes, Test suite and coverage gate) and jump to Step 5:
 
 ```bash
 CURRENT_BRANCH=$(git branch --show-current)
@@ -70,7 +70,7 @@ echo "Current branch: $CURRENT_BRANCH  Commits ahead of dev: $AHEAD"
 
 - If `$CURRENT_BRANCH` is not `dev` and `$AHEAD > 0` → set `$BRANCH=$CURRENT_BRANCH`,
   infer `$MSG` from the most recent commit subject (`git log -1 --format=%s`), then
-  **skip to Step 4** (still run the test/coverage gate before pushing).
+  **skip Steps 1–3 (Ask for branch/commit info, Pull latest if behind, Stage all changes)**, jumping to Step 4 (still run the test/coverage gate before pushing).
 - Otherwise → continue to Step 1 as normal.
 
 ---
