@@ -70,7 +70,7 @@ echo "Current branch: $CURRENT_BRANCH  Commits ahead of dev: $AHEAD"
 
 - If `$CURRENT_BRANCH` is not `dev` and `$AHEAD > 0` → set `$BRANCH=$CURRENT_BRANCH`,
   infer `$MSG` from the most recent commit subject (`git log -1 --format=%s`), then
-  **skip to Step 5**.
+  **skip to Step 4** (still run the test/coverage gate before pushing).
 - Otherwise → continue to Step 1 as normal.
 
 ---
@@ -170,7 +170,303 @@ If the staging area is empty (nothing to commit), stop and tell the user there i
 
 ---
 
-### Step 4 — Create the feature branch and commit
+### Step 4 — Test suite and coverage gate
+
+**This step is mandatory for both new and pre-committed branches. Never skip it.**
+
+Before committing (or before pushing, for pre-committed branches), verify the full test
+suite passes and that every changed source file has a corresponding test and meets 80 % coverage.
+
+---
+
+#### 4-A  Identify changed source files
+
+For **uncommitted work** (arriving from Step 3 with `git add --all` already done):
+
+```bash
+CHANGED_FILES=$(git diff --cached --name-only)
+```
+
+For **pre-committed branches** (branch already ahead of `dev`):
+
+```bash
+CHANGED_FILES=$(git diff origin/dev...HEAD --name-only)
+```
+
+Categorise by stack:
+
+```bash
+API_SRC=$(echo "$CHANGED_FILES" | grep '^api/src/'       | grep '\.py$'        || true)
+WEB_SRC=$(echo "$CHANGED_FILES" | grep '^web/src/'       | grep -E '\.[jt]sx?$' || true)
+EXT_SRC=$(echo "$CHANGED_FILES" | grep '^extension/src/' | grep -E '\.[jt]sx?$' || true)
+```
+
+Skip any stack whose variable is empty (no source files changed there).
+
+---
+
+#### 4-B  Run the full test suite
+
+```bash
+pwsh -NonInteractive -File "$REPO_ROOT/scripts/Start-Tests.ps1" -NoPrompt
+TEST_EXIT=$?
+```
+
+**If `$TEST_EXIT` is non-zero — STOP.** Do not proceed. Report which suites failed
+(the script prints a summary table; echo it to the user) and ask them to fix the
+failures before retrying `/ship-to-dev`.
+
+---
+
+#### 4-C  Verify test files exist for every changed source file
+
+For each file in `$API_SRC`, `$WEB_SRC`, and `$EXT_SRC`, check that at least one
+corresponding test file exists. Apply these mapping rules:
+
+| Stack | Source path pattern | Expected test location(s) |
+|---|---|---|
+| API (Python) | `api/src/<pkg>/<module>.py` | `api/tests/unit/<pkg>/test_<module>.py` **or** `api/tests/unit/test_<module>.py` |
+| Web (TS) | `web/src/<path>/<Component>.tsx` | `web/src/__tests__/<Component>.test.tsx` **or** `web/src/<path>/__tests__/<Component>.test.tsx` |
+| Extension (TS) | `extension/src/<path>/<file>.ts` | `extension/src/__tests__/<file>.test.ts` **or** `extension/src/<path>/__tests__/<file>.test.ts` |
+
+Check each file with `test -f <expected-path>` (or equivalent). Collect every source
+file that has **no matching test file** into `$MISSING_TESTS`.
+
+If `$MISSING_TESTS` is non-empty — **STOP.** List the missing test files and tell the
+user they must be created before shipping:
+
+```
+MISSING TEST FILES — create these before proceeding:
+  api/tests/unit/foo/test_bar.py  ←  covers api/src/foo/bar.py
+  web/src/__tests__/MyComponent.test.tsx  ←  covers web/src/components/MyComponent.tsx
+```
+
+---
+
+#### 4-D  Verify ≥ 80 % coverage for changed source files
+
+Run targeted coverage checks only for the stacks that have changed source files.
+Do **not** re-run the entire test suite — use focused runs against only the relevant
+test directories.
+
+**Python (API) — if `$API_SRC` is non-empty:**
+
+```bash
+cd "$REPO_ROOT/api"
+
+# Build --cov flags for changed source files (convert file paths to module paths)
+COV_FLAGS=$(echo "$API_SRC" | sed 's|api/||;s|/|.|g;s|\.py$||' | xargs -I{} echo "--cov={}")
+
+uv run pytest tests/unit tests/integration \
+  $COV_FLAGS \
+  --cov-report=json \
+  --cov-fail-under=0 \
+  -q 2>&1
+
+# Parse coverage.json for per-file percentages
+python - "$API_SRC" <<'PYEOF'
+import json, sys, os
+
+with open('coverage.json') as f:
+    data = json.load(f)
+
+# Build a normalised lookup: absolute path → percent_covered
+lookup = {}
+for fpath, fdata in data['files'].items():
+    lookup[os.path.normpath(fpath)] = fdata['summary']['percent_covered']
+
+failures = []
+for src_file in sys.argv[1].split():
+    src_file = src_file.strip()
+    if not src_file:
+        continue
+    # coverage.json keys are relative to the api/ dir
+    rel = src_file.replace('api/', '', 1)
+    pct = lookup.get(os.path.normpath(rel), None)
+    if pct is None:
+        print(f"  WARN: {src_file} not found in coverage report")
+    elif pct < 80:
+        failures.append((src_file, pct))
+    else:
+        print(f"  OK  {src_file}: {pct:.1f}%")
+
+if failures:
+    for f, p in failures:
+        print(f"  FAIL {f}: {p:.1f}%  (need >= 80%)")
+    sys.exit(1)
+PYEOF
+COV_EXIT=$?
+```
+
+If `$COV_EXIT` is non-zero — **STOP.** List the under-covered files and tell the user
+to add tests before retrying.
+
+**TypeScript — Web (if `$WEB_SRC` non-empty) and Extension (if `$EXT_SRC` non-empty):**
+
+Run each separately from its own directory:
+
+```bash
+# Web
+cd "$REPO_ROOT/web"
+npx vitest run --coverage --reporter=verbose 2>&1 | tee /tmp/web-coverage.txt
+
+# Extension
+cd "$REPO_ROOT/extension"
+npx vitest run --coverage --reporter=verbose 2>&1 | tee /tmp/ext-coverage.txt
+```
+
+After each run, inspect the coverage summary table printed to stdout. Lines look like:
+
+```
+ % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s
+   85.71 |    75.00 |   100.0 |   85.71 | 12-14
+```
+
+For each file in `$WEB_SRC` / `$EXT_SRC`, find its entry in the summary. If the
+**Statements** percentage is below 80 — **STOP** and list the under-covered files.
+
+If vitest generates a `coverage/coverage-summary.json` (Istanbul/v8 reporter), parse
+it directly:
+
+```bash
+python - "$WEB_SRC" "$EXT_SRC" <<'PYEOF'
+import json, sys, os
+
+def check_file(summary_path, src_files):
+    if not os.path.exists(summary_path):
+        return []
+    with open(summary_path) as f:
+        data = json.load(f)
+    failures = []
+    for src in src_files.split():
+        src = src.strip()
+        if not src:
+            continue
+        for key in data:
+            if key.endswith(src.lstrip('/')):
+                pct = data[key]['statements']['pct']
+                if pct < 80:
+                    failures.append((src, pct))
+                else:
+                    print(f"  OK  {src}: {pct:.1f}%")
+                break
+        else:
+            print(f"  WARN: {src} not found in coverage summary")
+    return failures
+
+web_failures = check_file('web/coverage/coverage-summary.json', sys.argv[1])
+ext_failures = check_file('extension/coverage/coverage-summary.json', sys.argv[2])
+all_failures = web_failures + ext_failures
+
+if all_failures:
+    for f, p in all_failures:
+        print(f"  FAIL {f}: {p:.1f}%  (need >= 80%)")
+    sys.exit(1)
+PYEOF
+```
+
+If any TS files are below 80 % — **STOP** and require tests before proceeding.
+
+---
+
+#### 4-E  Clean build gate — lint, type-check, and build warnings
+
+**This sub-step runs for every changed stack, no exceptions.**
+
+The goal is to confirm that the branch introduces **zero new lint errors, zero new type errors outside generated code, and no new build warnings** beyond the pre-existing baseline documented in `CLAUDE.md`.
+
+---
+
+**Python (API) — if `$API_SRC` is non-empty:**
+
+```bash
+cd "$REPO_ROOT"
+
+# Ruff: must be zero errors
+uv run ruff check api/src
+RUFF_EXIT=$?
+
+# Mypy: zero errors outside generated code
+uv run mypy api/src --exclude api/src/generated
+MYPY_EXIT=$?
+```
+
+If `$RUFF_EXIT` is non-zero — **STOP.** Show the ruff output and require the errors to be fixed.
+
+If `$MYPY_EXIT` is non-zero — check whether every error path is in `api/src/generated/`. If any error is outside `generated/`, **STOP** and require a fix. Errors strictly inside `generated/` are pre-existing (see CLAUDE.md) and do not block shipping.
+
+---
+
+**Web (TypeScript + ESLint + build) — if `$WEB_SRC` is non-empty:**
+
+```bash
+cd "$REPO_ROOT/web"
+
+# ESLint: zero errors (warnings are checked against pre-existing list)
+npm run lint 2>&1 | tee /tmp/web-lint.txt
+LINT_EXIT=$?
+
+# TypeScript
+npm run type-check 2>&1 | tee /tmp/web-typecheck.txt
+TSC_EXIT=$?
+
+# Production build (captures Vite warnings)
+npm run build 2>&1 | tee /tmp/web-build.txt
+BUILD_EXIT=$?
+```
+
+**If `$LINT_EXIT` is non-zero** — inspect `/tmp/web-lint.txt`. For each error or warning:
+- If the file is NOT in the pre-existing debt list in `CLAUDE.md` → **STOP**, require a fix.
+- If the file IS in the pre-existing list and the issue is the same known one → acceptable, note it but continue.
+- If the file is in the pre-existing list but the issue is NEW → **STOP**, require a fix.
+
+**If `$TSC_EXIT` is non-zero** — **STOP.** TypeScript errors must be resolved before shipping.
+
+**If `$BUILD_EXIT` is non-zero** — **STOP.** A failing build cannot ship.
+
+**For Vite warnings in `/tmp/web-build.txt`** — check each warning:
+- `[INEFFECTIVE_DYNAMIC_IMPORT]` on `auth.ts` → pre-existing (W2 in CLAUDE.md), acceptable.
+- Chunk size warning on the main bundle → pre-existing (W3 in CLAUDE.md), acceptable.
+- **Any other warning** → **STOP**, require a fix before shipping.
+
+```bash
+# Quick check: fail if any Vite warning is NOT in the known pre-existing list
+grep -E '^\[.*\] Warning:' /tmp/web-build.txt | grep -v 'INEFFECTIVE_DYNAMIC_IMPORT\|Some chunks are larger' && {
+  echo "NEW Vite build warning detected — must be resolved before shipping"
+  exit 1
+} || true
+```
+
+---
+
+**Extension (TypeScript) — if `$EXT_SRC` is non-empty:**
+
+```bash
+cd "$REPO_ROOT/extension"
+
+npm run type-check 2>&1 | tee /tmp/ext-typecheck.txt
+EXT_TSC_EXIT=$?
+
+npm test -- --run 2>&1 | tee /tmp/ext-test.txt
+EXT_TEST_EXIT=$?
+```
+
+**If `$EXT_TSC_EXIT` is non-zero** — **STOP.** Fix TypeScript errors before shipping.
+
+For stderr output from tests (`/tmp/ext-test.txt`): the `document is not defined` warning from `rating-panel.ts` is pre-existing (W5 in CLAUDE.md). Any other `ReferenceError` or uncaught exception → **STOP**, require investigation.
+
+---
+
+**Shrink the debt list when you fix something:**
+If during any of the above checks you observe that a pre-existing issue from the CLAUDE.md debt table is now gone, remove that row from the table as part of your commit.
+
+---
+
+**All checks passed?** Continue to Step 5.
+
+---
+
+### Step 5 — Create the feature branch and commit
 
 ```bash
 git checkout -b $BRANCH
@@ -185,7 +481,7 @@ git log --oneline -1
 
 ---
 
-### Step 5 — Push the feature branch to origin
+### Step 6 — Push the feature branch to origin
 
 ```bash
 git push -u origin $BRANCH
@@ -193,7 +489,7 @@ git push -u origin $BRANCH
 
 ---
 
-### Step 6 — Create a PR targeting DEV
+### Step 7 — Create a PR targeting DEV
 
 Capture both stdout and stderr so we can detect "already exists" gracefully:
 
@@ -234,7 +530,7 @@ fi
 
 ---
 
-### Step 7 — Merge the PR (squash merge)
+### Step 8 — Merge the PR (squash merge)
 
 **Important:** `gh pr merge` will attempt to switch the local working tree to `dev`
 after merging. Two things can block that checkout:
@@ -264,7 +560,7 @@ fi
 if [ "$IN_WORKTREE" = "true" ]; then
   git worktree prune
   [ -d "$WORKTREE_PATH" ] && rm -rf "$WORKTREE_PATH" && echo "Worktree removed ahead of merge: $WORKTREE_PATH"
-  IN_WORKTREE=false   # mark handled so Steps 8 & 9 skip the block
+  IN_WORKTREE=false   # mark handled so Steps 9 & 10 skip the block
 fi
 
 gh pr merge $BRANCH \
@@ -283,7 +579,7 @@ gh pr view $BRANCH --json state --jq '.state'
 
 ---
 
-### Steps 8 & 9 — Cleanup and sync DEV
+### Steps 9 & 10 — Cleanup and sync DEV
 
 All cleanup runs from `$REPO_ROOT`. `gh pr merge --squash` may have already switched
 the local working tree to `dev` and deleted the local feature branch; both operations
@@ -301,7 +597,7 @@ git branch --list "$BRANCH" | grep -q . && git branch -d "$BRANCH"
 ```
 
 If `-d` refuses with "not fully merged", use `-D` only after confirming the remote
-PR state in Step 7 returned `"MERGED"`.
+PR state in Step 8 returned `"MERGED"`.
 
 **Worktree cleanup** — if `$IN_WORKTREE` was `true` in Step 0, the worktree directory
 must be removed. Run from `$REPO_ROOT`:
@@ -323,7 +619,7 @@ git pull origin dev
 git log --oneline -5
 ```
 
-**Restore stashed changes** — if working-tree changes were stashed in Step 7, pop them now:
+**Restore stashed changes** — if working-tree changes were stashed in Step 8, pop them now:
 
 ```bash
 if [ "$STASH_NEEDED" = "true" ]; then
@@ -336,17 +632,18 @@ fi
 ## Quick Reference
 
 ```
-0. Detect context (worktree? already committed?)  git rev-parse --show-toplevel; git branch; git rev-list
-1. Ask for $BRANCH and $MSG (skip if already committed on feature branch)
-2. Fetch + pull only if behind             git fetch origin && [check BEHIND count] && git stash / pull / pop
-3. Stage all changes                        git add --all
-4. Create feature branch + commit           git checkout -b $BRANCH && git commit
-5. Push                                     git push -u origin $BRANCH
-6. Open PR into DEV                         gh pr create --base dev
-7. Merge PR (squash) from REPO_ROOT         cd $REPO_ROOT; [stash if dirty]; gh pr merge --squash --delete-branch
-8 & 9. Conditional cleanup + sync DEV       [if not on dev] checkout dev; [if branch exists] branch -d;
-                                            [if worktree] git worktree prune && rm -rf $WORKTREE_PATH;
-                                            git pull origin dev; [if stashed] git stash pop
+0.      Detect context (worktree? already committed?)  git rev-parse --show-toplevel; git branch; git rev-list
+1.      Ask for $BRANCH and $MSG (skip if already committed on feature branch)
+2.      Fetch + pull only if behind             git fetch origin && [check BEHIND count] && git stash / pull / pop
+3.      Stage all changes                        git add --all
+4.      Test, coverage + clean-build gate         pwsh Start-Tests.ps1 -NoPrompt; verify test files exist; check ≥80% coverage (4-D); ruff/mypy/eslint/tsc/build warnings (4-E) — all must pass
+5.      Create feature branch + commit           git checkout -b $BRANCH && git commit
+6.      Push                                     git push -u origin $BRANCH
+7.      Open PR into DEV                         gh pr create --base dev
+8.      Merge PR (squash) from REPO_ROOT         cd $REPO_ROOT; [stash if dirty]; gh pr merge --squash --delete-branch
+9 & 10. Conditional cleanup + sync DEV           [if not on dev] checkout dev; [if branch exists] branch -d;
+                                                 [if worktree] git worktree prune && rm -rf $WORKTREE_PATH;
+                                                 git pull origin dev; [if stashed] git stash pop
 ```
 
 ---
@@ -360,8 +657,11 @@ fi
 | PR merge fails (status checks) | Show failure reason with `gh pr checks $BRANCH` — do not force merge |
 | `gh` not authenticated | `gh auth login` — pause workflow until authenticated |
 | Feature branch already exists | Use **AskUserQuestion**: options "Reuse existing branch" / "Choose a different name" — if "different name", loop back to Step 1 |
+| Tests fail at Step 4 | Fix the failing tests/code before continuing — do not skip or bypass the gate |
+| Missing test file at Step 4 | Create the missing test file covering the changed source file, re-run the gate |
+| Coverage below 80% at Step 4 | Add tests for uncovered lines, re-run `pwsh Start-Tests.ps1 -NoPrompt`, re-check coverage |
 | `fatal: 'dev' is already used by worktree` | `cd $REPO_ROOT` before running `gh pr merge` — never merge from inside a secondary worktree |
-| `cannot delete branch '…' used by worktree` | Step 7 now removes the worktree automatically before `gh pr merge --delete-branch`. If the error still occurs, run manually: `git worktree prune && rm -rf $WORKTREE_PATH && git branch -d $BRANCH` |
-| `local changes would be overwritten by checkout` | Stash before `gh pr merge` (Step 7 now does this automatically); the PR may have already merged on GitHub even if the command errored — check with `gh pr view` before retrying |
+| `cannot delete branch '…' used by worktree` | Step 8 now removes the worktree automatically before `gh pr merge --delete-branch`. If the error still occurs, run manually: `git worktree prune && rm -rf $WORKTREE_PATH && git branch -d $BRANCH` |
+| `local changes would be overwritten by checkout` | Stash before `gh pr merge` (Step 8 now does this automatically); the PR may have already merged on GitHub even if the command errored — check with `gh pr view` before retrying |
 | PR already merged (second `gh pr merge` attempt) | Verify with `gh pr view $BRANCH --json state --jq '.state'`; if `"MERGED"`, skip to cleanup |
-| `gh pr create` exits 1: "already exists" | Step 6 detects this automatically, extracts the existing PR URL, and continues to Step 7 — no manual intervention needed |
+| `gh pr create` exits 1: "already exists" | Step 7 detects this automatically, extracts the existing PR URL, and continues to Step 8 — no manual intervention needed |
