@@ -9,7 +9,7 @@ llm_skills/
 ├── claude/
 │   ├── agents/     # 15 sub-agents invoked via the Task tool
 │   ├── commands/   # 26 slash commands
-│   └── skills/     # 82 domain-specific knowledge modules
+│   └── skills/     # 88 domain-specific knowledge modules
 ├── codex/
 │   └── skills/     # 65 domain-specific knowledge modules
 └── gemini/         # Google Gemini CLI skills (future)
@@ -111,6 +111,11 @@ Domain-specific knowledge modules loaded into AI context. Claude skills live in 
 | [`commit-hygiene`](claude/skills/commit-hygiene/) | Foundations & Workflow | Atomic commits, PR size limits, commit thresholds, stacked PRs | ✓ | ✓ | |
 | [`git-cleanup`](claude/skills/git-cleanup/) | Foundations & Workflow | Audits and removes stale git worktrees and branches (local + remote origin) that have been merged into `dev` — squash-merge aware, dirty-check protected | ✓ | | |
 | [`guide-assistant`](claude/skills/guide-assistant/) | Foundations & Workflow | Personal assistant for walking the user step-by-step through any markdown file, manual, guide, runbook, or instruction document | ✓ | | |
+| [`feature-start`](claude/skills/feature-start/) | Foundations & Workflow | Use when starting any HomeRadar feature — before reading code, writing plans, or creating a worktree | ✓ | | |
+| [`fix-start`](claude/skills/fix-start/) | Foundations & Workflow | Use when starting any HomeRadar bug fix or regression investigation, before writing any code | ✓ | | |
+| [`pre-pr`](claude/skills/pre-pr/) | Foundations & Workflow | Use before opening any HomeRadar pull request — three self-gates must all pass | ✓ | | |
+| [`retro-fit-spec`](claude/skills/retro-fit-spec/) | Foundations & Workflow | Use when editing a HomeRadar feature spec that has no CAP-IDs in its Capabilities section | ✓ | | |
+| [`spec-align`](claude/skills/spec-align/) | Foundations & Workflow | Use when the user provides a HomeRadar feature spec name and wants the codebase brought into full alignment with that spec — gap analysis through implementation, tests, and merge | ✓ | | |
 | [`typescript`](claude/skills/typescript/) | Languages & Runtimes | TypeScript strict mode with eslint and jest | ✓ | ✓ | |
 | [`python`](claude/skills/python/) | Languages & Runtimes | Python development with ruff, mypy, pytest — TDD and type safety | ✓ | ✓ | |
 | [`nodejs-backend`](claude/skills/nodejs-backend/) | Languages & Runtimes | Node.js backend patterns with Express/Fastify, repository pattern | ✓ | ✓ | |
@@ -156,6 +161,7 @@ Domain-specific knowledge modules loaded into AI context. Claude skills live in 
 | [`agentic-development`](claude/skills/agentic-development/) | AI & LLM | Build AI agents with Pydantic AI (Python) and Claude SDK (Node.js) | ✓ | ✓ | |
 | [`llm-patterns`](claude/skills/llm-patterns/) | AI & LLM | AI-first application patterns, LLM testing, prompt management | ✓ | ✓ | |
 | [`ai-models`](claude/skills/ai-models/) | AI & LLM | Latest AI models reference — Claude, OpenAI, Gemini, Eleven Labs, Replicate | ✓ | ✓ | |
+| [`project-manager`](claude/skills/project-manager/) | AI & LLM | Automated project implementation orchestrator — drives feature-driven development from initial prompt through completed code via typed agents, phased plans, and markdown state files | ✓ | | |
 | [`shopify-apps`](claude/skills/shopify-apps/) | Commerce & Payments | Shopify app development — Remix, Admin API, checkout extensions | ✓ | ✓ | |
 | [`woocommerce`](claude/skills/woocommerce/) | Commerce & Payments | WooCommerce REST API — products, orders, customers, webhooks | ✓ | ✓ | |
 | [`medusa`](claude/skills/medusa/) | Commerce & Payments | Medusa headless commerce — modules, workflows, API routes, admin UI | ✓ | ✓ | |
@@ -188,7 +194,7 @@ Domain-specific knowledge modules loaded into AI context. Claude skills live in 
 |------|-------|
 | Agents | 15 |
 | Commands | 26 |
-| Skills (Claude) | 83 |
+| Skills (Claude) | 89 |
 | Skills (Codex) | 65 |
 | Skills (Gemini) | 0 |
-| **Total Skills** | **148** |
+| **Total Skills** | **154** |
