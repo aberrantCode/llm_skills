@@ -40,8 +40,12 @@ across the workflow:
 
 ```bash
 mkdir -p /tmp
-echo "" > /tmp/ztracker_timing.log   # truncate/create for this run
-echo "workflow_start $(date +%s%3N)" >> /tmp/ztracker_timing.log
+# Derive the timing log filename from the repo directory name so it is
+# unique per project and not confused with artefacts from other solutions.
+REPO_NAME=$(basename "$(git rev-parse --show-toplevel 2>/dev/null || pwd)")
+TIMING_TMP="/tmp/${REPO_NAME}_timing.log"
+echo "" > "$TIMING_TMP"   # truncate/create for this run
+echo "workflow_start $(date +%s%3N)" >> "$TIMING_TMP"
 ```
 
 ---
@@ -55,7 +59,7 @@ Follow every step in order. Do not skip steps, do not reorder them.
 Before anything else, determine where you are and whether the work is already committed.
 
 ```bash
-echo "step_detect_start $(date +%s%3N)" >> /tmp/ztracker_timing.log
+echo "step_detect_start $(date +%s%3N)" >> "$TIMING_TMP"
 ```
 
 **Resolve the repo root** — all git/gh commands in Steps 5–9 must run from the repo root,
@@ -92,7 +96,7 @@ echo "Current branch: $CURRENT_BRANCH  Commits ahead of dev: $AHEAD"
 - Otherwise → continue to Step 1 as normal.
 
 ```bash
-echo "step_detect_end $(date +%s%3N)" >> /tmp/ztracker_timing.log
+echo "step_detect_end $(date +%s%3N)" >> "$TIMING_TMP"
 ```
 
 ---
@@ -138,7 +142,7 @@ Store answers as `$BRANCH` and `$MSG` for the rest of the steps.
 ### Step 2 — Pull latest on the current branch (only if behind)
 
 ```bash
-echo "step_pull_start $(date +%s%3N)" >> /tmp/ztracker_timing.log
+echo "step_pull_start $(date +%s%3N)" >> "$TIMING_TMP"
 ```
 
 First fetch and check whether the current branch is behind its remote — skip the pull entirely if there is nothing to integrate:
@@ -178,7 +182,7 @@ If rebase produces conflicts after the pull:
 4. If the rebase is unresolvable, abort with `git rebase --abort` and stop.
 
 ```bash
-echo "step_pull_end $(date +%s%3N)" >> /tmp/ztracker_timing.log
+echo "step_pull_end $(date +%s%3N)" >> "$TIMING_TMP"
 ```
 
 ---
@@ -186,7 +190,7 @@ echo "step_pull_end $(date +%s%3N)" >> /tmp/ztracker_timing.log
 ### Step 3 — Stage all changes
 
 ```bash
-echo "step_stage_start $(date +%s%3N)" >> /tmp/ztracker_timing.log
+echo "step_stage_start $(date +%s%3N)" >> "$TIMING_TMP"
 ```
 
 ```bash
@@ -203,7 +207,7 @@ git diff --cached --stat
 If the staging area is empty (nothing to commit), stop and tell the user there is nothing to ship.
 
 ```bash
-echo "step_stage_end $(date +%s%3N)" >> /tmp/ztracker_timing.log
+echo "step_stage_end $(date +%s%3N)" >> "$TIMING_TMP"
 ```
 
 ---
@@ -246,11 +250,11 @@ Skip any stack whose variable is empty (no source files changed there).
 #### 4-B  Run the full test suite
 
 ```bash
-echo "step_tests_start $(date +%s%3N)" >> /tmp/ztracker_timing.log
+echo "step_tests_start $(date +%s%3N)" >> "$TIMING_TMP"
 TIMING_LOG_PS=$(cygpath -w "$REPO_ROOT/logs/timing.jsonl" 2>/dev/null || echo "$REPO_ROOT/logs/timing.jsonl")
 pwsh -NonInteractive -File "$REPO_ROOT/scripts/Start-Tests.ps1" -NoPrompt -Parallel -TimingLog "$TIMING_LOG_PS"
 TEST_EXIT=$?
-echo "step_tests_end $(date +%s%3N)" >> /tmp/ztracker_timing.log
+echo "step_tests_end $(date +%s%3N)" >> "$TIMING_TMP"
 ```
 
 **If `$TEST_EXIT` is non-zero — STOP.** Do not proceed. Report which suites failed
@@ -287,7 +291,7 @@ MISSING TEST FILES — create these before proceeding:
 #### 4-D  Verify ≥ 80 % coverage for changed source files
 
 ```bash
-echo "step_coverage_start $(date +%s%3N)" >> /tmp/ztracker_timing.log
+echo "step_coverage_start $(date +%s%3N)" >> "$TIMING_TMP"
 ```
 
 Run targeted coverage checks only for the stacks that have changed source files.
@@ -417,8 +421,8 @@ If any TS files are below 80 % — **STOP** and require tests before proceeding.
 #### 4-E  Clean build gate — lint, type-check, and build warnings
 
 ```bash
-echo "step_coverage_end $(date +%s%3N)" >> /tmp/ztracker_timing.log
-echo "step_lint_start $(date +%s%3N)" >> /tmp/ztracker_timing.log
+echo "step_coverage_end $(date +%s%3N)" >> "$TIMING_TMP"
+echo "step_lint_start $(date +%s%3N)" >> "$TIMING_TMP"
 ```
 
 **This sub-step runs for every changed stack, no exceptions.**
@@ -515,7 +519,7 @@ If during any of the above checks you observe that a pre-existing issue from the
 **All checks passed?** Continue to Step 5.
 
 ```bash
-echo "step_lint_end $(date +%s%3N)" >> /tmp/ztracker_timing.log
+echo "step_lint_end $(date +%s%3N)" >> "$TIMING_TMP"
 ```
 
 ---
@@ -523,7 +527,7 @@ echo "step_lint_end $(date +%s%3N)" >> /tmp/ztracker_timing.log
 ### Step 5 — Create the feature branch and commit
 
 ```bash
-echo "step_commit_start $(date +%s%3N)" >> /tmp/ztracker_timing.log
+echo "step_commit_start $(date +%s%3N)" >> "$TIMING_TMP"
 ```
 
 ```bash
@@ -535,7 +539,7 @@ Verify the commit was created:
 
 ```bash
 git log --oneline -1
-echo "step_commit_end $(date +%s%3N)" >> /tmp/ztracker_timing.log
+echo "step_commit_end $(date +%s%3N)" >> "$TIMING_TMP"
 ```
 
 ---
@@ -543,9 +547,9 @@ echo "step_commit_end $(date +%s%3N)" >> /tmp/ztracker_timing.log
 ### Step 6 — Push the feature branch to origin
 
 ```bash
-echo "step_push_start $(date +%s%3N)" >> /tmp/ztracker_timing.log
+echo "step_push_start $(date +%s%3N)" >> "$TIMING_TMP"
 git push -u origin $BRANCH
-echo "step_push_end $(date +%s%3N)" >> /tmp/ztracker_timing.log
+echo "step_push_end $(date +%s%3N)" >> "$TIMING_TMP"
 ```
 
 ---
@@ -553,18 +557,66 @@ echo "step_push_end $(date +%s%3N)" >> /tmp/ztracker_timing.log
 ### Step 7 — Create a PR targeting DEV
 
 ```bash
-echo "step_pr_create_start $(date +%s%3N)" >> /tmp/ztracker_timing.log
+echo "step_pr_create_start $(date +%s%3N)" >> "$TIMING_TMP"
 ```
 
-Capture both stdout and stderr so we can detect "already exists" gracefully:
+Capture both stdout and stderr so we can detect "already exists" gracefully.
+
+**Before creating the PR, extract all capability IDs referenced in the branch commits** and include them in the PR body.
 
 ```bash
-PR_OUTPUT=$(gh pr create \
-  --base dev \
-  --head $BRANCH \
-  --title "$MSG" \
-  --body "$(cat <<'EOF'
-## Summary
+# --- Build capability ID section from branch commits ---
+# Structured CAP-IDs: Refs: XX-CAP-NN
+REFS_CAPS=$(git log "origin/dev..HEAD" --format='%b' 2>/dev/null \
+  | grep -E '^\s*Refs:\s+[A-Za-z]{2,5}-CAP-[0-9]+' \
+  | sed 's/.*Refs:[[:space:]]*//' \
+  | sort -u | tr -d '\r')
+
+# Spec-file refs: Refs: foo.md#...
+REFS_SPECS=$(git log "origin/dev..HEAD" --format='%b' 2>/dev/null \
+  | grep -E '^\s*Refs:\s+[a-z][a-z0-9-]+\.md' \
+  | sed 's/.*Refs:[[:space:]]*//' \
+  | sort -u | tr -d '\r')
+
+# Determine primary action type from commit message prefix
+if echo "$MSG" | grep -qiE '^feat'; then PR_ACTION="Implemented"
+elif echo "$MSG" | grep -qiE '^fix'; then PR_ACTION="Bug Fix"
+elif echo "$MSG" | grep -qiE '^test'; then PR_ACTION="Tested"
+elif echo "$MSG" | grep -qiE '^refactor'; then PR_ACTION="Refactored"
+elif echo "$MSG" | grep -qiE '^chore'; then PR_ACTION="Maintenance"
+elif echo "$MSG" | grep -qiE '^docs'; then PR_ACTION="Documented"
+else PR_ACTION="Updated"
+fi
+
+CAPS_TABLE=""
+if [ -n "$REFS_CAPS" ]; then
+  while IFS= read -r cap_id; do
+    cap_id=$(echo "$cap_id" | tr -d ' \r\n')
+    [ -z "$cap_id" ] && continue
+    # Look up description in feature specs, strip markdown formatting
+    desc=$(grep -rh "\[$cap_id\]" "$REPO_ROOT/docs/features/" 2>/dev/null \
+      | grep -v '^\s*-\s*\[\s*\]\|Refs:' \
+      | sed "s/.*\[$cap_id\][[:space:]]*//" \
+      | sed 's/^\*\*\[P[0-9]\]\*\*[[:space:]]*//' \
+      | sed 's/\*\*//g;s/|.*//' \
+      | head -1 | tr -d '\r' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+    [ -z "$desc" ] && desc="—"
+    desc=$(echo "$desc" | cut -c1-120)
+    CAPS_TABLE="${CAPS_TABLE}
+| \`${cap_id}\` | ${desc} | ${PR_ACTION} |"
+  done <<< "$REFS_CAPS"
+fi
+if [ -n "$REFS_SPECS" ]; then
+  while IFS= read -r spec_ref; do
+    spec_ref=$(echo "$spec_ref" | tr -d ' \r\n')
+    [ -z "$spec_ref" ] && continue
+    CAPS_TABLE="${CAPS_TABLE}
+| — | See \`docs/features/${spec_ref}\` | ${PR_ACTION} |"
+  done <<< "$REFS_SPECS"
+fi
+
+if [ -n "$CAPS_TABLE" ]; then
+  PR_BODY="## Summary
 Automated feature branch PR targeting DEV.
 
 ## Changes
@@ -572,8 +624,29 @@ See commit diff for details.
 
 ## Test plan
 - [ ] Smoke-tested locally before shipping
-EOF
-)" 2>&1)
+
+## Capabilities
+
+| ID | Description | Action |
+|----|-------------|--------|${CAPS_TABLE}"
+else
+  PR_BODY="## Summary
+Automated feature branch PR targeting DEV.
+
+## Changes
+See commit diff for details.
+
+## Test plan
+- [ ] Smoke-tested locally before shipping"
+fi
+```
+
+```bash
+PR_OUTPUT=$(gh pr create \
+  --base dev \
+  --head $BRANCH \
+  --title "$MSG" \
+  --body "$PR_BODY" 2>&1)
 PR_EXIT=$?
 
 if [ $PR_EXIT -eq 0 ]; then
@@ -594,7 +667,7 @@ fi
 `$PR_URL` is now set either way. Display it to the user and continue.
 
 ```bash
-echo "step_pr_create_end $(date +%s%3N)" >> /tmp/ztracker_timing.log
+echo "step_pr_create_end $(date +%s%3N)" >> "$TIMING_TMP"
 ```
 
 ---
@@ -611,7 +684,7 @@ after merging. Two things can block that checkout:
    leaving the working tree on the feature branch with a dirty state.
 
 ```bash
-echo "step_merge_start $(date +%s%3N)" >> /tmp/ztracker_timing.log
+echo "step_merge_start $(date +%s%3N)" >> "$TIMING_TMP"
 ```
 
 Always run this command from `$REPO_ROOT` and **always stash the working tree first**:
@@ -648,7 +721,7 @@ Wait for the merge to complete — confirm with:
 ```bash
 gh pr view $BRANCH --json state --jq '.state'
 # Expected: "MERGED"
-echo "step_merge_end $(date +%s%3N)" >> /tmp/ztracker_timing.log
+echo "step_merge_end $(date +%s%3N)" >> "$TIMING_TMP"
 ```
 
 ---
@@ -656,7 +729,7 @@ echo "step_merge_end $(date +%s%3N)" >> /tmp/ztracker_timing.log
 ### Steps 9 & 10 — Cleanup and sync DEV
 
 ```bash
-echo "step_cleanup_start $(date +%s%3N)" >> /tmp/ztracker_timing.log
+echo "step_cleanup_start $(date +%s%3N)" >> "$TIMING_TMP"
 ```
 
 All cleanup runs from `$REPO_ROOT`. `gh pr merge --squash` may have already switched
@@ -703,7 +776,7 @@ git log --oneline -5
 if [ "$STASH_NEEDED" = "true" ]; then
   git stash pop
 fi
-echo "step_cleanup_end $(date +%s%3N)" >> /tmp/ztracker_timing.log
+echo "step_cleanup_end $(date +%s%3N)" >> "$TIMING_TMP"
 ```
 
 **Timing report** — parse the temp file, print a summary, and append a JSONL entry to the repo log:
@@ -711,7 +784,7 @@ echo "step_cleanup_end $(date +%s%3N)" >> /tmp/ztracker_timing.log
 ```bash
 TIMING_LOG="$(git rev-parse --show-toplevel)/logs/timing.jsonl"
 mkdir -p "$(dirname "$TIMING_LOG")"
-python3 - "$BRANCH" "$TIMING_LOG" /tmp/ztracker_timing.log <<'PYEOF'
+python3 - "$BRANCH" "$TIMING_LOG" "$TIMING_TMP" <<'PYEOF'
 import sys, json, os
 from datetime import datetime, timezone
 
