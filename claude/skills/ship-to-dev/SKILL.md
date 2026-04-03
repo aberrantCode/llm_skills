@@ -252,9 +252,10 @@ Skip any stack whose variable is empty (no source files changed there).
 ```bash
 echo "step_tests_start $(date +%s%3N)" >> "$TIMING_TMP"
 TIMING_LOG_PS=$(cygpath -w "$REPO_ROOT/logs/timing.jsonl" 2>/dev/null || echo "$REPO_ROOT/logs/timing.jsonl")
-pwsh -NonInteractive -File "$REPO_ROOT/scripts/Start-Tests.ps1" -NoPrompt -Parallel -TimingLog "$TIMING_LOG_PS"
+pwsh -NonInteractive -File "$REPO_ROOT/scripts/Start-Tests.ps1" -NoPrompt -Parallel -SkipE2E -TimingLog "$TIMING_LOG_PS"
 TEST_EXIT=$?
 echo "step_tests_end $(date +%s%3N)" >> "$TIMING_TMP"
+exit $TEST_EXIT
 ```
 
 **If `$TEST_EXIT` is non-zero — STOP.** Do not proceed. Report which suites failed
@@ -784,7 +785,7 @@ echo "step_cleanup_end $(date +%s%3N)" >> "$TIMING_TMP"
 ```bash
 TIMING_LOG="$(git rev-parse --show-toplevel)/logs/timing.jsonl"
 mkdir -p "$(dirname "$TIMING_LOG")"
-python3 - "$BRANCH" "$TIMING_LOG" "$TIMING_TMP" <<'PYEOF'
+python - "$BRANCH" "$TIMING_LOG" "$TIMING_TMP" <<'PYEOF'
 import sys, json, os
 from datetime import datetime, timezone
 
@@ -849,7 +850,7 @@ PYEOF
 1.      Ask for $BRANCH and $MSG (skip if already committed on feature branch)
 2.      Fetch + pull only if behind             git fetch origin && [check BEHIND count] && git stash / pull / pop
 3.      Stage all changes                        git add --all
-4.      Test, coverage + clean-build gate         pwsh Start-Tests.ps1 -NoPrompt -Parallel; verify test files exist; check ≥80% coverage (4-D); ruff/mypy/eslint/tsc/build warnings (4-E) — all must pass
+4.      Test, coverage + clean-build gate         pwsh Start-Tests.ps1 -NoPrompt -Parallel -SkipE2E; verify test files exist; check ≥80% coverage (4-D); ruff/mypy/eslint/tsc/build warnings (4-E) — all must pass
 5.      Create feature branch + commit           git checkout -b $BRANCH && git commit
 6.      Push                                     git push -u origin $BRANCH
 7.      Open PR into DEV                         gh pr create --base dev
@@ -872,7 +873,7 @@ PYEOF
 | Feature branch already exists | Use **AskUserQuestion**: options "Reuse existing branch" / "Choose a different name" — if "different name", loop back to Step 1 |
 | Tests fail at Step 4 | Fix the failing tests/code before continuing — do not skip or bypass the gate |
 | Missing test file at Step 4 | Create the missing test file covering the changed source file, re-run the gate |
-| Coverage below 80% at Step 4 | Add tests for uncovered lines, re-run `pwsh Start-Tests.ps1 -NoPrompt -Parallel`, re-check coverage |
+| Coverage below 80% at Step 4 | Add tests for uncovered lines, re-run `pwsh Start-Tests.ps1 -NoPrompt -Parallel -SkipE2E`, re-check coverage |
 | `fatal: 'dev' is already used by worktree` | `cd $REPO_ROOT` before running `gh pr merge` — never merge from inside a secondary worktree |
 | `cannot delete branch '…' used by worktree` | Step 8 now removes the worktree automatically before `gh pr merge --delete-branch`. If the error still occurs, run manually: `git worktree prune && rm -rf $WORKTREE_PATH && git branch -d $BRANCH` |
 | `local changes would be overwritten by checkout` | Stash before `gh pr merge` (Step 8 now does this automatically); the PR may have already merged on GitHub even if the command errored — check with `gh pr view` before retrying |
