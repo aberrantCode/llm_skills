@@ -92,17 +92,30 @@ git push --force-with-lease origin dev
 
 ### Step 3 — Determine the next version (automatic)
 
-Get the most recent tag:
+Get the most recent tag. **Guard: never fall back to a fake `v0.0.0` string** — that string is not in git's object store and will cause `git log v0.0.0..HEAD` to fail with exit 128.
 
 ```bash
-LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
-echo "Last release: $LAST_TAG"
+LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null)
+
+if [ -z "$LAST_TAG" ]; then
+  IS_FIRST_RELEASE=true
+  echo "No previous tags found — this is the first release. Starting from v0.0.0."
+  LAST_TAG="(none)"
+else
+  IS_FIRST_RELEASE=false
+  echo "Last release: $LAST_TAG"
+fi
 ```
 
-Parse MAJOR, MINOR, PATCH from `$LAST_TAG` (strip leading `v`). Then scan commit subjects since that tag to determine the bump type:
+Parse MAJOR, MINOR, PATCH from `$LAST_TAG` (strip leading `v`; use `0.0.0` as the base when `IS_FIRST_RELEASE=true`). Then scan commit subjects to determine the bump type — **use a range only when a real previous tag exists**:
 
 ```bash
-git log "$LAST_TAG"..origin/dev --format="%s"
+if [ "$IS_FIRST_RELEASE" = true ]; then
+  # No real previous tag — scan all commits on dev
+  git log origin/dev --format="%s"
+else
+  git log "$LAST_TAG"..origin/dev --format="%s"
+fi
 ```
 
 Apply conventional commit rules (in priority order):
@@ -215,6 +228,24 @@ git push origin main
 
 ### Step 6 — Tag and publish the release
 
+**Guard: check the tag doesn't already exist before pushing.**
+
+```bash
+if git rev-parse "$VERSION" >/dev/null 2>&1; then
+  # Tag already exists — stop and ask user
+  AskUserQuestion(
+    questions: [{
+      question: "Tag $VERSION already exists locally or on remote. How would you like to proceed?",
+      header: "Tag conflict",
+      options: [
+        { label: "Pick a different version", description: "Go back and choose a new version string" },
+        { label: "Abort", description: "Stop the workflow without making any further changes" }
+      ]
+    }]
+  )
+fi
+```
+
 ```bash
 git tag "$VERSION"
 git push origin "$VERSION"
@@ -230,25 +261,62 @@ Then **publish a GitHub Release** from the tag. This is required for any repo us
 `/releases/latest` API (e.g. install.ps1 remote installers). A bare git tag is NOT
 sufficient — the API returns 404 until a Release is published.
 
-Summarise commits since the previous tag to generate release notes:
+**Guard: detect the GitHub repo explicitly** — never rely on `gh` auto-detection, which can fail with exit 128 when the remote URL format doesn't match expectations.
 
 ```bash
-PREV_TAG=$(git describe --tags --abbrev=0 "$VERSION^" 2>/dev/null || echo "")
-NOTES=$(git log "${PREV_TAG:+$PREV_TAG..}$VERSION" --format="- %s" 2>/dev/null)
+REPO=$(gh repo view --json nameWithOwner -q .nameWithOwner 2>/dev/null)
+if [ -z "$REPO" ]; then
+  echo "ERROR: Could not detect GitHub repo from 'gh repo view'."
+  echo "Check: gh auth status && git remote -v"
+  # STOP — do not proceed with gh commands
+fi
+echo "GitHub repo: $REPO"
 ```
 
-Create the release:
+Summarise commits since the previous tag to generate release notes. **Guard: only use a git range when the previous tag resolves as a real git object** — using a fake tag string (e.g. `v0.0.0` that was never actually tagged) causes `git log` to fail with exit 128, and `2>/dev/null` would silently produce empty notes.
+
+```bash
+if [ "$IS_FIRST_RELEASE" = true ]; then
+  # No real previous tag — include all commits reachable from $VERSION
+  NOTES=$(git log "$VERSION" --format="- %s")
+else
+  # Find the tag immediately before $VERSION
+  PREV_TAG=$(git describe --tags --abbrev=0 "${VERSION}^" 2>/dev/null)
+  if [ -z "$PREV_TAG" ]; then
+    # No prior tag found — fall back to all commits
+    NOTES=$(git log "$VERSION" --format="- %s")
+  else
+    # Validate PREV_TAG resolves before using it in a range
+    if git rev-parse "$PREV_TAG" >/dev/null 2>&1; then
+      NOTES=$(git log "$PREV_TAG..$VERSION" --format="- %s")
+    else
+      echo "WARNING: Previous tag '$PREV_TAG' cannot be resolved — falling back to all commits"
+      NOTES=$(git log "$VERSION" --format="- %s")
+    fi
+  fi
+fi
+
+# Guard: if notes are empty, provide a fallback rather than publishing a blank release
+if [ -z "$NOTES" ]; then
+  NOTES="(release notes unavailable — check git log manually)"
+fi
+```
+
+Create the release, always passing `--repo` explicitly:
 
 ```bash
 gh release create "$VERSION" \
   --title "$VERSION" \
-  --notes "$NOTES"
+  --notes "$NOTES" \
+  --repo "$REPO"
 ```
 
 Confirm:
 
 ```bash
-gh release view "$VERSION" --json tagName,publishedAt --jq '"Released: \(.tagName) at \(.publishedAt)"'
+gh release view "$VERSION" --repo "$REPO" \
+  --json tagName,publishedAt \
+  --jq '"Released: \(.tagName) at \(.publishedAt)"'
 ```
 
 ---
@@ -302,10 +370,13 @@ Report: PR complete, version tagged, dev synced.
 | Situation | Recovery |
 |---|---|
 | `$AHEAD` is 0 | Nothing to release — stop and tell user |
+| No previous tags (`IS_FIRST_RELEASE=true`) | Normal — start from `0.0.0`, scan all commits on dev without a range |
 | Rebase conflict (Step 2 or 7) | Use AskUserQuestion: resolve manually or abort |
 | Local main ahead of origin/main | Use **AskUserQuestion**: push local commits first, or abort |
 | Local main diverged from origin/main | **STOP** — do not merge; report to user and abort |
 | Push to main rejected | `git pull --rebase origin main` then retry — never force-push main |
-| Tag already exists | Use **AskUserQuestion**: pick a different version or abort |
+| Tag already exists | Guard in Step 6 catches this — use AskUserQuestion: pick a different version or abort |
+| `gh repo view` returns empty (`REPO` unset) | **STOP** — run `gh auth status` and `git remote -v` to diagnose; do not run any `gh` commands without `$REPO` |
 | `gh` not authenticated | `gh auth login` — pause until authenticated |
+| Release notes empty after `git log` | Fallback message already set — check git log manually; do not suppress with `2>/dev/null` in note generation |
 | dev ahead count wrong after rebase | Re-run `git fetch origin` and recount before proceeding |
