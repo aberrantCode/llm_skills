@@ -1,8 +1,8 @@
 ---
 description: >
-  Full lifecycle management of LLM skills — find, sync, install, update, and import.
-  Invoke with an operation name (/find-skills, /sync-skill, /install-skill, /update-skill,
-  /import-skill) or without arguments to choose interactively.
+  Full lifecycle management of LLM skills — find, sync, install, update, import, push,
+  search, audit, and backfill diagrams. Invoke with an operation name or without arguments
+  to choose interactively via AskUserQuestion.
 ---
 
 # /skills-manager
@@ -13,4 +13,4 @@ If an operation and arguments were provided (e.g. `/skills-manager sync-skill pr
 
 If no operation was specified, use `AskUserQuestion` to ask:
 - Question: "Which skills-manager operation would you like to run?"
-- Options: "Find new/changed skills" | "Sync a skill to archive" | "Install a skill into a project" | "Update installed skills" | "Import project changes to archive"
+- Options: "Find new/changed skills" | "Sync a skill to archive" | "Install a skill into a project" | "Update installed skills" | "Import project changes to archive" | "Push skill to global profile" | "Search the archive" | "Audit archive health" | "Backfill missing diagrams"

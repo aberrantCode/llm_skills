@@ -59,6 +59,21 @@ A `SKILL.md` whose body is primarily a delegation (`Invoke the \`X\` skill and e
 
 ---
 
+## Skill Metadata Standards
+
+All `SKILL.md` files support these optional frontmatter fields beyond the required `name` and `description`:
+
+- **`status`**: `draft` | `active` (default) | `deprecated`
+  - `draft` — skill is in development; `/install-skill` skips unless forced
+  - `active` — production-ready; normal install/sync behaviour
+  - `deprecated` — superseded or obsolete; `/install-skill` skips and warns; `/find-skills` classifies as **Deprecated** rather than New/Changed
+
+- **`version`**: semver string (e.g. `1.2.0`) or ISO date (e.g. `2026-04-05`) — displayed by `/update-skill` so the user sees the version delta before accepting an update
+
+- **`requires`**: YAML list of skill names this skill depends on (e.g. `[project-manager, base]`) — `/install-skill` reads this and auto-installs all listed dependencies before installing the target skill
+
+---
+
 ## Operation: /find-skills [path]
 
 Discover skills across the workstation that are new or changed relative to the archive. Read-only — makes no changes.
@@ -74,18 +89,21 @@ Discover skills across the workstation that are new or changed relative to the a
 
 2. For each discovered `SKILL.md`:
    - Read frontmatter — if `installed-from: llm_skills` is present, **skip** (installed copy)
+   - If `status: deprecated` is present, classify as **Deprecated** regardless of diff — do not treat as New or Changed
    - Compare content against archive counterpart using diff (ignore trailing whitespace)
-   - Classify: **New** | **Changed** | **Unchanged** | **Orphan**
+   - Classify: **New** | **Changed** | **Unchanged** | **Orphan** | **Deprecated**
+   - If `version:` is present and archive has a different version, note the version delta in the report
 
 3. For each New or Changed skill: also search the same project's `.claude/commands/` for companion commands using the detection heuristic.
 
 4. Output a structured report:
    ```
    ┌─ Skills Manager: Find Report ──────────────────┐
-   │ New (N):     skill-a, skill-b                  │
-   │ Changed (N): skill-c                           │
-   │ Unchanged:   N skills skipped                  │
-   │ Orphans:     N archive-only skills             │
+   │ New (N):        skill-a, skill-b               │
+   │ Changed (N):    skill-c  (v1.0 → v1.2)         │
+   │ Deprecated (N): skill-d                        │
+   │ Unchanged:      N skills skipped               │
+   │ Orphans:        N archive-only skills          │
    └────────────────────────────────────────────────┘
    ```
    For each New/Changed skill, list any detected companion commands beneath it.
@@ -153,21 +171,23 @@ Deploy a skill bundle from the archive into a project.
    - Question: "Where should the skill(s) be installed?"
    - Options: "Current project directory" | "Other path (specify below)"
 
-4. Inventory what will be installed per skill:
-   - `SKILL.md` (1 file)
+4. Resolve dependencies: read `requires:` list from each skill's frontmatter; recursively locate those skill bundles in the archive and add them to the install scope. Deduplicate — never install the same skill twice.
+
+5. Inventory what will be installed (target skill + all resolved dependencies):
+   - `SKILL.md` (1 file per skill)
    - Sub-skills from `sub-skills/` (N files)
    - Commands from `commands/` (N files)
 
-5. If `name` was given, use `AskUserQuestion` to confirm:
-   - Question: "Install `<name>` into `<target>`? This will write N files."
+6. If `name` was given, use `AskUserQuestion` to confirm:
+   - Question: "Install `<name>` (+ N dependencies) into `<target>`? This will write N files."
    - Options: "Yes, install" | "Cancel"
 
-6. On confirm:
+7. On confirm:
    - Write `<target>/.claude/skills/<name>/SKILL.md`; inject `installed-from: llm_skills` into frontmatter (add after existing fields)
    - Write each sub-skill to `<target>/.claude/skills/<sub>/SKILL.md` with same marker
    - Write each command to `<target>/.claude/commands/<cmd>.md` (no marker — commands are not skills)
 
-7. Report all files written
+8. Report all files written
 
 ---
 
@@ -186,8 +206,8 @@ Update installed skills in the current project when the archive has newer versio
    - If archive is newer: record as outdated
 
 4. **Confirm scope** with `AskUserQuestion` before touching anything:
-   - If updating all: "Update all N outdated skills? (list skill names)"
-   - If updating one by name: "Update `<name>` to the archive version?"
+   - If updating all: "Update all N outdated skills? (list skill names, include version delta where available, e.g. skill-x v1.0→v1.2)"
+   - If updating one by name: "Update `<name>` to the archive version? (v1.0 → v1.2)"
    - Options: "Yes, update" | "Cancel"
 
 5. On confirm:
@@ -233,6 +253,125 @@ Import project-level changes to a skill back into the archive and the global use
    - **README**: update Description cell if frontmatter `description` changed
 
 7. Report what was imported
+
+---
+
+## Operation: /backfill-diagrams [name]
+
+Generate `diagram.html` for archived skills that don't have one, retroactively applying the diagram standard.
+
+### Steps
+
+1. **Determine scope:**
+   - If `name` given: check only that skill
+   - If no `name`: scan `claude/skills/*/` and collect every skill directory that lacks `diagram.html`
+
+2. Use `AskUserQuestion` to confirm:
+   - Question: "Generate diagrams for N skills that are missing one? (list skill names)"
+   - Options: "Yes, backfill all" | "Cancel"
+   - Proceed only on confirm
+
+3. For each skill in scope:
+   - Invoke `visual-explainer:generate-web-diagram` using the skill's purpose, operations, and key decision points as input
+   - Save HTML to `claude/skills/<name>/diagram.html`
+   - Add or update `## Diagram` section in `claude/skills/<name>/SKILL.md` with `[View diagram](diagram.html)`
+
+4. Update README: for each skill now having a diagram, add the diagram link to its Skill column cell (see README Update Rules)
+
+5. Report how many diagrams were generated
+
+---
+
+## Operation: /search-skill [query]
+
+Search the archive for skills matching a keyword or phrase. Read-only — no changes made.
+
+### Steps
+
+1. If no `query` provided: use `AskUserQuestion`:
+   - Question: "What are you looking for?"
+   - Options: "Enter search query" (free text via Other)
+
+2. Search the following fields across all `claude/skills/*/SKILL.md` files (case-insensitive):
+   - `name:` frontmatter field — highest priority
+   - `description:` frontmatter field — high priority
+   - `## ` section headings in the body — medium priority
+   - Body text — lower priority
+
+3. Rank results: exact name match > description keyword hit > heading hit > body hit. Break ties alphabetically.
+
+4. Output ranked results (no `AskUserQuestion` needed):
+   ```
+   ┌─ Skills Manager: Search Results for "auth" ────┐
+   │ 1. security          (Security & Credentials)   │
+   │    "OWASP security patterns, secrets..."        │
+   │    [diagram](claude/skills/security/diagram.html)│
+   │ 2. credentials       (Security & Credentials)   │
+   │    "Centralized API key management..."          │
+   │ 3. supabase          (Databases & Storage)      │
+   │    "...Auth, Storage, real-time..."             │
+   └────────────────────────────────────────────────┘
+   ```
+   Include diagram link on result lines where `diagram.html` exists.
+
+---
+
+## Operation: /audit-skills
+
+Run a comprehensive read-only health check across the entire archive. No changes made, no confirmation needed.
+
+### Checks
+
+1. **Missing diagrams**: skills in `claude/skills/*/` that lack `diagram.html`
+2. **README drift — broken links**: rows in the README Skills table whose link target directory does not exist in `claude/skills/`
+3. **README drift — missing rows**: skill directories in `claude/skills/*/` that have no corresponding row in the README Skills table (match by link text)
+4. **Malformed frontmatter**: `SKILL.md` files missing required `name:` or `description:` fields
+5. **Deprecated installs**: scan all projects under `C:\development\` for installed skills (`installed-from: llm_skills`) where the archive copy has `status: deprecated` — list project and skill name
+6. **Codex/Gemini parity gaps**: README rows with `✓` only in the Claude column — grouped by subsection, sorted by description length as a proxy for skill complexity (longer = more porting value)
+
+### Output format
+
+```
+┌─ Skills Manager: Audit Report ─────────────────────────────────┐
+│ Missing diagrams (N):   skill-a, skill-b, ...                  │
+│ README broken links (N): row-name → path/does/not/exist        │
+│ README missing rows (N): skill-dir has no README entry         │
+│ Bad frontmatter (N):    skill-c (missing description)          │
+│ Deprecated installs (N): project-x uses deprecated skill-d     │
+│ Parity gaps — Claude only (N skills, top candidates):          │
+│   - security (Security & Credentials)                          │
+│   - typescript (Languages & Runtimes)                          │
+│   ...                                                           │
+└────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## Operation: /push-skill [name]
+
+Push a skill bundle from the archive to the global user profile (`~/.claude/`) so it is available across all projects.
+
+### Steps
+
+1. **Determine scope:**
+   - If `name` given: push that skill bundle only
+   - If no `name`: enumerate all skills in `claude/skills/`; use `AskUserQuestion` to confirm:
+     - Question: "Push all N archive skills to the global profile (~/.claude/)?"
+     - Options: "Yes, push all" | "Cancel"
+     - Proceed only on confirm
+
+2. For each skill to push:
+   - Check if `status: draft` — skip with a warning; drafts are not pushed to the global profile
+   - Check if `~/.claude/skills/<name>/SKILL.md` already exists and differs — use `AskUserQuestion`:
+     - Question: "~/.claude/skills/<name> exists and differs. Overwrite with archive version?"
+     - Options: "Yes, overwrite" | "Skip this skill"
+
+3. On confirm:
+   - Write `SKILL.md` to `~/.claude/skills/<name>/SKILL.md` (do NOT add `installed-from` marker — the global profile is a source, not a deployment target)
+   - Write each sub-skill from `sub-skills/` to `~/.claude/skills/<sub>/SKILL.md`
+   - Write each companion command from `commands/` to `~/.claude/commands/<cmd>.md`
+
+4. Report all files written
 
 ---
 
