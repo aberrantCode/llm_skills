@@ -106,8 +106,13 @@ Archive a specific skill (or all discovered skills) including its full bundle.
    - `SKILL.md` → `claude/skills/<name>/SKILL.md`
    - Companion commands → `claude/skills/<name>/commands/<cmd>.md`
    - Sub-skills → `claude/skills/<name>/sub-skills/<sub>/SKILL.md`
-6. Update README: add row if new, update description if `description` frontmatter changed
-7. Report what was written
+6. Generate a visual diagram for the skill:
+   - Invoke the `visual-explainer:generate-web-diagram` skill
+   - Instruct it to diagram: the skill's purpose (from `description` frontmatter), its key operations or phases (from section headings), significant inputs/outputs, and any decision points or branching paths
+   - Save the resulting HTML to `claude/skills/<name>/diagram.html`
+   - Add or update a `## Diagram` section at the bottom of `claude/skills/<name>/SKILL.md` (before any final horizontal rule) containing exactly: `[View diagram](diagram.html)`
+7. Update README: add row if new, update description if `description` frontmatter changed; include diagram link (see README Update Rules)
+8. Report what was written
 
 ### Without a skill name
 
@@ -122,6 +127,7 @@ Archive a specific skill (or all discovered skills) including its full bundle.
 - Changed skill: update Description cell only if frontmatter `description` changed; do not move the row
 - Bundled commands: document on the skill's row as `— ships with /cmd1, /cmd2`; do NOT add standalone rows for them in the Commands table
 - Sub-skills in bundles: do NOT list as standalone rows; implied by parent skill row
+- **Diagram link**: every skill row that has a `diagram.html` in its archive directory must include a diagram link in the Skill column cell, formatted as: `` [`<name>`](claude/skills/<name>/) [(diagram)](claude/skills/<name>/diagram.html) ``
 - Never delete from archive; never remove rows
 
 ---
@@ -188,6 +194,7 @@ Update installed skills in the current project when the archive has newer versio
    - Overwrite each `SKILL.md`, preserving the `installed-from: llm_skills` marker in frontmatter
    - Also check `commands/` in the archive bundle — write any new or changed commands to `<project>/.claude/commands/`
    - Also check `sub-skills/` — update any installed sub-skills that are outdated
+   - Regenerate the diagram: invoke `visual-explainer:generate-web-diagram` for each updated skill and overwrite `claude/skills/<name>/diagram.html`; update the `## Diagram` section in SKILL.md if the path changed
 
 6. Report updated files
 
