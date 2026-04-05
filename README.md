@@ -9,7 +9,7 @@ llm_skills/
 ├── claude/
 │   ├── agents/     # 15 sub-agents invoked via the Task tool
 │   ├── commands/   # 27 slash commands
-│   └── skills/     # 91 domain-specific knowledge modules
+│   └── skills/     # 90 domain-specific knowledge modules
 ├── codex/
 │   └── skills/     # 65 domain-specific knowledge modules
 └── gemini/         # Google Gemini CLI skills (future)
@@ -122,13 +122,12 @@ Domain-specific knowledge modules loaded into AI context. Claude skills live in 
 | [`python`](claude/skills/python/) [(diagram)](claude/skills/python/diagram.html) | Languages & Runtimes | Python development with ruff, mypy, pytest — TDD and type safety | ✓ | ✓ | |
 | [`nodejs-backend`](claude/skills/nodejs-backend/) [(diagram)](claude/skills/nodejs-backend/diagram.html) | Languages & Runtimes | Node.js backend patterns with Express/Fastify, repository pattern | ✓ | ✓ | |
 | [`react-web`](claude/skills/react-web/) [(diagram)](claude/skills/react-web/diagram.html) | Frontend Frameworks | React web development with hooks, React Query, Zustand | ✓ | ✓ | |
-| [`react-native`](claude/skills/react-native/) [(diagram)](claude/skills/react-native/diagram.html) | Frontend Frameworks | React Native mobile patterns, platform-specific code | ✓ | ✓ | |
+| [`react-native`](claude/skills/react-native/) [(diagram)](claude/skills/react-native/diagram.html) | Frontend Frameworks | React Native and Expo patterns, platform-specific code, list performance, animations, and navigation best practices | ✓ | ✓ | |
 | [`flutter`](claude/skills/flutter/) [(diagram)](claude/skills/flutter/diagram.html) | Frontend Frameworks | Flutter with Riverpod, Freezed, go_router, and mocktail testing | ✓ | ✓ | |
 | [`pwa-development`](claude/skills/pwa-development/) [(diagram)](claude/skills/pwa-development/diagram.html) | Frontend Frameworks | Progressive Web Apps — service workers, caching strategies, offline support, Workbox | ✓ | ✓ | |
 | [`chrome-extension-builder`](claude/skills/chrome-extension-builder/) [(diagram)](claude/skills/chrome-extension-builder/diagram.html) | Frontend Frameworks | Scaffold production-ready Chrome MV3 extensions using WXT + React + TypeScript + shadcn-UI — content scripts, background service workers, side panels, popups, native messaging, and Google Docs/Overleaf integrations | ✓ | | |
 | [`composition-patterns`](claude/skills/composition-patterns/) [(diagram)](claude/skills/composition-patterns/diagram.html) | Frontend Frameworks | React composition patterns that scale — for refactoring components with boolean prop proliferation and building flexible component libraries | ✓ | | |
 | [`react-best-practices`](claude/skills/react-best-practices/) [(diagram)](claude/skills/react-best-practices/diagram.html) | Frontend Frameworks | React and Next.js performance optimization guidelines from Vercel Engineering — components, data fetching, bundle optimization | ✓ | | |
-| [`react-native-skills`](claude/skills/react-native-skills/) [(diagram)](claude/skills/react-native-skills/diagram.html) | Frontend Frameworks | React Native and Expo best practices for performant mobile apps — list performance, rendering patterns | ✓ | | |
 | [`android-java`](claude/skills/android-java/) [(diagram)](claude/skills/android-java/diagram.html) | Mobile (Native) | Android Java development with MVVM, ViewBinding, and Espresso testing | ✓ | ✓ | |
 | [`android-kotlin`](claude/skills/android-kotlin/) [(diagram)](claude/skills/android-kotlin/diagram.html) | Mobile (Native) | Android Kotlin with Coroutines, Jetpack Compose, Hilt, and MockK testing | ✓ | ✓ | |
 | [`ui-mobile`](claude/skills/ui-mobile/) [(diagram)](claude/skills/ui-mobile/diagram.html) | Mobile (Native) | Mobile UI patterns — React Native, iOS/Android, touch targets | ✓ | ✓ | |
@@ -197,7 +196,7 @@ Domain-specific knowledge modules loaded into AI context. Claude skills live in 
 |------|-------|
 | Agents | 15 |
 | Commands | 27 |
-| Skills (Claude) | 91 |
+| Skills (Claude) | 90 |
 | Skills (Codex) | 65 |
 | Skills (Gemini) | 0 |
-| **Total Skills** | **156** |
+| **Total Skills** | **155** |
