@@ -655,3 +655,7 @@ drizzle-kit push                             # Push schema (dev only)
 - **Complex joins** - D1 is SQLite; keep queries simple
 - **No batching** - Use batch for multiple operations
 - **Ignoring limits** - Monitor usage on free tier
+
+## Diagram
+
+[View diagram](diagram.html)

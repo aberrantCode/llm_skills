@@ -576,3 +576,7 @@ public class ApiClient {
 - ❌ **Deep view hierarchies** - Keep layout depth under 10 levels, use ConstraintLayout
 - ❌ **Not closing resources** - Always close Cursor, InputStream, database connections
 
+## Diagram
+
+[View diagram](diagram.html)
+

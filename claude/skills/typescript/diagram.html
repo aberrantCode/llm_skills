@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TypeScript Skill — Strict Mode Patterns</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ============ THEME — Catppuccin Mocha (dark-first) ============ */
+:root {
+  --font-body: 'Geist', system-ui, sans-serif;
+  --font-mono: 'Geist Mono', 'SF Mono', Consolas, monospace;
+
+  /* Dark: Catppuccin Mocha */
+  --bg:        #1e1e2e;
+  --surface:   #24273a;
+  --surface2:  #2a2d3e;
+  --surface3:  #313446;
+  --border:    rgba(180,190,254,0.08);
+  --border-bright: rgba(180,190,254,0.18);
+  --text:      #cdd6f4;
+  --text-dim:  #7f849c;
+
+  --sky:    #89dceb;   /* sky blue — primary accent */
+  --sky-dim: rgba(137,220,235,0.10);
+  --teal:   #94e2d5;   /* teal — secondary */
+  --teal-dim: rgba(148,226,213,0.10);
+  --green:  #a6e3a1;   /* green — success / pass */
+  --green-dim: rgba(166,227,161,0.10);
+  --peach:  #fab387;   /* peach — warnings / anti-patterns */
+  --peach-dim: rgba(250,179,135,0.10);
+  --red:    #f38ba8;   /* red — danger */
+  --red-dim: rgba(243,139,168,0.10);
+  --mauve:  #cba6f7;   /* mauve — tooling */
+  --mauve-dim: rgba(203,166,247,0.10);
+  --yellow: #f9e2af;   /* yellow — highlights */
+  --yellow-dim: rgba(249,226,175,0.10);
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    --bg:        #eff1f5;
+    --surface:   #ffffff;
+    --surface2:  #e6e9ef;
+    --surface3:  #dce0e8;
+    --border:    rgba(76,79,105,0.10);
+    --border-bright: rgba(76,79,105,0.20);
+    --text:      #4c4f69;
+    --text-dim:  #8c8fa1;
+
+    --sky:    #04a5e5;
+    --sky-dim: rgba(4,165,229,0.08);
+    --teal:   #179299;
+    --teal-dim: rgba(23,146,153,0.08);
+    --green:  #40a02b;
+    --green-dim: rgba(64,160,43,0.08);
+    --peach:  #fe640b;
+    --peach-dim: rgba(254,100,11,0.08);
+    --red:    #d20f39;
+    --red-dim: rgba(210,15,57,0.08);
+    --mauve:  #8839ef;
+    --mauve-dim: rgba(136,57,239,0.08);
+    --yellow: #df8e1d;
+    --yellow-dim: rgba(223,142,29,0.08);
+  }
+}
+
+/* ============ RESET ============ */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  background-color: var(--bg);
+  background-image:
+    radial-gradient(ellipse at 80% 0%, var(--sky-dim) 0%, transparent 50%),
+    radial-gradient(ellipse at 10% 90%, var(--mauve-dim) 0%, transparent 45%);
+  color: var(--text);
+  font-family: var(--font-body);
+  padding: 48px 40px;
+  min-height: 100vh;
+  overflow-wrap: break-word;
+}
+
+/* ============ ANIMATIONS ============ */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.anim {
+  animation: fadeUp 0.4s ease-out both;
+  animation-delay: calc(var(--i, 0) * 0.055s);
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; animation-delay: 0ms !important; }
+}
+
+/* ============ LAYOUT ============ */
+.container { max-width: 1060px; margin: 0 auto; }
+
+/* ============ HEADER ============ */
+.mono-tag {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--sky);
+  background: var(--sky-dim);
+  border: 1px solid rgba(137,220,235,0.25);
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 4px;
+  margin-bottom: 14px;
+  letter-spacing: 0.05em;
+}
+
+h1 {
+  font-size: 40px;
+  font-weight: 700;
+  letter-spacing: -1.5px;
+  margin-bottom: 4px;
+  line-height: 1.05;
+}
+
+h1 .accent { color: var(--sky); }
+
+.subtitle {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-dim);
+  margin-bottom: 36px;
+}
+
+/* ============ MAIN GRID ============ */
+.main-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+.main-grid > .wide { grid-column: 1 / -1; }
+
+@media (max-width: 720px) {
+  .main-grid { grid-template-columns: 1fr; }
+  .main-grid > .wide { grid-column: 1; }
+}
+
+/* ============ SECTION CARD ============ */
+.sec {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 18px 20px;
+  min-width: 0;
+}
+
+.sec-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.sec-label .dot {
+  width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0;
+}
+
+/* ============ FLAG GRID (tsconfig flags) ============ */
+.flag-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+@media (max-width: 480px) { .flag-grid { grid-template-columns: 1fr; } }
+
+.flag {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 7px 10px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--sky);
+  min-width: 0;
+}
+.flag .check { color: var(--green); font-size: 12px; flex-shrink: 0; }
+
+/* ============ FILE TREE ============ */
+.tree {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 1.9;
+  color: var(--text-dim);
+}
+.tree .dir { color: var(--teal); font-weight: 500; }
+.tree .file { color: var(--text-dim); }
+.tree .comment { color: var(--text-dim); opacity: 0.5; }
+.tree .highlight { color: var(--yellow); }
+
+/* ============ SCRIPT LIST ============ */
+.scripts { display: flex; flex-direction: column; gap: 6px; }
+.script-row {
+  display: flex; align-items: baseline; gap: 10px;
+  background: var(--surface2); border-radius: 6px; padding: 7px 10px;
+  min-width: 0;
+}
+.script-name {
+  font-family: var(--font-mono); font-size: 11px; color: var(--mauve); flex-shrink: 0;
+}
+.script-cmd {
+  font-family: var(--font-mono); font-size: 11px; color: var(--text-dim); min-width: 0; overflow-wrap: break-word;
+}
+
+/* ============ PIPELINE ============ */
+.pipeline {
+  display: flex; align-items: center; gap: 0; flex-wrap: nowrap; overflow-x: auto;
+  padding-bottom: 4px;
+}
+.pipe-step {
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 8px; padding: 10px 14px; flex-shrink: 0; min-width: 80px;
+}
+.pipe-step .ps-icon { font-size: 16px; }
+.pipe-step .ps-name { font-family: var(--font-mono); font-size: 10px; color: var(--text-dim); text-align: center; }
+.pipe-step .ps-tool { font-family: var(--font-mono); font-size: 10px; color: var(--sky); }
+.pipe-arrow {
+  font-family: var(--font-mono); font-size: 16px; color: var(--text-dim);
+  padding: 0 6px; flex-shrink: 0;
+}
+.pipe-step.success { border-color: var(--green); }
+.pipe-step.success .ps-icon { color: var(--green); }
+
+/* ============ PATTERN CARDS ============ */
+.patterns-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+@media (max-width: 560px) { .patterns-grid { grid-template-columns: 1fr; } }
+
+.pattern-card {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px 14px;
+  min-width: 0;
+}
+.pattern-name {
+  font-family: var(--font-mono); font-size: 11px; color: var(--teal);
+  margin-bottom: 5px; font-weight: 500;
+}
+.pattern-desc { font-size: 12px; color: var(--text-dim); line-height: 1.55; }
+.pattern-desc code {
+  font-family: var(--font-mono); font-size: 11px; background: var(--surface3);
+  color: var(--text); padding: 1px 5px; border-radius: 3px;
+}
+
+/* ============ ANTI-PATTERNS ============ */
+.anti-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 8px;
+}
+.anti {
+  display: flex; align-items: flex-start; gap: 8px;
+  background: var(--red-dim);
+  border: 1px solid rgba(243,139,168,0.25);
+  border-radius: 7px; padding: 8px 10px;
+  font-size: 12px; color: var(--text-dim);
+  min-width: 0;
+}
+.anti .x { color: var(--red); font-family: var(--font-mono); font-size: 12px; flex-shrink: 0; }
+.anti code { font-family: var(--font-mono); font-size: 11px; background: rgba(0,0,0,0.15); padding: 1px 4px; border-radius: 3px; color: var(--red); }
+
+/* ============ COVERAGE BADGE ============ */
+.coverage-strip {
+  display: flex; align-items: center; gap: 16px;
+  background: var(--surface2);
+  border: 1px solid var(--green);
+  border-radius: 8px; padding: 14px 18px;
+  margin-top: 4px;
+}
+.cov-num {
+  font-family: var(--font-mono); font-size: 36px; font-weight: 600;
+  color: var(--green); line-height: 1;
+}
+.cov-label { font-size: 13px; color: var(--text-dim); line-height: 1.5; }
+.cov-label strong { color: var(--text); }
+
+/* ============ SECTION DIVIDER ============ */
+.divider {
+  font-family: var(--font-mono); font-size: 10px;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--text-dim); margin: 8px 0 14px;
+  display: flex; align-items: center; gap: 10px;
+}
+.divider::after { content: ''; flex: 1; height: 1px; background: var(--border-bright); }
+
+/* ============ HOOK STEPS ============ */
+.hook-steps { display: flex; flex-direction: column; gap: 8px; }
+.hook-step {
+  display: flex; align-items: flex-start; gap: 10px;
+  font-size: 13px; color: var(--text-dim);
+}
+.hook-num {
+  font-family: var(--font-mono); font-size: 10px;
+  background: var(--mauve-dim); color: var(--mauve);
+  border: 1px solid rgba(203,166,247,0.3);
+  width: 20px; height: 20px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; margin-top: 1px;
+}
+.hook-step code {
+  font-family: var(--font-mono); font-size: 11px;
+  background: var(--surface3); color: var(--text); padding: 1px 5px; border-radius: 3px;
+}
+
+@media (max-width: 768px) {
+  body { padding: 24px 16px; }
+  h1 { font-size: 28px; }
+}
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="mono-tag anim" style="--i:0">skill · typescript</div>
+  <h1 class="anim" style="--i:1"><span class="accent">TypeScript</span> Strict</h1>
+  <p class="subtitle anim" style="--i:2">eslint · jest · husky · github actions · 80%+ coverage</p>
+
+  <div class="main-grid">
+
+    <!-- tsconfig strict flags -->
+    <div class="sec anim" style="--i:3">
+      <div class="sec-label">
+        <div class="dot" style="background:var(--sky)"></div>
+        <span style="color:var(--sky)">tsconfig.json — strict mode</span>
+      </div>
+      <div class="flag-grid">
+        <div class="flag"><span class="check">✓</span> strict</div>
+        <div class="flag"><span class="check">✓</span> noImplicitAny</div>
+        <div class="flag"><span class="check">✓</span> strictNullChecks</div>
+        <div class="flag"><span class="check">✓</span> noUnusedLocals</div>
+        <div class="flag"><span class="check">✓</span> noUnusedParameters</div>
+        <div class="flag"><span class="check">✓</span> noImplicitReturns</div>
+        <div class="flag"><span class="check">✓</span> esModuleInterop</div>
+        <div class="flag"><span class="check">✓</span> skipLibCheck</div>
+      </div>
+    </div>
+
+    <!-- Project structure -->
+    <div class="sec anim" style="--i:4">
+      <div class="sec-label">
+        <div class="dot" style="background:var(--teal)"></div>
+        <span style="color:var(--teal)">project structure</span>
+      </div>
+      <div class="tree">
+        <div><span class="dir">src/</span></div>
+        <div>&nbsp; <span class="dir">core/</span> <span class="comment">← pure business logic</span></div>
+        <div>&nbsp; &nbsp; <span class="highlight">types.ts</span> <span class="comment">← domain types</span></div>
+        <div>&nbsp; &nbsp; <span class="dir">services/</span> <span class="comment">← pure functions</span></div>
+        <div>&nbsp; <span class="dir">infra/</span> <span class="comment">← side effects</span></div>
+        <div>&nbsp; &nbsp; <span class="dir">api/</span> <span class="comment">← HTTP handlers</span></div>
+        <div>&nbsp; &nbsp; <span class="dir">db/</span> <span class="comment">← database ops</span></div>
+        <div>&nbsp; &nbsp; <span class="dir">external/</span> <span class="comment">← 3rd-party</span></div>
+        <div>&nbsp; <span class="dir">utils/</span></div>
+        <div><span class="dir">tests/</span></div>
+        <div>&nbsp; <span class="dir">unit/</span> &nbsp; <span class="dir">integration/</span></div>
+      </div>
+    </div>
+
+    <!-- npm scripts -->
+    <div class="sec anim" style="--i:5">
+      <div class="sec-label">
+        <div class="dot" style="background:var(--mauve)"></div>
+        <span style="color:var(--mauve)">npm scripts</span>
+      </div>
+      <div class="scripts">
+        <div class="script-row"><span class="script-name">lint</span><span class="script-cmd">eslint src/ --ext .ts,.tsx</span></div>
+        <div class="script-row"><span class="script-name">typecheck</span><span class="script-cmd">tsc --noEmit</span></div>
+        <div class="script-row"><span class="script-name">test</span><span class="script-cmd">jest</span></div>
+        <div class="script-row"><span class="script-name">test:coverage</span><span class="script-cmd">jest --coverage</span></div>
+        <div class="script-row"><span class="script-name">format</span><span class="script-cmd">prettier --write 'src/**/*.ts'</span></div>
+      </div>
+    </div>
+
+    <!-- ESLint limits -->
+    <div class="sec anim" style="--i:6">
+      <div class="sec-label">
+        <div class="dot" style="background:var(--peach)"></div>
+        <span style="color:var(--peach)">eslint enforcement</span>
+      </div>
+      <div class="scripts">
+        <div class="script-row"><span class="script-name" style="color:var(--peach)">config</span><span class="script-cmd">typescript-eslint strictTypeChecked</span></div>
+        <div class="script-row"><span class="script-name" style="color:var(--red)">no-any</span><span class="script-cmd">no-explicit-any: error</span></div>
+        <div class="script-row"><span class="script-name" style="color:var(--peach)">fn-size</span><span class="script-cmd">max-lines-per-function: 20</span></div>
+        <div class="script-row"><span class="script-name" style="color:var(--peach)">depth</span><span class="script-cmd">max-depth: 2</span></div>
+        <div class="script-row"><span class="script-name" style="color:var(--peach)">params</span><span class="script-cmd">max-params: 3</span></div>
+        <div class="script-row"><span class="script-name" style="color:var(--peach)">returns</span><span class="script-cmd">explicit-function-return-type: error</span></div>
+      </div>
+    </div>
+
+    <!-- CI/CD pipeline — wide -->
+    <div class="sec wide anim" style="--i:7">
+      <div class="sec-label">
+        <div class="dot" style="background:var(--green)"></div>
+        <span style="color:var(--green)">GitHub Actions quality gate</span>
+      </div>
+      <div class="pipeline">
+        <div class="pipe-step">
+          <div class="ps-icon" style="color:var(--sky)">⬇</div>
+          <div class="ps-name">checkout</div>
+          <div class="ps-tool">actions/checkout</div>
+        </div>
+        <div class="pipe-arrow">→</div>
+        <div class="pipe-step">
+          <div class="ps-icon" style="color:var(--teal)">⬡</div>
+          <div class="ps-name">setup node</div>
+          <div class="ps-tool">node 20</div>
+        </div>
+        <div class="pipe-arrow">→</div>
+        <div class="pipe-step">
+          <div class="ps-icon" style="color:var(--mauve)">⬢</div>
+          <div class="ps-name">install</div>
+          <div class="ps-tool">npm ci</div>
+        </div>
+        <div class="pipe-arrow">→</div>
+        <div class="pipe-step">
+          <div class="ps-icon" style="color:var(--peach)">◈</div>
+          <div class="ps-name">lint</div>
+          <div class="ps-tool">eslint</div>
+        </div>
+        <div class="pipe-arrow">→</div>
+        <div class="pipe-step">
+          <div class="ps-icon" style="color:var(--sky)">◆</div>
+          <div class="ps-name">typecheck</div>
+          <div class="ps-tool">tsc --noEmit</div>
+        </div>
+        <div class="pipe-arrow">→</div>
+        <div class="pipe-step success">
+          <div class="ps-icon">✓</div>
+          <div class="ps-name">test + coverage</div>
+          <div class="ps-tool">jest --coverage</div>
+        </div>
+        <div class="pipe-arrow">→</div>
+        <div class="pipe-step success">
+          <div class="ps-icon">80%</div>
+          <div class="ps-name">threshold</div>
+          <div class="ps-tool">coverageThreshold</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pre-commit hooks -->
+    <div class="sec anim" style="--i:8">
+      <div class="sec-label">
+        <div class="dot" style="background:var(--mauve)"></div>
+        <span style="color:var(--mauve)">pre-commit hooks (husky)</span>
+      </div>
+      <div class="hook-steps">
+        <div class="hook-step">
+          <div class="hook-num">1</div>
+          <span><code>lint-staged</code> — ESLint + Prettier on staged <code>.ts/.tsx</code> files</span>
+        </div>
+        <div class="hook-step">
+          <div class="hook-num">2</div>
+          <span><code>tsc --noEmit</code> — type-check entire project</span>
+        </div>
+        <div class="hook-step">
+          <div class="hook-num">3</div>
+          <span><code>jest --onlyChanged --passWithNoTests</code> — tests for changed files only</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Jest pattern -->
+    <div class="sec anim" style="--i:9">
+      <div class="sec-label">
+        <div class="dot" style="background:var(--green)"></div>
+        <span style="color:var(--green)">jest test structure (AAA)</span>
+      </div>
+      <div class="hook-steps">
+        <div class="hook-step">
+          <div class="hook-num" style="background:var(--sky-dim);color:var(--sky);border-color:rgba(137,220,235,0.3)">A</div>
+          <span><strong>Arrange</strong> — set up inputs, fixtures, mocks</span>
+        </div>
+        <div class="hook-step">
+          <div class="hook-num" style="background:var(--teal-dim);color:var(--teal);border-color:rgba(148,226,213,0.3)">A</div>
+          <span><strong>Act</strong> — call the function under test</span>
+        </div>
+        <div class="hook-step">
+          <div class="hook-num" style="background:var(--green-dim);color:var(--green);border-color:rgba(166,227,161,0.3)">A</div>
+          <span><strong>Assert</strong> — verify output, side-effects, errors</span>
+        </div>
+        <div class="hook-step" style="margin-top:6px;padding-top:8px;border-top:1px solid var(--border)">
+          <div class="hook-num" style="background:transparent;color:var(--text-dim);border-color:var(--border)">+</div>
+          <span>Cover: happy path · edge cases · error throws</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Type patterns — wide -->
+    <div class="sec wide anim" style="--i:10">
+      <div class="sec-label">
+        <div class="dot" style="background:var(--teal)"></div>
+        <span style="color:var(--teal)">type patterns</span>
+      </div>
+      <div class="patterns-grid">
+        <div class="pattern-card">
+          <div class="pattern-name">Discriminated Union — Result&lt;T&gt;</div>
+          <div class="pattern-desc">
+            <code>&#123; ok: true; value: T &#125; | &#123; ok: false; error: string &#125;</code><br>
+            Type-safe error handling without exceptions. Narrows correctly in both branches.
+          </div>
+        </div>
+        <div class="pattern-card">
+          <div class="pattern-name">Branded Types — IDs</div>
+          <div class="pattern-desc">
+            <code>type UserId = string &amp; &#123; readonly brand: unique symbol &#125;</code><br>
+            Prevents accidentally passing a <code>UserId</code> where an <code>OrderId</code> is expected.
+          </div>
+        </div>
+        <div class="pattern-card">
+          <div class="pattern-name">Const Assertions — Literals</div>
+          <div class="pattern-desc">
+            <code>['pending','active','closed'] as const</code><br>
+            Derive a union type from an array: <code>type Status = typeof STATUSES[number]</code>
+          </div>
+        </div>
+        <div class="pattern-card">
+          <div class="pattern-name">Zod — Runtime Validation</div>
+          <div class="pattern-desc">
+            <code>z.object(&#123; email: z.string().email() &#125;)</code><br>
+            Schema validates at runtime; <code>z.infer&lt;&gt;</code> derives the static TypeScript type.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Coverage + anti-patterns — wide -->
+    <div class="sec wide anim" style="--i:11">
+      <div class="sec-label">
+        <div class="dot" style="background:var(--red)"></div>
+        <span style="color:var(--red)">anti-patterns — never use these</span>
+      </div>
+      <div class="anti-grid">
+        <div class="anti"><span class="x">✕</span><span><code>any</code> type — use <code>unknown</code> and narrow</span></div>
+        <div class="anti"><span class="x">✕</span><span>Type assertions (<code>as</code>) — use type guards</span></div>
+        <div class="anti"><span class="x">✕</span><span>Non-null assertions (<code>!</code>) — handle null explicitly</span></div>
+        <div class="anti"><span class="x">✕</span><span><code>@ts-ignore</code> without explanation</span></div>
+        <div class="anti"><span class="x">✕</span><span>Enums — use const objects or union types</span></div>
+        <div class="anti"><span class="x">✕</span><span>Classes for data — use interfaces/types</span></div>
+        <div class="anti"><span class="x">✕</span><span>Default exports — use named exports</span></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Coverage target -->
+  <div class="sec anim" style="--i:12">
+    <div class="coverage-strip">
+      <div class="cov-num">80%</div>
+      <div class="cov-label">
+        <strong>Minimum test coverage</strong> enforced in CI via <code>coverageThreshold</code>.<br>
+        Applied to: branches · functions · lines · statements
+      </div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

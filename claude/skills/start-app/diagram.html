@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Start App — Skill Diagram</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --font-body: 'Plus Jakarta Sans', system-ui, sans-serif;
+    --font-mono: 'Roboto Mono', Consolas, monospace;
+    --bg: #f0fdf4;
+    --surface: #ffffff;
+    --surface2: #dcfce7;
+    --border: rgba(22,163,74,0.12);
+    --border-bright: rgba(22,163,74,0.28);
+    --text: #14532d;
+    --text-dim: #6b7280;
+    --green: #16a34a;
+    --green-dim: rgba(22,163,74,0.1);
+    --teal: #0d9488;
+    --teal-dim: rgba(13,148,136,0.1);
+    --blue: #2563eb;
+    --blue-dim: rgba(37,99,235,0.1);
+    --orange: #ea580c;
+    --orange-dim: rgba(234,88,12,0.1);
+    --red: #dc2626;
+    --red-dim: rgba(220,38,38,0.1);
+    --amber: #d97706;
+    --amber-dim: rgba(217,119,6,0.1);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #071a0e; --surface: #0d2818; --surface2: #122d1c;
+      --border: rgba(74,222,128,0.1); --border-bright: rgba(74,222,128,0.22);
+      --text: #dcfce7; --text-dim: #86efac;
+      --green: #4ade80; --green-dim: rgba(74,222,128,0.1);
+      --teal: #2dd4bf; --teal-dim: rgba(45,212,191,0.1);
+      --blue: #60a5fa; --blue-dim: rgba(96,165,250,0.1);
+      --orange: #fb923c; --orange-dim: rgba(251,146,60,0.1);
+      --red: #f87171; --red-dim: rgba(248,113,113,0.1);
+      --amber: #fbbf24; --amber-dim: rgba(251,191,36,0.1);
+    }
+  }
+  *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+  body {
+    font-family: var(--font-body);
+    background: var(--bg);
+    background-image:
+      radial-gradient(at 70% 10%, var(--teal-dim) 0%, transparent 50%),
+      radial-gradient(at 10% 80%, var(--green-dim) 0%, transparent 50%);
+    color: var(--text);
+    padding: 44px 24px 72px;
+    min-height: 100vh;
+  }
+  .page { max-width: 920px; margin: 0 auto; }
+
+  .header { margin-bottom: 44px; }
+  .skill-tag {
+    display: inline-block;
+    font-family: var(--font-mono); font-size: 10px; color: var(--green);
+    background: var(--green-dim); border: 1px solid var(--green);
+    border-radius: 4px; padding: 3px 10px; letter-spacing: 0.08em;
+    margin-bottom: 12px;
+  }
+  h1 { font-size: 38px; font-weight: 800; letter-spacing: -0.03em; margin-bottom: 10px; }
+  .subtitle { color: var(--text-dim); font-size: 14px; line-height: 1.65; max-width: 640px; }
+
+  /* THREE STEP FLOW */
+  .main-steps { display: flex; flex-direction: column; gap: 2px; margin-bottom: 28px; }
+  .main-step {
+    display: flex; align-items: stretch;
+    animation: riseUp 0.35s ease both;
+    animation-delay: calc(var(--i,0) * 0.07s);
+  }
+  .ms-left { width: 42px; display: flex; flex-direction: column; align-items: center; flex-shrink: 0; }
+  .ms-num {
+    width: 34px; height: 34px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: 14px; flex-shrink: 0;
+  }
+  .ms-line { width: 2px; flex: 1; min-height: 12px; margin: 3px 0; }
+  .ms-card {
+    flex: 1; margin: 3px 0 3px 12px;
+    background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+    padding: 18px 22px;
+  }
+  .ms-card:hover { border-color: var(--border-bright); }
+  .ms-title { font-size: 16px; font-weight: 700; margin-bottom: 7px; }
+  .ms-desc { font-size: 13px; color: var(--text-dim); line-height: 1.65; margin-bottom: 10px; }
+  .ms-code {
+    font-family: var(--font-mono); font-size: 11.5px;
+    background: var(--surface2); border-radius: 6px; padding: 10px 14px;
+    color: var(--green); line-height: 1.7; margin-top: 10px;
+    overflow-x: auto;
+  }
+
+  /* BRANCH CASES */
+  .cases { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-top: 12px; }
+  .case-box {
+    border-radius: 8px; padding: 12px 14px;
+    border: 1px solid;
+    font-size: 12px;
+  }
+  .case-box h4 { font-size: 11px; font-weight: 700; letter-spacing: 0.05em; margin-bottom: 6px; }
+  .case-box p { color: var(--text-dim); line-height: 1.55; }
+
+  .case-a { border-color: var(--amber-dim); background: var(--amber-dim); }
+  .case-a h4 { color: var(--amber); }
+  .case-b { border-color: var(--green-dim); background: var(--green-dim); }
+  .case-b h4 { color: var(--green); }
+  .case-c { border-color: var(--blue-dim); background: var(--blue-dim); }
+  .case-c h4 { color: var(--blue); }
+
+  .ms-1 .ms-num { background: var(--teal-dim); color: var(--teal); border: 2px solid var(--teal); }
+  .ms-1 .ms-line { background: linear-gradient(to bottom, var(--teal), transparent); }
+  .ms-1 .ms-title { color: var(--teal); }
+  .ms-2 .ms-num { background: var(--blue-dim); color: var(--blue); border: 2px solid var(--blue); }
+  .ms-2 .ms-line { background: linear-gradient(to bottom, var(--blue), transparent); }
+  .ms-2 .ms-title { color: var(--blue); }
+  .ms-3 .ms-num { background: var(--green-dim); color: var(--green); border: 2px solid var(--green); }
+  .ms-3 .ms-title { color: var(--green); }
+
+  /* FAILURE RECOVERY */
+  .recovery {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+    margin-bottom: 24px;
+  }
+  .recovery-header {
+    padding: 14px 20px; border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 8px;
+    background: var(--red-dim);
+    font-size: 14px; font-weight: 700; color: var(--red);
+  }
+  .error-table { width: 100%; font-size: 12.5px; border-collapse: collapse; }
+  .error-table th {
+    padding: 10px 16px; text-align: left;
+    font-size: 11px; color: var(--text-dim); font-weight: 600; letter-spacing: 0.05em;
+    border-bottom: 1px solid var(--border); background: var(--surface2);
+  }
+  .error-table td { padding: 10px 16px; border-bottom: 1px solid var(--border); vertical-align: top; line-height: 1.5; }
+  .error-table tr:last-child td { border-bottom: none; }
+  .error-table td:first-child { font-family: var(--font-mono); font-size: 11px; color: var(--red); }
+  .error-table td:nth-child(2) { color: var(--text-dim); }
+  .error-table td:last-child { color: var(--green); font-size: 12px; }
+
+  /* STACK DETECTION */
+  .stack-section {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 22px 24px;
+  }
+  .stack-title { font-size: 14px; font-weight: 700; margin-bottom: 14px; }
+  .stack-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+  .stack-item {
+    background: var(--surface2); border-radius: 8px; padding: 12px 14px;
+    border: 1px solid var(--border);
+  }
+  .stack-lang { font-size: 12px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+  .stack-cmd {
+    font-family: var(--font-mono); font-size: 10.5px; color: var(--green);
+    line-height: 1.6;
+  }
+
+  @keyframes riseUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @media (prefers-reduced-motion: reduce) { * { animation: none !important; } }
+  @media (max-width: 700px) {
+    .cases { grid-template-columns: 1fr; }
+    .stack-grid { grid-template-columns: 1fr 1fr; }
+    h1 { font-size: 28px; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="header">
+    <div class="skill-tag">SKILL / START-APP</div>
+    <h1>Start App</h1>
+    <p class="subtitle">End-to-end workflow for discovering, selecting, and executing the correct startup procedure for any modern application — then validating success and recovering from failures across every major stack.</p>
+  </div>
+
+  <div class="main-steps">
+
+    <!-- STEP 1 -->
+    <div class="main-step ms-1" style="--i:0">
+      <div class="ms-left"><div class="ms-num">1</div><div class="ms-line"></div></div>
+      <div class="ms-card">
+        <div class="ms-title">Discover Existing Scripts</div>
+        <div class="ms-desc">Search <code style="font-family:var(--font-mono);font-size:11.5px">scripts/</code> for filenames starting with <code style="font-family:var(--font-mono);font-size:11.5px">start</code>, <code style="font-family:var(--font-mono);font-size:11.5px">run</code>, <code style="font-family:var(--font-mono);font-size:11.5px">execute</code>, or <code style="font-family:var(--font-mono);font-size:11.5px">launch</code>. Also check for <code style="font-family:var(--font-mono);font-size:11.5px">docker-compose.yml</code>, <code style="font-family:var(--font-mono);font-size:11.5px">Makefile</code>, <code style="font-family:var(--font-mono);font-size:11.5px">package.json</code>, and <code style="font-family:var(--font-mono);font-size:11.5px">Procfile</code>. Build a candidate list.</div>
+      </div>
+    </div>
+
+    <!-- STEP 2 -->
+    <div class="main-step ms-2" style="--i:1">
+      <div class="ms-left"><div class="ms-num">2</div><div class="ms-line"></div></div>
+      <div class="ms-card">
+        <div class="ms-title">Match Candidates to Intent</div>
+        <div class="ms-desc">Use the user's prompt to filter by technology name, component name, or environment. Then branch on how many candidates were found.</div>
+        <div class="cases">
+          <div class="case-box case-a">
+            <h4>CASE A — Not found</h4>
+            <p>Offer to create a startup script, run directly, or accept manual command. Generate <code style="font-family:var(--font-mono);font-size:10.5px">scripts/Start-App.ps1</code> using stack detection if user agrees.</p>
+          </div>
+          <div class="case-box case-b">
+            <h4>CASE B — Exactly one</h4>
+            <p>Read the script, check for parameter overrides implied by the user's prompt, then execute directly.</p>
+          </div>
+          <div class="case-box case-c">
+            <h4>CASE C — Multiple</h4>
+            <p>Present all candidates via AskUserQuestion with one-line summaries. After selection, offer default vs. custom parameters.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 3 -->
+    <div class="main-step ms-3" style="--i:2">
+      <div class="ms-left"><div class="ms-num">3</div></div>
+      <div class="ms-card">
+        <div class="ms-title">Execute and Inspect Results</div>
+        <div class="ms-desc">Run the command, capture stdout/stderr, stream for 10–20 seconds and evaluate the tail. Classify as <strong style="color:var(--green)">Success</strong> or <strong style="color:var(--red)">Failure</strong> from output patterns.</div>
+        <div class="ms-code">
+          # Success indicators<br>
+          Listening on | Running on | ready | compiled | serving | ✓ | port number<br><br>
+          # Failure indicators<br>
+          Error | EADDRINUSE | failed | ModuleNotFoundError | exited with code
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- FAILURE RECOVERY -->
+  <div class="recovery">
+    <div class="recovery-header">
+      <span>⚡</span>
+      <span>Step 3a — Failure Recovery (up to 3 auto-fix retries)</span>
+    </div>
+    <table class="error-table">
+      <thead>
+        <tr><th>Error Pattern</th><th>Likely Cause</th><th>Suggested Fix</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>EADDRINUSE</td>
+          <td>Port occupied by another process</td>
+          <td>Kill process on that port or use a different port</td>
+        </tr>
+        <tr>
+          <td>ModuleNotFoundError</td>
+          <td>Missing dependencies</td>
+          <td>npm install / pip install -r requirements.txt / uv sync</td>
+        </tr>
+        <tr>
+          <td>command not found</td>
+          <td>Missing runtime (node, python, docker)</td>
+          <td>Install the required runtime</td>
+        </tr>
+        <tr>
+          <td>connection refused</td>
+          <td>Database/service not running</td>
+          <td>Start the required dependency first</td>
+        </tr>
+        <tr>
+          <td>.env not found</td>
+          <td>Missing environment config</td>
+          <td>Copy from .env.example or set the missing variable</td>
+        </tr>
+        <tr>
+          <td>Cannot connect to Docker daemon</td>
+          <td>Docker not running</td>
+          <td>Start Docker Desktop</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- STACK DETECTION -->
+  <div class="stack-section">
+    <div class="stack-title">Stack Detection Reference</div>
+    <div class="stack-grid">
+      <div class="stack-item">
+        <div class="stack-lang">Node.js / TS</div>
+        <div class="stack-cmd">npm/pnpm/yarn run dev<br>Priority: dev → start → serve</div>
+      </div>
+      <div class="stack-item">
+        <div class="stack-lang">Python</div>
+        <div class="stack-cmd">uv run uvicorn ...<br>flask run / manage.py runserver</div>
+      </div>
+      <div class="stack-item">
+        <div class="stack-lang">Docker</div>
+        <div class="stack-cmd">docker compose up<br>--build on first run</div>
+      </div>
+      <div class="stack-item">
+        <div class="stack-lang">.NET</div>
+        <div class="stack-cmd">dotnet run --project ...<br>dotnet watch run</div>
+      </div>
+      <div class="stack-item">
+        <div class="stack-lang">Go</div>
+        <div class="stack-cmd">go run ./cmd/...<br>go run main.go</div>
+      </div>
+      <div class="stack-item">
+        <div class="stack-lang">Rails</div>
+        <div class="stack-cmd">bundle exec rails server<br>bin/rails s</div>
+      </div>
+      <div class="stack-item">
+        <div class="stack-lang">Rust</div>
+        <div class="stack-cmd">cargo run<br>cargo watch -x run</div>
+      </div>
+      <div class="stack-item">
+        <div class="stack-lang">Java</div>
+        <div class="stack-cmd">./mvnw spring-boot:run<br>./gradlew bootRun</div>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

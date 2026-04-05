@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>UI Web Skill — Design System</title>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #fdfbf8;
+      --surface: #ffffff;
+      --surface-2: #f6f3ef;
+      --border: rgba(0,0,0,0.07);
+      --border-bright: rgba(0,0,0,0.13);
+      --text: #1c1510;
+      --text-dim: #7a6e62;
+      --accent: #1a3a5c;
+      --accent-warm: #c25b1a;
+      --accent-dim: rgba(26,58,92,0.10);
+      --gold: #b8832a;
+      --gold-dim: rgba(184,131,42,0.10);
+      --font-body: 'DM Sans', system-ui, sans-serif;
+      --font-serif: 'Instrument Serif', Georgia, serif;
+      --font-mono: 'Fira Code', 'Courier New', monospace;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--font-body);
+      background: var(--bg);
+      background-image:
+        radial-gradient(at 50% 0%, var(--accent-dim) 0%, transparent 55%);
+      color: var(--text);
+      padding: 48px 24px 80px;
+    }
+
+    header {
+      max-width: 920px;
+      margin: 0 auto 52px;
+    }
+
+    .skill-tag {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: 0.12em;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      margin-bottom: 16px;
+    }
+
+    h1 {
+      font-family: var(--font-serif);
+      font-size: 3.4rem;
+      font-weight: 400;
+      font-style: italic;
+      line-height: 1.05;
+      color: var(--accent);
+      margin-bottom: 14px;
+      letter-spacing: -0.01em;
+    }
+
+    .tagline {
+      font-size: 1rem;
+      color: var(--text-dim);
+      max-width: 520px;
+      line-height: 1.6;
+    }
+
+    main {
+      max-width: 920px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    /* WCAG hero section */
+    .wcag-hero {
+      background: var(--accent);
+      border-radius: 14px;
+      padding: 28px 32px;
+      color: rgba(255,255,255,0.92);
+      animation: fadeUp 0.35s ease both;
+    }
+
+    .wcag-hero h2 {
+      font-family: var(--font-serif);
+      font-size: 1.5rem;
+      font-weight: 400;
+      font-style: italic;
+      margin-bottom: 18px;
+      color: rgba(255,255,255,0.95);
+    }
+
+    .contrast-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+      gap: 8px;
+    }
+
+    .contrast-card {
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 8px;
+      padding: 10px 14px;
+    }
+
+    .contrast-card .ratio {
+      font-family: var(--font-mono);
+      font-size: 1.4rem;
+      font-weight: 500;
+      color: #ffffff;
+      margin-bottom: 2px;
+    }
+
+    .contrast-card .label {
+      font-size: 0.72rem;
+      color: rgba(255,255,255,0.65);
+      line-height: 1.4;
+    }
+
+    .pass { color: #7ee787; }
+    .fail { color: #f85149; }
+
+    /* Two column layout */
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      animation: fadeUp 0.35s 0.1s ease both;
+    }
+
+    .ve-card {
+      background: var(--surface);
+      border: 1px solid var(--border-bright);
+      border-radius: 12px;
+      padding: 20px 22px;
+      min-width: 0;
+    }
+
+    .ve-card h3 {
+      font-family: var(--font-serif);
+      font-size: 1.15rem;
+      font-weight: 400;
+      font-style: italic;
+      color: var(--accent);
+      margin-bottom: 14px;
+    }
+
+    .spec-row {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      padding: 6px 0;
+      border-bottom: 1px solid var(--border);
+      gap: 8px;
+      min-width: 0;
+    }
+    .spec-row:last-child { border-bottom: none; }
+
+    .spec-row .spec-name {
+      font-size: 0.8rem;
+      color: var(--text-dim);
+      min-width: 0;
+    }
+
+    .spec-row .spec-val {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--text);
+      font-weight: 500;
+      text-align: right;
+      flex-shrink: 0;
+    }
+
+    /* Glass section */
+    .glass-section {
+      background: var(--surface);
+      border: 1px solid var(--border-bright);
+      border-radius: 12px;
+      padding: 20px 22px;
+      animation: fadeUp 0.35s 0.15s ease both;
+    }
+
+    .glass-section h3 {
+      font-family: var(--font-serif);
+      font-size: 1.15rem;
+      font-weight: 400;
+      font-style: italic;
+      color: var(--accent);
+      margin-bottom: 14px;
+    }
+
+    .use-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .use-block h4 {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    .use-block.do h4 { color: #1a7f37; }
+    .use-block.dont h4 { color: #cf222e; }
+
+    .use-block ul {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .use-block li {
+      font-size: 0.78rem;
+      padding: 5px 10px;
+      border-radius: 6px;
+      min-width: 0;
+      overflow-wrap: break-word;
+    }
+
+    .use-block.do li   { background: rgba(26,127,55,0.09); color: #1a7f37; }
+    .use-block.dont li { background: rgba(207,34,46,0.09); color: #cf222e; }
+
+    /* Dark mode pairing table */
+    .mode-table {
+      background: var(--surface);
+      border: 1px solid var(--border-bright);
+      border-radius: 12px;
+      padding: 20px 22px;
+      animation: fadeUp 0.35s 0.20s ease both;
+    }
+
+    .mode-table h3 {
+      font-family: var(--font-serif);
+      font-size: 1.15rem;
+      font-weight: 400;
+      font-style: italic;
+      color: var(--accent);
+      margin-bottom: 14px;
+    }
+
+    .pair-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .pair-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 7px 12px;
+      border-radius: 7px;
+      background: var(--surface-2);
+      font-size: 0.78rem;
+      gap: 8px;
+      min-width: 0;
+      overflow-wrap: break-word;
+    }
+
+    .pair-row .swatch-pair {
+      display: flex;
+      gap: 4px;
+      flex-shrink: 0;
+    }
+
+    .swatch {
+      width: 16px;
+      height: 16px;
+      border-radius: 3px;
+      border: 1px solid var(--border-bright);
+    }
+
+    /* Anti-patterns */
+    .anti-section {
+      background: var(--surface);
+      border: 1px solid var(--border-bright);
+      border-radius: 12px;
+      padding: 20px 22px;
+      animation: fadeUp 0.35s 0.25s ease both;
+    }
+
+    .anti-section h3 {
+      font-family: var(--font-serif);
+      font-size: 1.15rem;
+      font-weight: 400;
+      font-style: italic;
+      color: var(--accent-warm);
+      margin-bottom: 14px;
+    }
+
+    .anti-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+      gap: 6px;
+    }
+
+    .anti-item {
+      font-size: 0.76rem;
+      padding: 6px 10px;
+      background: rgba(194,91,26,0.07);
+      border-left: 2px solid var(--accent-warm);
+      border-radius: 4px;
+      color: var(--text-dim);
+      min-width: 0;
+      overflow-wrap: break-word;
+    }
+
+    @media (max-width: 680px) {
+      .two-col { grid-template-columns: 1fr; }
+      .use-grid { grid-template-columns: 1fr; }
+      .pair-grid { grid-template-columns: 1fr; }
+      h1 { font-size: 2.4rem; }
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(12px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @media (prefers-reduced-motion: reduce) { * { animation: none !important; } }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="skill-tag">ui-web skill</div>
+  <h1>Web UI Design</h1>
+  <p class="tagline">Glassmorphism, Tailwind CSS, dark mode, accessibility. Beautiful UI is communication — every visual choice serves clarity, hierarchy, and user confidence.</p>
+</header>
+
+<main>
+
+  <!-- WCAG Hero -->
+  <div class="wcag-hero">
+    <h2>WCAG 2.1 AA — Mandatory Contrast Rules</h2>
+    <div class="contrast-grid">
+      <div class="contrast-card">
+        <div class="ratio pass">16:1</div>
+        <div class="label">gray-900 on white<br>#111827 — always safe</div>
+      </div>
+      <div class="contrast-card">
+        <div class="ratio pass">9.2:1</div>
+        <div class="label">gray-700 on white<br>#374151 — safe body text</div>
+      </div>
+      <div class="contrast-card">
+        <div class="ratio pass">6.4:1</div>
+        <div class="label">gray-600 on white<br>#4B5563 — safe secondary</div>
+      </div>
+      <div class="contrast-card">
+        <div class="ratio fail">2.6:1</div>
+        <div class="label">gray-400 on white<br>#9CA3AF — FAILS. Never use.</div>
+      </div>
+      <div class="contrast-card">
+        <div class="ratio pass">16:1</div>
+        <div class="label">white on gray-900<br>dark mode primary</div>
+      </div>
+      <div class="contrast-card">
+        <div class="ratio fail">3.1:1</div>
+        <div class="label">gray-500 on gray-900<br>#6B7280 — FAILS dark mode</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Spacing + Typography -->
+  <div class="two-col">
+    <div class="ve-card">
+      <h3>Spacing System — 8px Grid</h3>
+      <div class="spec-row"><span class="spec-name">xs — tight internal</span><span class="spec-val">p-1 / 4px</span></div>
+      <div class="spec-row"><span class="spec-name">sm — compact</span><span class="spec-val">p-2 / 8px</span></div>
+      <div class="spec-row"><span class="spec-name">md — default</span><span class="spec-val">p-4 / 16px</span></div>
+      <div class="spec-row"><span class="spec-name">lg — comfortable</span><span class="spec-val">p-6 / 24px</span></div>
+      <div class="spec-row"><span class="spec-name">xl — spacious</span><span class="spec-val">p-8 / 32px</span></div>
+      <div class="spec-row"><span class="spec-name">2xl — section gap</span><span class="spec-val">p-12 / 48px</span></div>
+      <div class="spec-row"><span class="spec-name">Min click target</span><span class="spec-val">44px</span></div>
+    </div>
+
+    <div class="ve-card">
+      <h3>Typography Scale</h3>
+      <div class="spec-row"><span class="spec-name">Hero heading</span><span class="spec-val">text-4xl md:text-5xl</span></div>
+      <div class="spec-row"><span class="spec-name">Section heading</span><span class="spec-val">text-2xl md:text-3xl</span></div>
+      <div class="spec-row"><span class="spec-name">Subheading</span><span class="spec-val">text-lg md:text-xl</span></div>
+      <div class="spec-row"><span class="spec-name">Body text</span><span class="spec-val">text-base leading-relaxed</span></div>
+      <div class="spec-row"><span class="spec-name">Caption</span><span class="spec-val">text-sm text-gray-500</span></div>
+      <div class="spec-row"><span class="spec-name">Max fonts per page</span><span class="spec-val">2 families</span></div>
+      <div class="spec-row"><span class="spec-name">Line height (body)</span><span class="spec-val">1.5–1.7</span></div>
+    </div>
+  </div>
+
+  <!-- Glassmorphism -->
+  <div class="glass-section">
+    <h3>Glassmorphism — When to Use</h3>
+    <div class="use-grid">
+      <div class="use-block do">
+        <h4>Use For</h4>
+        <ul>
+          <li>Hero sections with image backgrounds</li>
+          <li>Floating cards over gradients</li>
+          <li>Modal overlays</li>
+          <li>Navigation bars (subtle)</li>
+          <li>Feature highlights</li>
+        </ul>
+      </div>
+      <div class="use-block dont">
+        <h4>Avoid For</h4>
+        <ul>
+          <li>Every card (overuse kills effect)</li>
+          <li>Text-heavy content areas</li>
+          <li>Forms (reduces contrast)</li>
+          <li>Data tables</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dark mode pairings -->
+  <div class="mode-table">
+    <h3>Light / Dark Mode Color Pairings</h3>
+    <div class="pair-grid">
+      <div class="pair-row">
+        <span>Page background</span>
+        <div class="swatch-pair">
+          <div class="swatch" style="background:#f9fafb"></div>
+          <div class="swatch" style="background:#030712"></div>
+        </div>
+      </div>
+      <div class="pair-row">
+        <span>Surface / Card</span>
+        <div class="swatch-pair">
+          <div class="swatch" style="background:#ffffff"></div>
+          <div class="swatch" style="background:#111827"></div>
+        </div>
+      </div>
+      <div class="pair-row">
+        <span>Elevated surface</span>
+        <div class="swatch-pair">
+          <div class="swatch" style="background:#ffffff"></div>
+          <div class="swatch" style="background:#1f2937"></div>
+        </div>
+      </div>
+      <div class="pair-row">
+        <span>Primary text</span>
+        <div class="swatch-pair">
+          <div class="swatch" style="background:#111827"></div>
+          <div class="swatch" style="background:#ffffff"></div>
+        </div>
+      </div>
+      <div class="pair-row">
+        <span>Secondary text</span>
+        <div class="swatch-pair">
+          <div class="swatch" style="background:#4b5563"></div>
+          <div class="swatch" style="background:#9ca3af"></div>
+        </div>
+      </div>
+      <div class="pair-row">
+        <span>Primary action</span>
+        <div class="swatch-pair">
+          <div class="swatch" style="background:#2563eb"></div>
+          <div class="swatch" style="background:#3b82f6"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Anti-patterns -->
+  <div class="anti-section">
+    <h3>Anti-Patterns — Never Do These</h3>
+    <div class="anti-list">
+      <div class="anti-item">3+ font sizes on a page</div>
+      <div class="anti-item">Random spacing (use 8px grid)</div>
+      <div class="anti-item">Pure black on pure white</div>
+      <div class="anti-item">Colored text on bg without contrast check</div>
+      <div class="anti-item">Animations longer than 500ms</div>
+      <div class="anti-item">Glassmorphism everywhere</div>
+      <div class="anti-item">Drop shadows on everything</div>
+      <div class="anti-item">Gradients on body text</div>
+      <div class="anti-item">Auto-playing animations</div>
+      <div class="anti-item">Removing focus indicators</div>
+      <div class="anti-item">Gray text below 4.5:1 contrast</div>
+      <div class="anti-item">Tiny click targets (&lt;44px)</div>
+    </div>
+  </div>
+
+</main>
+
+</body>
+</html>

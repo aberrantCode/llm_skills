@@ -1022,3 +1022,7 @@ async function graphqlWithRetry(admin, query, variables, maxRetries = 3) {
 - **Large GraphQL queries** - Paginate, query only needed fields
 - **Polling for updates** - Use webhooks instead
 - **Custom auth flow** - Use Shopify's OAuth flow via SDK
+
+## Diagram
+
+[View diagram](diagram.html)

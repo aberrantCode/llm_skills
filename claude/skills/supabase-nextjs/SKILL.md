@@ -727,3 +727,7 @@ export function SignOutButton() {
 - **Service key in client** - Never expose, server-only
 - **Missing revalidatePath** - Always revalidate after mutations
 - **Not handling auth errors** - Show user-friendly messages
+
+## Diagram
+
+[View diagram](diagram.html)

@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LLM Patterns — AI-First Application Patterns</title>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <style>
+    :root {
+      --font-body: 'Instrument Serif', Georgia, serif;
+      --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+      --bg: #faf7f2;
+      --surface: #ffffff;
+      --surface-warm: #f5efe8;
+      --surface-recessed: #ede8e0;
+      --border: rgba(120, 80, 40, 0.10);
+      --border-bright: rgba(120, 80, 40, 0.20);
+      --text: #2d1f0e;
+      --text-dim: #7a6450;
+      --accent: #c2410c;
+      --accent-dim: rgba(194, 65, 12, 0.08);
+      --node-a: #c2410c;
+      --node-a-dim: rgba(194, 65, 12, 0.10);
+      --node-b: #65a30d;
+      --node-b-dim: rgba(101, 163, 13, 0.10);
+      --node-c: #0369a1;
+      --node-c-dim: rgba(3, 105, 161, 0.10);
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #1a1208;
+        --surface: #251a0e;
+        --surface-warm: #2e2010;
+        --surface-recessed: #1a1208;
+        --border: rgba(220, 170, 100, 0.08);
+        --border-bright: rgba(220, 170, 100, 0.16);
+        --text: #f0e6d4;
+        --text-dim: #9e8060;
+        --accent: #f97316;
+        --accent-dim: rgba(249, 115, 22, 0.10);
+        --node-a: #f97316;
+        --node-a-dim: rgba(249, 115, 22, 0.12);
+        --node-b: #84cc16;
+        --node-b-dim: rgba(132, 204, 22, 0.12);
+        --node-c: #38bdf8;
+        --node-c-dim: rgba(56, 189, 248, 0.12);
+      }
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: var(--font-body);
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 56px 28px;
+    }
+    .page-wrap { max-width: 1000px; margin: 0 auto; }
+    .page-label {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 12px;
+    }
+    h1 {
+      font-size: clamp(32px, 4.5vw, 52px);
+      font-weight: 400;
+      font-style: italic;
+      line-height: 1.1;
+      color: var(--text);
+      margin-bottom: 14px;
+    }
+    .subtitle {
+      font-size: 17px;
+      color: var(--text-dim);
+      line-height: 1.65;
+      max-width: 600px;
+      margin-bottom: 52px;
+    }
+    .section { margin-bottom: 52px; }
+    .section-label {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .section-label::before { content: '§'; font-size: 14px; color: var(--accent); }
+    h2 { font-size: 22px; font-weight: 400; margin-bottom: 16px; }
+    /* The split */
+    .split-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+    @media (max-width: 640px) { .split-grid { grid-template-columns: 1fr; } }
+    .ve-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 22px 26px;
+      min-width: 0;
+    }
+    .split-left { border-left: 3px solid var(--node-a); }
+    .split-right { border-left: 3px solid var(--node-b); }
+    .card-title {
+      font-size: 17px;
+      font-weight: 400;
+      margin-bottom: 12px;
+    }
+    .card-tag {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--text-dim);
+      margin-bottom: 8px;
+    }
+    .use-list {
+      list-style: none;
+      padding: 0;
+      font-size: 14px;
+      line-height: 1.9;
+      color: var(--text-dim);
+    }
+    .use-list li { padding-left: 16px; position: relative; overflow-wrap: break-word; }
+    .use-list li::before { content: '·'; position: absolute; left: 4px; color: var(--accent); }
+    /* Testing pyramid */
+    .test-pyramid {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .pyramid-row {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+    }
+    .pyramid-tier {
+      flex: 1;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 14px 16px;
+      min-width: 0;
+    }
+    .pyramid-tier-label {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+    .pyramid-tier-desc { font-size: 13px; color: var(--text-dim); line-height: 1.5; overflow-wrap: break-word; }
+    .ci-badge {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      padding: 3px 8px;
+      border-radius: 4px;
+      display: inline-block;
+      margin-top: 6px;
+    }
+    .ci-every { background: var(--node-b-dim); color: var(--node-b); }
+    .ci-nightly { background: var(--node-c-dim); color: var(--node-c); }
+    /* Flow diagram */
+    .mermaid-wrap {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 20px;
+      overflow: hidden;
+      position: relative;
+    }
+    .zoom-controls {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      display: flex;
+      gap: 4px;
+      z-index: 10;
+    }
+    .zoom-btn {
+      width: 28px; height: 28px;
+      background: var(--surface);
+      border: 1px solid var(--border-bright);
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--text);
+      font-family: var(--font-mono);
+    }
+    .zoom-btn:hover { background: var(--accent-dim); }
+    .mermaid-inner { transform-origin: top left; transition: transform 0.15s ease; }
+    /* Prompt versioning */
+    .prompt-pattern {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+    @media (max-width: 640px) { .prompt-pattern { grid-template-columns: 1fr; } }
+    .prompt-card {
+      background: var(--surface-warm);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 14px 16px;
+      min-width: 0;
+    }
+    .prompt-step {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--accent);
+      margin-bottom: 6px;
+    }
+    .prompt-name { font-size: 14px; font-weight: 400; margin-bottom: 4px; }
+    .prompt-desc { font-size: 12px; color: var(--text-dim); line-height: 1.5; overflow-wrap: break-word; }
+    /* Anti-patterns */
+    .antipattern-list {
+      list-style: none;
+      padding: 0;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+    @media (max-width: 640px) { .antipattern-list { grid-template-columns: 1fr; } }
+    .antipattern-list li {
+      font-size: 13px;
+      color: var(--text-dim);
+      padding: 9px 13px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--accent);
+      border-radius: 6px;
+      line-height: 1.4;
+      overflow-wrap: break-word;
+    }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(14px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .a1 { animation: fadeUp 0.5s ease both; }
+    .a2 { animation: fadeUp 0.5s 0.1s ease both; }
+    .a3 { animation: fadeUp 0.5s 0.2s ease both; }
+    .a4 { animation: fadeUp 0.5s 0.3s ease both; }
+    .a5 { animation: fadeUp 0.5s 0.4s ease both; }
+    @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+    .principle-quote {
+      font-size: clamp(18px, 2.5vw, 24px);
+      font-style: italic;
+      color: var(--text);
+      border-left: 4px solid var(--accent);
+      padding: 14px 20px;
+      margin-bottom: 40px;
+      background: var(--accent-dim);
+      border-radius: 0 8px 8px 0;
+    }
+    .principle-quote em { font-style: normal; color: var(--accent); }
+  </style>
+</head>
+<body>
+<div class="page-wrap">
+  <div class="a1">
+    <div class="page-label">Skill Reference · llm-patterns</div>
+    <h1>LLM Patterns</h1>
+    <p class="subtitle">AI-first application patterns, LLM testing strategies, and prompt management for production systems.</p>
+  </div>
+
+  <div class="principle-quote a2">
+    <em>LLM for logic,</em> code for plumbing.
+  </div>
+
+  <!-- LLM vs Code -->
+  <section class="section a2">
+    <div class="section-label">Division of Responsibility</div>
+    <div class="split-grid">
+      <div class="ve-card split-left">
+        <div class="card-tag">Use LLM for</div>
+        <div class="card-title">Semantic &amp; Cognitive Work</div>
+        <ul class="use-list">
+          <li>Classification, extraction, summarization</li>
+          <li>Decision-making with natural language reasoning</li>
+          <li>Content generation &amp; transformation</li>
+          <li>Complex conditional logic (brittle in code)</li>
+        </ul>
+      </div>
+      <div class="ve-card split-right">
+        <div class="card-tag">Use Code for</div>
+        <div class="card-title">Deterministic Plumbing</div>
+        <ul class="use-list">
+          <li>Data validation (Zod / Pydantic)</li>
+          <li>API routing &amp; HTTP handling</li>
+          <li>Database operations</li>
+          <li>Auth/authorization, orchestration, error handling</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- LLM Client Pattern Flow -->
+  <section class="section a3">
+    <div class="section-label">Typed LLM Client Pattern</div>
+    <div class="mermaid-wrap">
+      <div class="zoom-controls">
+        <button class="zoom-btn" id="zIn">+</button>
+        <button class="zoom-btn" id="zOut">−</button>
+        <button class="zoom-btn" id="zReset">⟳</button>
+      </div>
+      <div class="mermaid-inner" id="mm1">
+        <div class="mermaid">
+%%{init: {'theme': 'base', 'themeVariables': {'primaryColor': '#fdf0e8', 'primaryTextColor': '#2d1f0e', 'primaryBorderColor': '#c2410c', 'lineColor': '#7a6450', 'fontFamily': 'JetBrains Mono', 'edgeLabelBackground': '#faf7f2'}}}%%
+flowchart LR
+    A["Business Logic\ncall llmCall()"] --> B["LLM Client Wrapper\nllmCall<T>"]
+    B --> C["Anthropic SDK\nmessages.create()"]
+    C --> D["Raw Text\nresponse"]
+    D --> E{"Parse\nJSON"}
+    E -->|"valid"| F["Zod Schema\nValidation"]
+    E -->|"invalid"| G["Error Handler\nthrow Error"]
+    F -->|"passes"| H["Typed Result T\nreturned"]
+    F -->|"fails"| G
+    H --> I["Service Layer\nbusiness logic continues"]
+
+    classDef default fill:#faf7f2,stroke:#e0d4c0,color:#2d1f0e
+    classDef primary fill:#fde8dc,stroke:#c2410c,color:#c2410c
+    classDef success fill:#f0fdf4,stroke:#65a30d,color:#65a30d
+    classDef error fill:#fff1f2,stroke:#e11d48,color:#e11d48
+    class B primary
+    class H,I success
+    class G error
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Prompt Management -->
+  <section class="section a3">
+    <div class="section-label">Prompt Management</div>
+    <div class="prompt-pattern">
+      <div class="prompt-card">
+        <div class="prompt-step">01 — TEMPLATE</div>
+        <div class="prompt-name">Template Functions</div>
+        <div class="prompt-desc">Prompts as typed functions with interpolated context. One file per prompt domain.</div>
+      </div>
+      <div class="prompt-card">
+        <div class="prompt-step">02 — VERSION</div>
+        <div class="prompt-name">Version Registry</div>
+        <div class="prompt-desc">Export named versions (v1, v2) with a <code style="font-family:var(--font-mono);font-size:11px">current</code> pointer. Track accuracy over time.</div>
+      </div>
+      <div class="prompt-card">
+        <div class="prompt-step">03 — SCHEMA</div>
+        <div class="prompt-name">Zod Schemas</div>
+        <div class="prompt-desc">All LLM responses validated via Zod. Never trust unvalidated JSON from an LLM.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Testing Pyramid -->
+  <section class="section a4">
+    <div class="section-label">Three-Tier LLM Testing Strategy</div>
+    <div class="test-pyramid">
+      <div class="pyramid-row">
+        <div class="pyramid-tier" style="border-top: 2px solid var(--node-b);">
+          <div class="pyramid-tier-label" style="color:var(--node-b)">Tier 1 — Unit Tests (Mocks)</div>
+          <div class="pyramid-tier-desc">Mock the LLM client. Fast, deterministic. Tests that your service logic handles the response correctly. Run on every commit.</div>
+          <span class="ci-badge ci-every">every CI run</span>
+        </div>
+      </div>
+      <div class="pyramid-row">
+        <div class="pyramid-tier" style="border-top: 2px solid var(--node-c);">
+          <div class="pyramid-tier-label" style="color:var(--node-c)">Tier 2 — Fixture Tests</div>
+          <div class="pyramid-tier-desc">Saved real LLM responses as JSON fixtures. Tests parsing &amp; schema validation without calling the API. Still deterministic.</div>
+          <span class="ci-badge ci-every">every CI run</span>
+        </div>
+      </div>
+      <div class="pyramid-row">
+        <div class="pyramid-tier" style="border-top: 2px solid var(--node-a);">
+          <div class="pyramid-tier-label" style="color:var(--node-a)">Tier 3 — Evaluation Tests</div>
+          <div class="pyramid-tier-desc">Live API calls against labeled test cases. Measures accuracy &gt;90%. Slow &amp; expensive — run nightly or on-demand via <code style="font-family:var(--font-mono);font-size:11px">RUN_LLM_EVALS=true</code>.</div>
+          <span class="ci-badge ci-nightly">nightly · on-demand</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Cost & Performance -->
+  <section class="section a4">
+    <div class="section-label">Cost &amp; Performance Tracking</div>
+    <div class="ve-card">
+      <div style="font-size:14px;line-height:1.8;color:var(--text-dim);">
+        Track every LLM call with: <span style="font-family:var(--font-mono);font-size:12px;color:var(--node-a)">model</span> · <span style="font-family:var(--font-mono);font-size:12px;color:var(--node-a)">inputTokens</span> · <span style="font-family:var(--font-mono);font-size:12px;color:var(--node-a)">outputTokens</span> · <span style="font-family:var(--font-mono);font-size:12px;color:var(--node-a)">latencyMs</span> · <span style="font-family:var(--font-mono);font-size:12px;color:var(--node-a)">cost</span>.
+        Log or pipe to your observability stack. LLM calls are slow by design — build async-first and never block UI.
+      </div>
+    </div>
+  </section>
+
+  <!-- Anti-Patterns -->
+  <section class="section a5">
+    <div class="section-label">Anti-Patterns to Avoid</div>
+    <ul class="antipattern-list">
+      <li>Hardcoded prompts in business logic</li>
+      <li>No schema validation on LLM responses</li>
+      <li>Live LLM calls in CI unit tests</li>
+      <li>No cost tracking</li>
+      <li>Ignoring latency — LLM calls are slow</li>
+      <li>No fallback for timeouts &amp; failures</li>
+      <li>Prompts without version control</li>
+      <li>No evaluation suite — measure accuracy</li>
+      <li>LLM for deterministic logic (auth, math)</li>
+      <li>Giant monolithic prompts</li>
+    </ul>
+  </section>
+</div>
+
+<script>
+  mermaid.initialize({ startOnLoad: true, theme: 'base' });
+  let s = 1;
+  const mm = document.getElementById('mm1');
+  document.getElementById('zIn').addEventListener('click', () => { s = Math.min(s+0.2,3); mm.style.transform=`scale(${s})`; });
+  document.getElementById('zOut').addEventListener('click', () => { s = Math.max(s-0.2,0.5); mm.style.transform=`scale(${s})`; });
+  document.getElementById('zReset').addEventListener('click', () => { s=1; mm.style.transform='scale(1)'; });
+</script>
+</body>
+</html>

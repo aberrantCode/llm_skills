@@ -639,3 +639,7 @@ aws rds restore-db-cluster-from-snapshot --db-cluster-identifier restored --snap
 - **No retry logic** - Handle transient errors from scaling/failover
 - **Over-provisioned capacity** - Use Serverless v2 for variable workloads
 - **Skipping Secrets Manager** - Never hardcode credentials
+
+## Diagram
+
+[View diagram](diagram.html)

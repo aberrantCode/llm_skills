@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TDD Workflow Skill — Diagram</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --font-body: 'Plus Jakarta Sans', system-ui, sans-serif;
+    --font-mono: 'Roboto Mono', 'SF Mono', monospace;
+    --bg: #fefefe;
+    --surface: #ffffff;
+    --surface2: #f8fafc;
+    --border: rgba(0,0,0,0.08);
+    --border-bright: rgba(0,0,0,0.16);
+    --text: #0f172a;
+    --text-dim: #64748b;
+    --red: #dc2626;
+    --red-dim: rgba(220,38,38,0.08);
+    --green: #16a34a;
+    --green-dim: rgba(22,163,74,0.08);
+    --blue: #2563eb;
+    --blue-dim: rgba(37,99,235,0.08);
+    --amber: #d97706;
+    --amber-dim: rgba(217,119,6,0.08);
+    --slate: #475569;
+    --slate-dim: rgba(71,85,105,0.08);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0c1220;
+      --surface: #131e30;
+      --surface2: #1a2840;
+      --border: rgba(255,255,255,0.07);
+      --border-bright: rgba(255,255,255,0.14);
+      --text: #e2e8f0;
+      --text-dim: #7a8fa6;
+      --red: #f87171;
+      --red-dim: rgba(248,113,113,0.1);
+      --green: #4ade80;
+      --green-dim: rgba(74,222,128,0.1);
+      --blue: #60a5fa;
+      --blue-dim: rgba(96,165,250,0.1);
+      --amber: #fbbf24;
+      --amber-dim: rgba(251,191,36,0.1);
+      --slate: #94a3b8;
+      --slate-dim: rgba(148,163,184,0.1);
+    }
+  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  body {
+    font-family: var(--font-body);
+    background: var(--bg);
+    background-image:
+      radial-gradient(ellipse at 20% 0%, var(--green-dim) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 80%, var(--blue-dim) 0%, transparent 50%);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 44px 24px 80px;
+  }
+  .page { max-width: 1060px; margin: 0 auto; }
+
+  .hero { text-align: center; margin-bottom: 52px; animation: fadeUp 0.5s ease both; }
+  .hero-badge {
+    display: inline-block; font-family: var(--font-mono); font-size: 11px;
+    color: var(--green); background: var(--green-dim);
+    border: 1px solid rgba(22,163,74,0.2); border-radius: 20px;
+    padding: 4px 14px; margin-bottom: 18px; letter-spacing: 0.08em;
+  }
+  .hero h1 {
+    font-size: clamp(30px, 5vw, 50px); font-weight: 800;
+    letter-spacing: -0.03em; line-height: 1.1; margin-bottom: 14px;
+    color: var(--text);
+  }
+  .hero p { font-size: 16px; color: var(--text-dim); max-width: 560px; margin: 0 auto; line-height: 1.65; }
+  .coverage-pill {
+    display: inline-block; font-family: var(--font-mono); font-size: 13px; font-weight: 600;
+    background: var(--green-dim); color: var(--green);
+    border: 1px solid rgba(22,163,74,0.2); border-radius: 20px;
+    padding: 5px 16px; margin-top: 12px;
+  }
+
+  .section-label {
+    font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.12em;
+    text-transform: uppercase; color: var(--text-dim); margin: 46px 0 14px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+  /* TDD LOOP */
+  .tdd-loop {
+    display: flex; align-items: center; justify-content: center;
+    gap: 0; flex-wrap: wrap; margin-bottom: 8px;
+    animation: fadeUp 0.4s ease both;
+  }
+  .tdd-step {
+    display: flex; flex-direction: column; align-items: center;
+    padding: 24px 20px;
+    border-radius: 14px; border: 2px solid;
+    min-width: 130px; text-align: center;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .tdd-step:hover { transform: translateY(-4px); }
+  .tdd-step.red { background: var(--red-dim); border-color: rgba(220,38,38,0.35); }
+  .tdd-step.green { background: var(--green-dim); border-color: rgba(22,163,74,0.35); }
+  .tdd-step.refactor { background: var(--blue-dim); border-color: rgba(37,99,235,0.35); }
+  .tdd-step-icon { font-size: 28px; margin-bottom: 8px; }
+  .tdd-step-name { font-size: 16px; font-weight: 800; margin-bottom: 4px; }
+  .tdd-step-sub { font-size: 11px; color: var(--text-dim); line-height: 1.4; }
+  .tdd-arrow { font-size: 24px; color: var(--text-dim); padding: 0 8px; flex-shrink: 0; }
+
+  /* WORKFLOW STEPS */
+  .workflow-steps { display: flex; flex-direction: column; gap: 10px; }
+  .w-step {
+    display: flex; gap: 16px; align-items: flex-start;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 12px; padding: 16px 20px;
+    animation: fadeUp 0.5s ease both;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .w-step:hover { border-color: var(--border-bright); box-shadow: 0 4px 16px rgba(0,0,0,0.06); }
+  .w-step-num {
+    width: 30px; height: 30px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-mono); font-weight: 700; font-size: 13px; flex-shrink: 0;
+  }
+  .w-step-content { flex: 1; }
+  .w-step-title { font-size: 14px; font-weight: 700; margin-bottom: 4px; }
+  .w-step-desc { font-size: 12px; color: var(--text-dim); line-height: 1.5; }
+  .w-step-cmd { font-family: var(--font-mono); font-size: 11px; margin-top: 6px; padding: 4px 10px; border-radius: 5px; display: inline-block; }
+
+  /* TEST TYPES */
+  .test-types { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  .type-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 14px; padding: 20px;
+    animation: fadeUp 0.5s ease both;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .type-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.06); }
+  .type-icon { font-size: 24px; margin-bottom: 10px; }
+  .type-name { font-size: 15px; font-weight: 700; margin-bottom: 8px; }
+  .type-items { font-size: 12px; color: var(--text-dim); line-height: 1.7; }
+  .type-tag {
+    display: inline-block; font-family: var(--font-mono); font-size: 10px;
+    border-radius: 6px; padding: 2px 8px; margin-top: 10px; font-weight: 600;
+  }
+
+  /* COVERAGE */
+  .coverage-box {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 14px; padding: 24px;
+    animation: fadeUp 0.4s ease 0.1s both;
+  }
+  .cov-row { margin-bottom: 14px; }
+  .cov-label { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 6px; font-weight: 500; }
+  .cov-bar { height: 12px; border-radius: 6px; background: var(--surface2); overflow: hidden; border: 1px solid var(--border); }
+  .cov-fill { height: 100%; border-radius: 6px; }
+  .cov-threshold {
+    position: relative; font-size: 11px; color: var(--text-dim);
+    margin-top: 4px; display: flex; justify-content: space-between;
+  }
+
+  /* PATTERNS */
+  .patterns-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .pat-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 12px; overflow: hidden;
+    animation: fadeUp 0.5s ease both;
+  }
+  .pat-header { padding: 11px 16px; font-size: 13px; font-weight: 700; border-bottom: 1px solid var(--border); display: flex; gap: 6px; }
+  .pat-body { padding: 14px 16px; }
+  .pat-item { font-size: 12px; color: var(--text-dim); margin-bottom: 6px; display: flex; gap: 8px; line-height: 1.4; }
+  .pat-item::before { content: '→'; flex-shrink: 0; font-weight: 700; }
+
+  footer { text-align: center; margin-top: 60px; font-size: 12px; color: var(--text-dim); font-family: var(--font-mono); }
+  @keyframes fadeUp { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)} }
+  @media (prefers-reduced-motion: reduce) { *{animation:none!important;transition:none!important} }
+  @media (max-width:640px) { .tdd-loop{flex-direction:column} .tdd-arrow{transform:rotate(90deg)} .test-types{grid-template-columns:1fr} .patterns-grid{grid-template-columns:1fr} }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="hero">
+    <div class="hero-badge">tdd-workflow skill</div>
+    <h1>Test-Driven Development</h1>
+    <p>Write tests first. Make them pass. Refactor. Always. Tests are not optional — they are the safety net that enables confident refactoring and production reliability.</p>
+    <div class="coverage-pill">Minimum 80% coverage required</div>
+  </div>
+
+  <!-- RED → GREEN → REFACTOR LOOP -->
+  <div class="section-label">01 — The TDD Loop</div>
+  <div class="tdd-loop">
+    <div class="tdd-step red">
+      <div class="tdd-step-icon">🔴</div>
+      <div class="tdd-step-name" style="color:var(--red)">RED</div>
+      <div class="tdd-step-sub">Write a failing test.<br>It must fail first.</div>
+    </div>
+    <div class="tdd-arrow">→</div>
+    <div class="tdd-step green">
+      <div class="tdd-step-icon">🟢</div>
+      <div class="tdd-step-name" style="color:var(--green)">GREEN</div>
+      <div class="tdd-step-sub">Write minimal code<br>to make it pass.</div>
+    </div>
+    <div class="tdd-arrow">→</div>
+    <div class="tdd-step refactor">
+      <div class="tdd-step-icon">🔵</div>
+      <div class="tdd-step-name" style="color:var(--blue)">REFACTOR</div>
+      <div class="tdd-step-sub">Clean up. Keep<br>tests green.</div>
+    </div>
+    <div class="tdd-arrow" style="font-style:italic;font-size:14px;color:var(--text-dim)">repeat</div>
+  </div>
+
+  <!-- WORKFLOW STEPS -->
+  <div class="section-label">02 — Full TDD Workflow (7 Steps)</div>
+  <div class="workflow-steps">
+    <div class="w-step" style="--i:0">
+      <div class="w-step-num" style="background:var(--slate-dim);color:var(--slate)">1</div>
+      <div class="w-step-content">
+        <div class="w-step-title">Write User Journey</div>
+        <div class="w-step-desc">Define what the user needs: <em>"As a user, I want to search for markets, so I can find relevant results without exact keywords."</em></div>
+      </div>
+    </div>
+    <div class="w-step" style="--i:1">
+      <div class="w-step-num" style="background:var(--red-dim);color:var(--red)">2</div>
+      <div class="w-step-content">
+        <div class="w-step-title">Generate Test Cases</div>
+        <div class="w-step-desc">Write comprehensive tests covering happy path, edge cases, errors, boundary conditions, and fallback behaviors. One assertion per test.</div>
+      </div>
+    </div>
+    <div class="w-step" style="--i:2">
+      <div class="w-step-num" style="background:var(--red-dim);color:var(--red)">3</div>
+      <div class="w-step-content">
+        <div class="w-step-title" style="color:var(--red)">Run Tests — They Must FAIL</div>
+        <div class="w-step-desc">Confirm the tests actually fail before writing any implementation. Failing tests prove the tests are meaningful.</div>
+        <div class="w-step-cmd" style="background:var(--red-dim);color:var(--red)">npm test # → FAIL (expected)</div>
+      </div>
+    </div>
+    <div class="w-step" style="--i:3">
+      <div class="w-step-num" style="background:var(--amber-dim);color:var(--amber)">4</div>
+      <div class="w-step-content">
+        <div class="w-step-title">Implement Code</div>
+        <div class="w-step-desc">Write the minimal implementation to make the tests pass. Don't over-engineer at this stage.</div>
+      </div>
+    </div>
+    <div class="w-step" style="--i:4">
+      <div class="w-step-num" style="background:var(--green-dim);color:var(--green)">5</div>
+      <div class="w-step-content">
+        <div class="w-step-title" style="color:var(--green)">Run Tests — They Must PASS</div>
+        <div class="w-step-desc">All tests should now be green. If not, fix the implementation (not the tests — unless the tests were wrong).</div>
+        <div class="w-step-cmd" style="background:var(--green-dim);color:var(--green)">npm test # → PASS ✓</div>
+      </div>
+    </div>
+    <div class="w-step" style="--i:5">
+      <div class="w-step-num" style="background:var(--blue-dim);color:var(--blue)">6</div>
+      <div class="w-step-content">
+        <div class="w-step-title">Refactor</div>
+        <div class="w-step-desc">Improve code quality: remove duplication, improve naming, optimize performance, enhance readability. Tests stay green throughout.</div>
+      </div>
+    </div>
+    <div class="w-step" style="--i:6">
+      <div class="w-step-num" style="background:var(--green-dim);color:var(--green)">7</div>
+      <div class="w-step-content">
+        <div class="w-step-title">Verify Coverage</div>
+        <div class="w-step-desc">Must achieve 80%+ on branches, functions, lines, and statements. Identify gaps and add tests as needed.</div>
+        <div class="w-step-cmd" style="background:var(--green-dim);color:var(--green)">npm run test:coverage</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TEST TYPES -->
+  <div class="section-label">03 — Required Test Types</div>
+  <div class="test-types">
+    <div class="type-card" style="border-top:3px solid var(--blue)">
+      <div class="type-icon">🧩</div>
+      <div class="type-name" style="color:var(--blue)">Unit Tests</div>
+      <div class="type-items">Individual functions<br>Component logic<br>Pure utilities<br>Helpers &amp; validators</div>
+      <div class="type-tag" style="background:var(--blue-dim);color:var(--blue)">Jest / Vitest · &lt;50ms each</div>
+    </div>
+    <div class="type-card" style="border-top:3px solid var(--amber)">
+      <div class="type-icon">🔗</div>
+      <div class="type-name" style="color:var(--amber)">Integration Tests</div>
+      <div class="type-items">API endpoints<br>Database operations<br>Service interactions<br>External API calls</div>
+      <div class="type-tag" style="background:var(--amber-dim);color:var(--amber)">Supertest / MSW</div>
+    </div>
+    <div class="type-card" style="border-top:3px solid var(--green)">
+      <div class="type-icon">🎭</div>
+      <div class="type-name" style="color:var(--green)">E2E Tests (Playwright)</div>
+      <div class="type-items">Critical user flows<br>Complete workflows<br>Browser automation<br>UI interactions</div>
+      <div class="type-tag" style="background:var(--green-dim);color:var(--green)">Playwright · cross-browser</div>
+    </div>
+  </div>
+
+  <!-- COVERAGE REQUIREMENTS -->
+  <div class="section-label">04 — Coverage Thresholds</div>
+  <div class="coverage-box">
+    <div class="cov-row">
+      <div class="cov-label"><span>Branches</span><span style="color:var(--green);font-weight:700">≥ 80%</span></div>
+      <div class="cov-bar"><div class="cov-fill" style="width:80%;background:var(--green)"></div></div>
+    </div>
+    <div class="cov-row">
+      <div class="cov-label"><span>Functions</span><span style="color:var(--green);font-weight:700">≥ 80%</span></div>
+      <div class="cov-bar"><div class="cov-fill" style="width:80%;background:var(--green)"></div></div>
+    </div>
+    <div class="cov-row">
+      <div class="cov-label"><span>Lines</span><span style="color:var(--green);font-weight:700">≥ 80%</span></div>
+      <div class="cov-bar"><div class="cov-fill" style="width:80%;background:var(--green)"></div></div>
+    </div>
+    <div class="cov-row" style="margin-bottom:0">
+      <div class="cov-label"><span>Statements</span><span style="color:var(--green);font-weight:700">≥ 80%</span></div>
+      <div class="cov-bar"><div class="cov-fill" style="width:80%;background:var(--green)"></div></div>
+    </div>
+  </div>
+
+  <!-- PATTERNS -->
+  <div class="section-label">05 — Testing Patterns</div>
+  <div class="patterns-grid">
+    <div class="pat-card" style="border-top:3px solid var(--green)">
+      <div class="pat-header" style="color:var(--green)">✅ Correct Patterns</div>
+      <div class="pat-body">
+        <div class="pat-item" style="--before-color:var(--green)">Test user-visible behavior, not internal state</div>
+        <div class="pat-item">One assertion per test — focused &amp; clear</div>
+        <div class="pat-item">Each test sets up its own data (no shared state)</div>
+        <div class="pat-item">Use semantic selectors: role, text, testId</div>
+        <div class="pat-item">Mock external dependencies (DB, Redis, APIs)</div>
+        <div class="pat-item">Arrange-Act-Assert structure in every test</div>
+      </div>
+    </div>
+    <div class="pat-card" style="border-top:3px solid var(--red)">
+      <div class="pat-header" style="color:var(--red)">❌ Anti-Patterns</div>
+      <div class="pat-body">
+        <div class="pat-item">Testing <code style="font-family:var(--font-mono);font-size:11px">component.state.count</code> (internal)</div>
+        <div class="pat-item">Tests depending on execution order</div>
+        <div class="pat-item">CSS selectors like <code style="font-family:var(--font-mono);font-size:11px">.css-class-xyz</code></div>
+        <div class="pat-item">Skipping or disabling failing tests</div>
+        <div class="pat-item"><code style="font-family:var(--font-mono);font-size:11px">waitForTimeout()</code> in E2E tests</div>
+        <div class="pat-item">Fixing tests to match broken implementation</div>
+      </div>
+    </div>
+  </div>
+
+  <footer>tdd-workflow skill · RED → GREEN → REFACTOR · 80%+ coverage · Unit + Integration + E2E</footer>
+</div>
+</body>
+</html>

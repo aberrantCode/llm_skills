@@ -924,3 +924,7 @@ public/
 | Twitter Image | 1200 x 628 |
 | Favicon | 32 x 32 |
 | Apple Touch Icon | 180 x 180 |
+
+## Diagram
+
+[View diagram](diagram.html)

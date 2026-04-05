@@ -37,3 +37,7 @@ Spec: docs/features/<spec-name>.md
 ```
 
 **Reference:** `docs/workflow/SDLC.md` — Fix Track
+
+## Diagram
+
+[View diagram](diagram.html)

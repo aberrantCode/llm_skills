@@ -742,3 +742,7 @@ firebase functions:log               # View logs
 - **Reading all fields** - Use field masks or Firestore Lite
 - **Ignoring indexes** - Check console for missing index errors
 - **No emulator testing** - Always test rules before deploy
+
+## Diagram
+
+[View diagram](diagram.html)

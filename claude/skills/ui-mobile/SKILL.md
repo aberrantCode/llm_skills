@@ -949,3 +949,7 @@ Shadow: iOS shadowOpacity 0.08-0.15, Android elevation 2-8
 □ Haptic feedback on actions
 □ Pull-to-refresh where appropriate
 ```
+
+## Diagram
+
+[View diagram](diagram.html)

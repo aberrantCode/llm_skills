@@ -473,3 +473,7 @@ When a project needs team coordination:
 - [ ] Update `team/state.md`
 - [ ] Create handoff if needed
 - [ ] Push everything
+
+## Diagram
+
+[View diagram](diagram.html)

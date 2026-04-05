@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Iterative Development — Ralph Wiggum TDD Loops</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --font-body: 'Space Grotesk', system-ui, sans-serif;
+    --font-mono: 'Space Mono', 'SF Mono', Consolas, monospace;
+    --bg: #fafaf5;
+    --surface: #ffffff;
+    --surface2: #f5f5ee;
+    --surface-elevated: #fffffe;
+    --border: rgba(0,0,0,0.07);
+    --border-bright: rgba(0,0,0,0.14);
+    --text: #1c1c16;
+    --text-dim: #7a7a68;
+    --loop: #7c3aed;
+    --loop-dim: rgba(124,58,237,0.08);
+    --green: #15803d;
+    --green-dim: rgba(21,128,61,0.08);
+    --red: #b91c1c;
+    --red-dim: rgba(185,28,28,0.08);
+    --amber: #b45309;
+    --amber-dim: rgba(180,83,9,0.08);
+    --blue: #1d4ed8;
+    --blue-dim: rgba(29,78,216,0.08);
+    --teal: #0f766e;
+    --teal-dim: rgba(15,118,110,0.08);
+    --tag-stop: #fef2f2; --tag-stop-text: #b91c1c;
+    --tag-go: #f0fdf4;   --tag-go-text: #15803d;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0e0e0a; --surface: #18180f; --surface2: #1e1e14;
+      --surface-elevated: #252515;
+      --border: rgba(255,255,230,0.07); --border-bright: rgba(255,255,230,0.15);
+      --text: #efefdf; --text-dim: #8a8a72;
+      --loop: #c4b5fd; --loop-dim: rgba(196,181,253,0.1);
+      --green: #86efac; --green-dim: rgba(134,239,172,0.1);
+      --red: #fca5a5; --red-dim: rgba(252,165,165,0.1);
+      --amber: #fcd34d; --amber-dim: rgba(252,211,77,0.1);
+      --blue: #93c5fd; --blue-dim: rgba(147,197,253,0.1);
+      --teal: #5eead4; --teal-dim: rgba(94,234,212,0.1);
+      --tag-stop: rgba(252,165,165,0.12); --tag-stop-text: #fca5a5;
+      --tag-go: rgba(134,239,172,0.12);   --tag-go-text: #86efac;
+    }
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    background: var(--bg);
+    background-image:
+      radial-gradient(ellipse at 60% 0%, var(--loop-dim) 0%, transparent 55%),
+      radial-gradient(ellipse at 0% 80%, var(--green-dim) 0%, transparent 50%);
+    color: var(--text); font-family: var(--font-body);
+    padding: 48px 40px; min-height: 100vh;
+  }
+  @keyframes fadeUp { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+  .section,.flow-arrow { animation: fadeUp 0.35s ease-out both; animation-delay: calc(var(--i,0)*0.06s); }
+  @media (prefers-reduced-motion: reduce) { *,*::before,*::after { animation-duration:0.01ms!important; animation-delay:0ms!important; } }
+
+  h1 { font-size:36px; font-weight:700; letter-spacing:-1px; margin-bottom:4px; }
+  .subtitle { font-family:var(--font-mono); font-size:11px; color:var(--text-dim); margin-bottom:44px; }
+  .section-label {
+    font-family:var(--font-mono); font-size:10px; font-weight:700;
+    text-transform:uppercase; letter-spacing:2px; margin-bottom:14px;
+    display:flex; align-items:center; gap:8px;
+  }
+  .dot { width:7px; height:7px; border-radius:50%; display:inline-block; }
+
+  .diagram { display:grid; grid-template-columns:1fr; gap:20px; max-width:1100px; margin:0 auto; }
+  .section { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:20px 24px; }
+  .section--hero { background:var(--surface-elevated); border-color:var(--border-bright); box-shadow:0 4px 24px rgba(0,0,0,0.07); padding:28px 32px; }
+  .section--recessed { background:var(--surface2); box-shadow:inset 0 1px 3px rgba(0,0,0,0.04); }
+
+  .section--loop   .section-label { color:var(--loop); }  .section--loop .dot { background:var(--loop); } .section--loop { border-color:var(--loop-dim); }
+  .section--green  .section-label { color:var(--green); } .section--green .dot { background:var(--green); } .section--green { border-color:var(--green-dim); }
+  .section--red    .section-label { color:var(--red); }   .section--red .dot { background:var(--red); } .section--red { border-color:var(--red-dim); }
+  .section--amber  .section-label { color:var(--amber); } .section--amber .dot { background:var(--amber); } .section--amber { border-color:var(--amber-dim); }
+  .section--blue   .section-label { color:var(--blue); }  .section--blue .dot { background:var(--blue); } .section--blue { border-color:var(--blue-dim); }
+  .section--teal   .section-label { color:var(--teal); }  .section--teal .dot { background:var(--teal); } .section--teal { border-color:var(--teal-dim); }
+
+  .two-col { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  .three-col { display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; }
+
+  .ve-card { background:var(--surface2); border:1px solid var(--border); border-radius:8px; padding:12px 14px; }
+  .ve-card .title { font-weight:600; font-size:12px; margin-bottom:5px; }
+  .ve-card .desc { font-size:11px; color:var(--text-dim); line-height:1.55; }
+  .ve-card--loop   { border-left:3px solid var(--loop); }
+  .ve-card--green  { border-left:3px solid var(--green); }
+  .ve-card--red    { border-left:3px solid var(--red); }
+  .ve-card--amber  { border-left:3px solid var(--amber); }
+
+  /* Loop cycle diagram */
+  .loop-cycle {
+    display:flex; align-items:center; justify-content:center;
+    gap:0; flex-wrap:wrap; margin-top:12px;
+    position:relative;
+  }
+  .loop-box {
+    background:var(--loop-dim); border:1px solid var(--loop);
+    border-radius:8px; padding:12px 16px; text-align:center;
+    min-width:130px; font-family:var(--font-mono);
+  }
+  .loop-box .lb-num { font-size:10px; color:var(--loop); font-weight:700; margin-bottom:4px; }
+  .loop-box .lb-title { font-size:12px; font-weight:600; margin-bottom:3px; }
+  .loop-box .lb-desc { font-size:10px; color:var(--text-dim); line-height:1.4; }
+  .loop-arrow { font-size:20px; color:var(--loop); padding:0 8px; font-weight:700; }
+  .loop-back { font-family:var(--font-mono); font-size:10px; color:var(--loop); padding:8px 0; text-align:center; font-weight:700; }
+
+  /* Error table */
+  .error-table { width:100%; border-collapse:collapse; font-size:11px; margin-top:10px; }
+  .error-table th { font-family:var(--font-mono); font-size:10px; text-transform:uppercase; letter-spacing:1px; color:var(--text-dim); padding:6px 10px; text-align:left; border-bottom:1px solid var(--border); font-weight:600; }
+  .error-table td { padding:7px 10px; border-bottom:1px solid var(--border); vertical-align:top; line-height:1.45; }
+  .error-table tr:last-child td { border-bottom:none; }
+  .fix-yes { color:var(--green); font-weight:600; font-family:var(--font-mono); font-size:10px; }
+  .fix-no  { color:var(--red);   font-weight:600; font-family:var(--font-mono); font-size:10px; }
+
+  /* Template blocks */
+  .template-block {
+    background:var(--surface2); border:1px solid var(--border); border-radius:8px;
+    padding:12px 14px; font-family:var(--font-mono); font-size:11px;
+    line-height:1.6; color:var(--text-dim);
+  }
+  .template-block strong { color:var(--text); font-weight:600; }
+  .template-block .promise { color:var(--green); font-weight:700; }
+
+  .flow-arrow { display:flex; justify-content:center; align-items:center; gap:8px; color:var(--text-dim); font-family:var(--font-mono); font-size:11px; padding:2px 0; }
+  .flow-arrow svg { width:18px; height:18px; fill:none; stroke:var(--border-bright); stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
+
+  .callout { background:var(--surface2); border:1px solid var(--border); border-left:3px solid var(--loop); border-radius:0 8px 8px 0; padding:12px 16px; font-size:12px; line-height:1.6; color:var(--text-dim); }
+  .callout strong { color:var(--text); }
+  .callout code { font-family:var(--font-mono); font-size:10px; background:var(--loop-dim); color:var(--loop); padding:1px 5px; border-radius:3px; }
+
+  .tag { display:inline-block; font-family:var(--font-mono); font-size:10px; font-weight:600; padding:2px 7px; border-radius:4px; margin:1px; }
+  .tag--stop { background:var(--tag-stop); color:var(--tag-stop-text); }
+  .tag--go   { background:var(--tag-go); color:var(--tag-go-text); }
+
+  .ve-list { list-style:none; font-size:12px; line-height:1.85; color:var(--text-dim); }
+  .ve-list li { padding-left:14px; position:relative; }
+  .ve-list li::before { content:'›'; font-weight:700; position:absolute; left:0; color:var(--text-dim); }
+  .ve-list li strong { color:var(--text); font-weight:600; }
+
+  @media (max-width:860px) { body{padding:24px 16px;} .two-col,.three-col{grid-template-columns:1fr;} .loop-cycle{flex-direction:column;} .loop-arrow{transform:rotate(90deg);} }
+</style>
+</head>
+<body>
+
+<h1>Iterative Development</h1>
+<p class="subtitle">ralph wiggum loops · self-referential tdd iteration · clear completion criteria</p>
+
+<div class="diagram">
+
+  <!-- Core Philosophy -->
+  <div class="section section--loop section--hero" style="--i:0">
+    <div class="section-label"><span class="dot"></span> Core Philosophy</div>
+    <div class="three-col">
+      <div class="ve-card ve-card--loop">
+        <div class="title">Iteration &gt; Perfection</div>
+        <div class="desc">Don't aim for perfect on first try. Let the loop refine the work. Each iteration builds on previous attempts visible in files and git history.</div>
+      </div>
+      <div class="ve-card ve-card--amber">
+        <div class="title">Failures Are Data</div>
+        <div class="desc">Failed tests, lint errors, type mismatches are signals. Use them to guide the next iteration — not reasons to panic or quit.</div>
+      </div>
+      <div class="ve-card ve-card--green">
+        <div class="title">Clear Completion Criteria</div>
+        <div class="desc">Define exactly what "done" looks like. Tests passing. Coverage met. Lint clean. No ambiguity about when to stop iterating.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="flow-arrow" style="--i:1">
+    <svg viewBox="0 0 20 20"><path d="M10 4 L10 16 M6 12 L10 16 L14 12"/></svg>
+    implemented by
+  </div>
+
+  <!-- The Loop Mechanism -->
+  <div class="section section--loop" style="--i:2">
+    <div class="section-label"><span class="dot"></span> How the Loop Works</div>
+    <div class="loop-cycle">
+      <div class="loop-box">
+        <div class="lb-num">START</div>
+        <div class="lb-title">/ralph-loop</div>
+        <div class="lb-desc">"Your task prompt"<br>--max-iterations N</div>
+      </div>
+      <div class="loop-arrow">→</div>
+      <div class="loop-box">
+        <div class="lb-num">WORK</div>
+        <div class="lb-title">Claude works</div>
+        <div class="lb-desc">Reads files, writes code,<br>runs tests</div>
+      </div>
+      <div class="loop-arrow">→</div>
+      <div class="loop-box">
+        <div class="lb-num">EXIT?</div>
+        <div class="lb-title">Claude attempts exit</div>
+        <div class="lb-desc">Outputs completion<br>or partial work</div>
+      </div>
+      <div class="loop-arrow">→</div>
+      <div class="loop-box">
+        <div class="lb-num">HOOK</div>
+        <div class="lb-title">Stop hook fires</div>
+        <div class="lb-desc">Blocks exit, feeds<br>SAME PROMPT back</div>
+      </div>
+    </div>
+    <div class="loop-back">↓ Claude sees modified files + git history from before — iterates and improves ↓</div>
+    <div class="callout">
+      <strong>Key insight:</strong> The prompt never changes. Only the file state evolves. Claude reads its own previous work and refines it. Loop continues until <code>&lt;promise&gt;DONE&lt;/promise&gt;</code> is detected OR max iterations reached.
+    </div>
+  </div>
+
+  <!-- Error Classification -->
+  <div class="section section--amber" style="--i:3">
+    <div class="section-label"><span class="dot"></span> Error Classification — Critical for Loops</div>
+    <table class="error-table">
+      <thead>
+        <tr><th>Error Type</th><th>Examples</th><th>Claude Can Fix?</th><th>Action</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>Code / Logic Error</strong></td><td>Wrong algorithm, logic bug, missing validation</td><td class="fix-yes">✓ YES</td><td>Continue loop</td></tr>
+        <tr><td><strong>Type Error</strong></td><td>Wrong types, missing properties, interface mismatch</td><td class="fix-yes">✓ YES</td><td>Continue loop</td></tr>
+        <tr><td><strong>Test Error</strong></td><td>Wrong assertion, incomplete test, test gap</td><td class="fix-yes">✓ YES</td><td>Continue loop</td></tr>
+        <tr><td><strong>Access Error</strong></td><td>Missing API key, DB connection refused (ECONNREFUSED)</td><td class="fix-no">✗ NO</td><td>STOP + report blocker</td></tr>
+        <tr><td><strong>Permission Error</strong></td><td>File access denied, auth failed (401/403)</td><td class="fix-no">✗ NO</td><td>STOP + report blocker</td></tr>
+        <tr><td><strong>Environment Error</strong></td><td>Missing dependency, wrong Node version, ENOENT .env</td><td class="fix-no">✗ NO</td><td>STOP + report blocker</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Templates + Use Cases -->
+  <div class="two-col" style="--i:4">
+    <div class="section section--green">
+      <div class="section-label"><span class="dot"></span> Good For (Clear Success Criteria)</div>
+      <ul class="ve-list">
+        <li><strong>TDD feature development</strong> — tests provide clear pass/fail</li>
+        <li><strong>Bug fixes</strong> — reproduction → test → fix cycle</li>
+        <li><strong>Refactoring</strong> — tests ensure no regressions</li>
+        <li><strong>API development</strong> — each endpoint independently testable</li>
+        <li><strong>Greenfield projects</strong> — iterate without human oversight</li>
+        <li><strong>Getting tests to pass</strong> — clear success criteria</li>
+      </ul>
+    </div>
+    <div class="section section--red section--recessed">
+      <div class="section-label"><span class="dot"></span> Not Good For (No Clear "Done")</div>
+      <ul class="ve-list">
+        <li><strong>Subjective design decisions</strong> — no objective metric</li>
+        <li><strong>UI/UX work</strong> — requires human judgment</li>
+        <li><strong>One-shot operations</strong> — no need for iteration</li>
+        <li><strong>Unclear requirements</strong> — will loop indefinitely</li>
+        <li><strong>Production debugging</strong> — needs human oversight</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Prompt Writing Rules -->
+  <div class="section section--blue" style="--i:5">
+    <div class="section-label"><span class="dot"></span> Required Prompt Elements</div>
+    <div class="three-col">
+      <div class="template-block">
+        <strong>1. Clear Completion Criteria</strong><br><br>
+        ### Completion Criteria<br>
+        - [ ] All tests passing<br>
+        - [ ] Coverage &gt;= 80%<br>
+        - [ ] Lint clean<br><br>
+        ### Exit Condition<br>
+        <span class="promise">&lt;promise&gt;DONE&lt;/promise&gt;</span>
+      </div>
+      <div class="template-block">
+        <strong>2. Always Set Max Iterations</strong><br><br>
+        ❌ /ralph-loop "task"<br>
+        <span style="color:var(--red);"># runs forever!</span><br><br>
+        ✅ /ralph-loop "task"<br>
+        &nbsp;&nbsp;--max-iterations 30<br>
+        &nbsp;&nbsp;--completion-promise "DONE"
+      </div>
+      <div class="template-block">
+        <strong>3. TDD in Every Prompt</strong><br><br>
+        ### TDD Workflow<br>
+        1. Write failing tests<br>
+        2. Verify tests FAIL<br>
+        3. Implement feature<br>
+        4. Verify tests PASS<br>
+        5. Run lint + typecheck<br>
+        6. Repeat if failures
+      </div>
+    </div>
+  </div>
+
+  <!-- Anti-patterns -->
+  <div class="section section--recessed" style="--i:6">
+    <div class="section-label"><span class="dot"></span> Anti-Patterns</div>
+    <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:4px;">
+      <span class="tag tag--stop">No max-iterations (runs forever)</span>
+      <span class="tag tag--stop">Vague completion criteria</span>
+      <span class="tag tag--stop">No TDD in prompt</span>
+      <span class="tag tag--stop">Lying to exit (false promise)</span>
+      <span class="tag tag--stop">Manual intervention mid-loop</span>
+      <span class="tag tag--stop">Skipping test verification</span>
+      <span class="tag tag--stop">Continuing on access/env errors</span>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

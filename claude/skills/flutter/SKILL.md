@@ -578,3 +578,7 @@ linter:
 - ❌ **BuildContext across async** - Store values before await, not context
 - ❌ **Ignoring dispose** - Clean up controllers in ConsumerStatefulWidget
 
+## Diagram
+
+[View diagram](diagram.html)
+

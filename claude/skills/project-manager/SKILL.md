@@ -267,3 +267,7 @@ directory should contain at most one file per active work stream.
 
 **Specs before plans, plans before tasks.** Never generate a task for a feature without an approved
 spec. Never spawn an agent for a task that isn't in a plan. The pipeline flows in one direction.
+
+## Diagram
+
+[View diagram](diagram.html)

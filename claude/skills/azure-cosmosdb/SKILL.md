@@ -717,3 +717,7 @@ const session = {
 - **Strong consistency everywhere** - Use Session (default) unless required
 - **No retry logic** - Handle 429 (throttling) with exponential backoff
 - **Missing TTL** - Set TTL for temporary/session data
+
+## Diagram
+
+[View diagram](diagram.html)

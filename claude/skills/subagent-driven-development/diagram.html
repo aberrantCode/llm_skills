@@ -1,0 +1,965 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Subagent-Driven Development</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  /* ===== THEME: Deep Violet / Electric Indigo ===== */
+  :root {
+    --font-body: 'Space Grotesk', system-ui, sans-serif;
+    --font-mono: 'Space Mono', 'SF Mono', Consolas, monospace;
+
+    --bg: #0e0e1a;
+    --surface: #14142a;
+    --surface2: #1a1a35;
+    --surface3: #20203f;
+    --border: rgba(140, 120, 255, 0.12);
+    --border-bright: rgba(140, 120, 255, 0.25);
+    --text: #e8e6ff;
+    --text-dim: #8b88b8;
+    --text-muted: #5a5870;
+
+    --violet: #8c78ff;
+    --violet-dim: rgba(140, 120, 255, 0.12);
+    --violet-glow: rgba(140, 120, 255, 0.25);
+    --indigo: #6366f1;
+    --indigo-dim: rgba(99, 102, 241, 0.12);
+    --cyan: #22d3ee;
+    --cyan-dim: rgba(34, 211, 238, 0.12);
+    --green: #4ade80;
+    --green-dim: rgba(74, 222, 128, 0.10);
+    --amber: #fbbf24;
+    --amber-dim: rgba(251, 191, 36, 0.10);
+    --rose: #f87171;
+    --rose-dim: rgba(248, 113, 113, 0.10);
+    --emerald: #34d399;
+    --emerald-dim: rgba(52, 211, 153, 0.10);
+  }
+
+  /* ===== RESET ===== */
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background-color: var(--bg);
+    background-image:
+      radial-gradient(ellipse at 20% 0%, rgba(99, 102, 241, 0.15) 0%, transparent 55%),
+      radial-gradient(ellipse at 80% 100%, rgba(140, 120, 255, 0.10) 0%, transparent 55%);
+    color: var(--text);
+    font-family: var(--font-body);
+    padding: 48px 32px;
+    min-height: 100vh;
+    line-height: 1.5;
+  }
+
+  /* ===== ANIMATIONS ===== */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(14px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes pulse-border {
+    0%, 100% { border-color: rgba(140, 120, 255, 0.20); }
+    50%       { border-color: rgba(140, 120, 255, 0.45); }
+  }
+  .animate {
+    animation: fadeUp 0.45s ease-out both;
+    animation-delay: calc(var(--i, 0) * 0.07s);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: 0.01ms !important; }
+  }
+
+  /* ===== LAYOUT ===== */
+  .container { max-width: 1040px; margin: 0 auto; }
+
+  /* ===== HEADER ===== */
+  .header-label {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--violet);
+    margin-bottom: 10px;
+  }
+  h1 {
+    font-size: 40px;
+    font-weight: 700;
+    letter-spacing: -1.5px;
+    line-height: 1.1;
+    margin-bottom: 10px;
+    background: linear-gradient(135deg, #e8e6ff 0%, #8c78ff 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .subtitle {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--text-dim);
+    margin-bottom: 14px;
+  }
+  .tagline {
+    font-size: 14px;
+    color: var(--text-dim);
+    max-width: 660px;
+    line-height: 1.7;
+    margin-bottom: 40px;
+  }
+  .tagline strong { color: var(--text); }
+
+  /* ===== SECTION HEADING ===== */
+  .section-title {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  /* ===== FLOW DIAGRAM ===== */
+
+  /* Pipeline row */
+  .pipeline {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    margin-bottom: 40px;
+  }
+
+  /* Phase blocks */
+  .phase {
+    display: grid;
+    grid-template-columns: 140px 1fr;
+    gap: 0;
+    position: relative;
+  }
+  .phase + .phase { margin-top: 0; }
+
+  /* Left label column */
+  .phase-label {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    padding-right: 20px;
+    padding-top: 18px;
+    position: relative;
+  }
+  .phase-label::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: linear-gradient(to bottom, transparent 0%, var(--border-bright) 20%, var(--border-bright) 80%, transparent 100%);
+  }
+  .phase-num {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--text-muted);
+    letter-spacing: 0.1em;
+    margin-bottom: 3px;
+  }
+  .phase-name {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--violet);
+    text-align: right;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-family: var(--font-mono);
+  }
+
+  /* Right content column */
+  .phase-content {
+    padding: 16px 0 16px 24px;
+    position: relative;
+  }
+  .phase-content::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 28px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--violet);
+    box-shadow: 0 0 8px var(--violet-glow);
+    transform: translateX(-50%);
+  }
+
+  /* Connector dot for continued phases */
+  .phase-content.dot-cyan::before  { background: var(--cyan); box-shadow: 0 0 8px var(--cyan-dim); }
+  .phase-content.dot-green::before { background: var(--green); box-shadow: 0 0 8px var(--green-dim); }
+  .phase-content.dot-amber::before { background: var(--amber); box-shadow: 0 0 8px var(--amber-dim); }
+  .phase-content.dot-rose::before  { background: var(--rose); box-shadow: 0 0 8px var(--rose-dim); }
+  .phase-content.dot-emerald::before { background: var(--emerald); box-shadow: 0 0 8px var(--emerald-dim); }
+
+  /* ===== CARDS ===== */
+  .ve-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px 20px;
+    margin-bottom: 12px;
+    transition: border-color 0.2s ease;
+  }
+  .ve-card:hover { border-color: var(--border-bright); }
+  .ve-card:last-child { margin-bottom: 0; }
+
+  .ve-card.accent-violet { border-left: 3px solid var(--violet); }
+  .ve-card.accent-cyan   { border-left: 3px solid var(--cyan); }
+  .ve-card.accent-green  { border-left: 3px solid var(--green); }
+  .ve-card.accent-amber  { border-left: 3px solid var(--amber); }
+  .ve-card.accent-rose   { border-left: 3px solid var(--rose); }
+  .ve-card.accent-emerald { border-left: 3px solid var(--emerald); }
+
+  .card-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .card-title .badge {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 2px 7px;
+    border-radius: 20px;
+    font-weight: 400;
+  }
+  .badge-violet { background: var(--violet-dim); color: var(--violet); }
+  .badge-cyan   { background: var(--cyan-dim);   color: var(--cyan); }
+  .badge-green  { background: var(--green-dim);  color: var(--green); }
+  .badge-amber  { background: var(--amber-dim);  color: var(--amber); }
+  .badge-rose   { background: var(--rose-dim);   color: var(--rose); }
+  .badge-emerald { background: var(--emerald-dim); color: var(--emerald); }
+
+  .card-body {
+    font-size: 12px;
+    color: var(--text-dim);
+    line-height: 1.6;
+  }
+  .card-body code {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    background: var(--surface3);
+    color: var(--violet);
+    padding: 1px 5px;
+    border-radius: 3px;
+  }
+
+  /* ===== INLINE STEP ROW ===== */
+  .step-row {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 10px;
+  }
+  .step-chip {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 6px 12px;
+    font-size: 12px;
+    color: var(--text-dim);
+    white-space: nowrap;
+  }
+  .step-chip .dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .dot-v { background: var(--violet); }
+  .dot-c { background: var(--cyan); }
+  .dot-g { background: var(--green); }
+  .dot-a { background: var(--amber); }
+  .dot-r { background: var(--rose); }
+  .dot-e { background: var(--emerald); }
+
+  /* ===== DECISION DIAMONDS ===== */
+  .decision-row {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 8px;
+  }
+  .decision {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+  .diamond-wrap {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .diamond {
+    width: 14px; height: 14px;
+    background: var(--amber);
+    transform: rotate(45deg);
+    border-radius: 2px;
+    flex-shrink: 0;
+  }
+  .diamond.cyan   { background: var(--cyan); }
+  .diamond.violet { background: var(--violet); }
+  .diamond.green  { background: var(--green); }
+  .diamond.rose   { background: var(--rose); }
+  .decision-text {
+    font-size: 12px;
+    color: var(--text);
+    font-weight: 500;
+  }
+  .decision-paths {
+    display: flex;
+    gap: 8px;
+    margin-left: 24px;
+  }
+  .path-chip {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 4px;
+  }
+  .path-yes { background: var(--green-dim); color: var(--green); }
+  .path-no  { background: var(--rose-dim);  color: var(--rose); }
+  .path-more { background: var(--violet-dim); color: var(--violet); }
+
+  /* ===== REVIEW GATE SECTION ===== */
+  .review-gate {
+    background: var(--surface2);
+    border: 1px solid var(--border-bright);
+    border-radius: 12px;
+    padding: 20px 24px;
+    margin-bottom: 10px;
+    animation: pulse-border 4s ease-in-out infinite;
+  }
+  .gate-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+  .gate-num {
+    background: var(--violet-dim);
+    color: var(--violet);
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 4px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .gate-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+  }
+  .gate-subtitle {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--text-muted);
+  }
+  .gate-body {
+    font-size: 12px;
+    color: var(--text-dim);
+    line-height: 1.6;
+    margin-bottom: 12px;
+  }
+  .gate-loop {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+  }
+  .gate-loop .loop-arrow {
+    color: var(--rose);
+    font-size: 14px;
+  }
+  .gate-loop .loop-ok {
+    color: var(--green);
+    font-size: 14px;
+  }
+
+  /* ===== ORDER RULE ===== */
+  .order-rule {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    margin: 16px 0;
+    font-size: 12px;
+  }
+  .order-step {
+    flex: 1;
+    background: var(--surface3);
+    border: 1px solid var(--border);
+    padding: 10px 14px;
+    text-align: center;
+    font-weight: 600;
+    font-size: 12px;
+  }
+  .order-step:first-child { border-radius: 8px 0 0 8px; }
+  .order-step:last-child  { border-radius: 0 8px 8px 0; border-left: none; }
+  .order-step.must-first { color: var(--cyan); border-color: var(--cyan); background: var(--cyan-dim); }
+  .order-step.must-second { color: var(--emerald); border-color: var(--emerald); background: var(--emerald-dim); }
+  .order-arrow {
+    width: 32px;
+    height: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--surface2);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    color: var(--text-muted);
+    font-size: 16px;
+    flex-shrink: 0;
+    z-index: 1;
+  }
+
+  /* ===== RULES GRID ===== */
+  .rules-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 12px;
+    margin-bottom: 40px;
+  }
+  .rule-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 16px;
+  }
+  .rule-icon {
+    font-size: 18px;
+    margin-bottom: 6px;
+  }
+  .rule-title {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+  .rule-body {
+    font-size: 11px;
+    color: var(--text-dim);
+    line-height: 1.5;
+  }
+  .rule-card.rule-never {
+    border-color: var(--rose-dim);
+    background: linear-gradient(135deg, var(--surface) 0%, var(--rose-dim) 100%);
+  }
+  .rule-card.rule-always {
+    border-color: var(--green-dim);
+    background: linear-gradient(135deg, var(--surface) 0%, var(--green-dim) 100%);
+  }
+  .rule-card.rule-key {
+    border-color: var(--violet-dim);
+    background: linear-gradient(135deg, var(--surface) 0%, var(--violet-dim) 100%);
+  }
+
+  /* ===== MERMAID SECTION ===== */
+  .mermaid-wrap {
+    position: relative;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 32px 24px;
+    overflow: auto;
+    margin-bottom: 32px;
+  }
+  .mermaid-wrap .mermaid {
+    display: flex;
+    justify-content: center;
+    transition: transform 0.2s ease;
+    transform-origin: top center;
+  }
+  .zoom-controls {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    display: flex;
+    gap: 2px;
+    z-index: 10;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 2px;
+  }
+  .zoom-controls button {
+    width: 28px; height: 28px;
+    border: none;
+    background: transparent;
+    color: var(--text-dim);
+    font-family: var(--font-mono);
+    font-size: 14px;
+    cursor: pointer;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s ease;
+  }
+  .zoom-controls button:hover { background: var(--border); color: var(--text); }
+  .mermaid .nodeLabel { font-family: var(--font-body) !important; font-size: 14px !important; }
+  .mermaid .edgeLabel { font-family: var(--font-mono) !important; font-size: 11px !important; }
+
+  /* ===== LEGEND ===== */
+  .legend {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin-bottom: 40px;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--text-dim);
+  }
+  .legend-swatch {
+    width: 10px; height: 10px;
+    border-radius: 2px;
+  }
+
+  /* ===== IO TABLE ===== */
+  .io-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 40px;
+  }
+  @media (max-width: 600px) { .io-grid { grid-template-columns: 1fr; } }
+  .io-section { }
+  .io-label {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 10px;
+  }
+  .io-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    font-size: 12px;
+    color: var(--text-dim);
+    margin-bottom: 6px;
+    line-height: 1.4;
+  }
+  .io-item::before {
+    content: '›';
+    color: var(--violet);
+    font-family: var(--font-mono);
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  /* ===== RESPONSIVE ===== */
+  @media (max-width: 768px) {
+    body { padding: 20px 16px; }
+    h1 { font-size: 26px; }
+    .phase { grid-template-columns: 100px 1fr; }
+    .phase-label { padding-right: 12px; }
+    .phase-content { padding-left: 16px; }
+    .order-rule { flex-direction: column; }
+    .order-step { border-radius: 0; width: 100%; }
+    .order-step:first-child { border-radius: 8px 8px 0 0; }
+    .order-step:last-child { border-radius: 0 0 8px 8px; border-left: 1px solid var(--border); border-top: none; }
+    .order-arrow { transform: rotate(90deg); width: 100%; height: 28px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- HEADER -->
+  <div class="header-label animate" style="--i:0">Skill Reference</div>
+  <h1 class="animate" style="--i:1">Subagent-Driven<br>Development</h1>
+  <p class="subtitle animate" style="--i:2">superpowers:subagent-driven-development</p>
+  <p class="tagline animate" style="--i:3">
+    Execute implementation plans by dispatching a <strong>fresh subagent per task</strong> — eliminating context
+    pollution — then enforcing a <strong>mandatory two-stage review</strong> (spec compliance first, code quality
+    second) before marking any task complete.
+  </p>
+
+  <!-- INPUTS / OUTPUTS -->
+  <div class="section-title animate" style="--i:4">Inputs &amp; Outputs</div>
+  <div class="io-grid animate" style="--i:5">
+    <div class="io-section">
+      <div class="io-label">Inputs</div>
+      <div class="io-item">Implementation plan file (e.g. <code>docs/plans/*.md</code>)</div>
+      <div class="io-item">Task list with full text &amp; context for each task</div>
+      <div class="io-item">Optional: scene-setting context (project purpose, conventions)</div>
+    </div>
+    <div class="io-section">
+      <div class="io-label">Outputs</div>
+      <div class="io-item">Completed, committed code for all tasks — tests passing</div>
+      <div class="io-item">All tasks marked complete in TodoWrite</div>
+      <div class="io-item">Final code review sign-off on entire implementation</div>
+      <div class="io-item">Branch ready for <code>finishing-a-development-branch</code></div>
+    </div>
+  </div>
+
+  <!-- FULL FLOW DIAGRAM -->
+  <div class="section-title animate" style="--i:6">Full Process Flow</div>
+  <div class="mermaid-wrap animate" style="--i:7">
+    <div class="zoom-controls">
+      <button onclick="zoomDiagram(this, 1.2)" title="Zoom in">+</button>
+      <button onclick="zoomDiagram(this, 0.8)" title="Zoom out">&minus;</button>
+      <button onclick="resetZoom(this)" title="Reset">&#8634;</button>
+    </div>
+    <pre class="mermaid">
+flowchart TD
+    A([Read plan file once]) --> B[Extract ALL tasks with\nfull text + context]
+    B --> C[Create TodoWrite with\nall tasks]
+    C --> D{More tasks?}
+    D -->|yes| E[Dispatch Implementer\nSubagent]
+    E --> F{Implementer\nhas questions?}
+    F -->|yes| G[Answer questions\n& provide context]
+    G --> E
+    F -->|no| H[Implements, writes tests,\ncommits, self-reviews]
+    H --> I[Dispatch Spec Compliance\nReviewer]
+    I --> J{Spec\ncompliant?}
+    J -->|no — fix issues| K[Implementer\nfixes spec gaps]
+    K --> I
+    J -->|yes ✓| L[Dispatch Code Quality\nReviewer]
+    L --> M{Quality\napproved?}
+    M -->|no — fix issues| N[Implementer\nfixes quality issues]
+    N --> L
+    M -->|yes ✓| O[Mark task complete\nin TodoWrite]
+    O --> D
+    D -->|no — all done| P[Dispatch Final Code\nReviewer for full impl]
+    P --> Q([Run finishing-a-development-branch])
+
+    style A fill:#1a1a35,stroke:#8c78ff,color:#e8e6ff
+    style Q fill:#1a1a35,stroke:#34d399,color:#34d399
+    style J fill:#20203f,stroke:#fbbf24,color:#fbbf24
+    style M fill:#20203f,stroke:#fbbf24,color:#fbbf24
+    style F fill:#20203f,stroke:#22d3ee,color:#22d3ee
+    style D fill:#20203f,stroke:#8c78ff,color:#8c78ff
+    style I fill:#1a1a35,stroke:#22d3ee,color:#e8e6ff
+    style L fill:#1a1a35,stroke:#34d399,color:#e8e6ff
+    style E fill:#1a1a35,stroke:#8c78ff,color:#e8e6ff
+    style P fill:#1a1a35,stroke:#34d399,color:#e8e6ff
+    </pre>
+  </div>
+
+  <div class="legend animate" style="--i:8">
+    <div class="legend-item"><div class="legend-swatch" style="background:var(--violet)"></div> Controller / setup steps</div>
+    <div class="legend-item"><div class="legend-swatch" style="background:var(--cyan)"></div> Spec compliance review</div>
+    <div class="legend-item"><div class="legend-swatch" style="background:var(--emerald)"></div> Code quality review &amp; finish</div>
+    <div class="legend-item"><div class="legend-swatch" style="background:var(--amber)"></div> Decision gates</div>
+    <div class="legend-item"><div class="legend-swatch" style="background:var(--rose)"></div> Fix loops</div>
+  </div>
+
+  <!-- PHASE DETAIL WALKTHROUGH -->
+  <div class="section-title animate" style="--i:9">Phase-by-Phase Detail</div>
+  <div class="pipeline animate" style="--i:10">
+
+    <!-- PHASE 0: SETUP -->
+    <div class="phase">
+      <div class="phase-label">
+        <div class="phase-num">phase 0</div>
+        <div class="phase-name">Setup</div>
+      </div>
+      <div class="phase-content">
+        <div class="ve-card accent-violet">
+          <div class="card-title">Read plan once, extract everything upfront <span class="badge badge-violet">Controller</span></div>
+          <div class="card-body">
+            Read the plan file <em>once</em>. Extract all tasks with their full text, context, and dependencies.
+            Create a TodoWrite list with every task. The controller curates exactly what each subagent needs —
+            subagents never read the plan file directly.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PHASE 1: DISPATCH IMPLEMENTER -->
+    <div class="phase">
+      <div class="phase-label">
+        <div class="phase-num">phase 1</div>
+        <div class="phase-name">Implement</div>
+      </div>
+      <div class="phase-content dot-cyan">
+        <div class="ve-card accent-cyan">
+          <div class="card-title">Dispatch Implementer Subagent <span class="badge badge-violet">Fresh context</span></div>
+          <div class="card-body">
+            Provide full task text + scene-setting context. The implementer gets complete information
+            upfront — no file-reading overhead. If it asks questions, answer completely before
+            letting it start work. The implementer writes code, tests (TDD), commits, and self-reviews.
+          </div>
+        </div>
+        <div class="decision-row">
+          <div class="decision">
+            <div class="diamond-wrap">
+              <div class="diamond cyan"></div>
+              <span class="decision-text">Implementer asks questions?</span>
+            </div>
+            <div class="decision-paths">
+              <span class="path-chip path-yes">yes → answer fully, then re-dispatch</span>
+              <span class="path-chip path-no">no → proceed to implementation</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PHASE 2: SPEC REVIEW -->
+    <div class="phase">
+      <div class="phase-label">
+        <div class="phase-num">phase 2</div>
+        <div class="phase-name">Spec Gate</div>
+      </div>
+      <div class="phase-content dot-amber">
+        <div class="review-gate">
+          <div class="gate-header">
+            <span class="gate-num">Gate 1 — Spec Compliance</span>
+            <span class="gate-subtitle">MUST pass before code quality review</span>
+          </div>
+          <div class="gate-body">
+            Dispatch a <strong>Spec Compliance Reviewer</strong> subagent with the git SHAs.
+            This reviewer checks two things: <em>missing</em> (required behavior not implemented)
+            and <em>extra</em> (unrequested additions that weren't specced). Both are failures.
+          </div>
+          <div class="gate-loop">
+            <span class="loop-arrow">↺</span>
+            <span>Issues found → same Implementer subagent fixes → re-review until ✓</span>
+            <span class="loop-ok">✓</span>
+            <span>All clear → advance to Gate 2</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PHASE 3: QUALITY REVIEW -->
+    <div class="phase">
+      <div class="phase-label">
+        <div class="phase-num">phase 3</div>
+        <div class="phase-name">Quality Gate</div>
+      </div>
+      <div class="phase-content dot-green">
+        <div class="review-gate">
+          <div class="gate-header">
+            <span class="gate-num">Gate 2 — Code Quality</span>
+            <span class="gate-subtitle">Only runs after Gate 1 is ✓</span>
+          </div>
+          <div class="gate-body">
+            Dispatch a <strong>Code Quality Reviewer</strong> subagent (see <code>code-quality-reviewer-prompt.md</code>).
+            Reviews architecture, naming, test quality, edge cases, and code smells — entirely separate concern
+            from spec compliance. Never skip this gate even if "the task is simple."
+          </div>
+          <div class="gate-loop">
+            <span class="loop-arrow">↺</span>
+            <span>Issues found → same Implementer subagent fixes → re-review until ✓</span>
+            <span class="loop-ok">✓</span>
+            <span>Approved → mark task complete in TodoWrite</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PHASE 4: NEXT TASK -->
+    <div class="phase">
+      <div class="phase-label">
+        <div class="phase-num">phase 4</div>
+        <div class="phase-name">Loop</div>
+      </div>
+      <div class="phase-content dot-violet">
+        <div class="ve-card accent-violet">
+          <div class="card-title">Advance to next task <span class="badge badge-violet">Sequential only</span></div>
+          <div class="card-body">
+            One task at a time — never dispatch multiple implementation subagents in parallel (file conflicts).
+            Each new task gets a <em>fresh</em> subagent with its own extracted context.
+            Continue until all tasks in TodoWrite are marked complete.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PHASE 5: FINAL REVIEW -->
+    <div class="phase">
+      <div class="phase-label">
+        <div class="phase-num">phase 5</div>
+        <div class="phase-name">Finish</div>
+      </div>
+      <div class="phase-content dot-emerald">
+        <div class="ve-card accent-emerald">
+          <div class="card-title">Final code review + finishing-a-development-branch <span class="badge badge-emerald">Completion</span></div>
+          <div class="card-body">
+            Dispatch a final code reviewer across the entire implementation (not per-task).
+            Then invoke <code>superpowers:finishing-a-development-branch</code> to verify tests,
+            present options (merge/PR/keep/discard), and clean up the worktree.
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- MANDATORY REVIEW ORDER -->
+  <div class="section-title animate" style="--i:11">Mandatory Review Order</div>
+  <div class="animate" style="--i:12">
+    <div style="font-size:12px;color:var(--text-dim);margin-bottom:12px;">
+      Starting code quality review before spec compliance is confirmed is a hard violation.
+    </div>
+    <div class="order-rule">
+      <div class="order-step must-first">Spec Compliance Review<br><span style="font-size:10px;font-weight:400;font-family:var(--font-mono)">spec-reviewer-prompt.md</span></div>
+      <div class="order-arrow">→</div>
+      <div class="order-step must-second">Code Quality Review<br><span style="font-size:10px;font-weight:400;font-family:var(--font-mono)">code-quality-reviewer-prompt.md</span></div>
+    </div>
+  </div>
+
+  <!-- RULES GRID -->
+  <div class="section-title animate" style="--i:13" style="margin-top:32px;">Key Rules</div>
+  <div class="rules-grid animate" style="--i:14">
+    <div class="rule-card rule-never">
+      <div class="rule-icon">🚫</div>
+      <div class="rule-title">Never skip reviews</div>
+      <div class="rule-body">Both spec compliance AND code quality are mandatory per task — every single time, no exceptions for "simple" tasks.</div>
+    </div>
+    <div class="rule-card rule-never">
+      <div class="rule-icon">🚫</div>
+      <div class="rule-title">Never parallel-implement</div>
+      <div class="rule-body">Multiple implementation subagents in parallel cause file conflicts. Tasks execute one at a time in strict sequence.</div>
+    </div>
+    <div class="rule-card rule-never">
+      <div class="rule-icon">🚫</div>
+      <div class="rule-title">Never skip re-reviews</div>
+      <div class="rule-body">Reviewer found issues → fix → review again. "Close enough" is not done. Don't advance until the reviewer explicitly approves.</div>
+    </div>
+    <div class="rule-card rule-always">
+      <div class="rule-icon">✓</div>
+      <div class="rule-title">Always extract upfront</div>
+      <div class="rule-body">Controller reads the plan once and extracts all task text. Subagents receive their task as provided text — never sent to read plan files themselves.</div>
+    </div>
+    <div class="rule-card rule-always">
+      <div class="rule-icon">✓</div>
+      <div class="rule-title">Always answer questions</div>
+      <div class="rule-body">If the implementer asks questions before starting, answer clearly and completely. Don't rush them into implementation before they have what they need.</div>
+    </div>
+    <div class="rule-card rule-key">
+      <div class="rule-icon">⚡</div>
+      <div class="rule-title">Fresh context per task</div>
+      <div class="rule-body">Each implementer subagent starts with zero context from prior tasks. This eliminates context pollution — bugs from Task 3 can't bleed into Task 4.</div>
+    </div>
+  </div>
+
+  <!-- INTEGRATION -->
+  <div class="section-title animate" style="--i:15">Integration</div>
+  <div class="step-row animate" style="--i:16">
+    <div class="step-chip"><div class="dot dot-v"></div>writing-plans → creates the plan</div>
+    <div class="step-chip"><div class="dot dot-c"></div>requesting-code-review → reviewer templates</div>
+    <div class="step-chip"><div class="dot dot-e"></div>finishing-a-development-branch → completion</div>
+    <div class="step-chip"><div class="dot dot-g"></div>test-driven-development → subagents use TDD</div>
+    <div class="step-chip"><div class="dot dot-v"></div>using-git-worktrees → isolation setup</div>
+  </div>
+
+</div><!-- /container -->
+
+<script type="module">
+  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+  import elkLayouts from 'https://cdn.jsdelivr.net/npm/@mermaid-js/layout-elk/dist/mermaid-layout-elk.esm.min.mjs';
+
+  mermaid.registerLayoutLoaders(elkLayouts);
+  mermaid.initialize({
+    startOnLoad: true,
+    theme: 'base',
+    look: 'classic',
+    layout: 'elk',
+    themeVariables: {
+      primaryColor:       '#1a1a35',
+      primaryBorderColor: '#8c78ff',
+      primaryTextColor:   '#e8e6ff',
+      secondaryColor:     '#14142a',
+      secondaryBorderColor:'#22d3ee',
+      secondaryTextColor: '#e8e6ff',
+      tertiaryColor:      '#20203f',
+      tertiaryBorderColor:'#fbbf24',
+      tertiaryTextColor:  '#fbbf24',
+      lineColor:          '#5a5870',
+      fontSize:           '14px',
+      fontFamily:         "'Space Grotesk', system-ui, sans-serif",
+      edgeLabelBackground:'#14142a',
+      noteBkgColor:       '#1a1a35',
+      noteTextColor:      '#e8e6ff',
+      noteBorderColor:    '#8c78ff',
+    }
+  });
+</script>
+<script>
+  function updateZoomState(wrap) {
+    var target = wrap.querySelector('.mermaid');
+    var zoom = parseFloat(target.dataset.zoom || '1');
+    wrap.classList.toggle('is-zoomed', zoom > 1);
+  }
+  function zoomDiagram(btn, factor) {
+    var wrap = btn.closest('.mermaid-wrap');
+    var target = wrap.querySelector('.mermaid');
+    var current = parseFloat(target.dataset.zoom || '1');
+    var next = Math.min(Math.max(current * factor, 0.3), 5);
+    target.dataset.zoom = next;
+    target.style.transform = 'scale(' + next + ')';
+    updateZoomState(wrap);
+  }
+  function resetZoom(btn) {
+    var wrap = btn.closest('.mermaid-wrap');
+    var target = wrap.querySelector('.mermaid');
+    target.dataset.zoom = '1';
+    target.style.transform = 'scale(1)';
+    updateZoomState(wrap);
+  }
+  document.querySelectorAll('.mermaid-wrap').forEach(function(wrap) {
+    wrap.addEventListener('wheel', function(e) {
+      if (!e.ctrlKey && !e.metaKey) return;
+      e.preventDefault();
+      var target = wrap.querySelector('.mermaid');
+      var current = parseFloat(target.dataset.zoom || '1');
+      var factor = e.deltaY < 0 ? 1.1 : 0.9;
+      var next = Math.min(Math.max(current * factor, 0.3), 5);
+      target.dataset.zoom = next;
+      target.style.transform = 'scale(' + next + ')';
+      updateZoomState(wrap);
+    }, { passive: false });
+
+    var startX, startY, scrollL, scrollT;
+    wrap.addEventListener('mousedown', function(e) {
+      if (e.target.closest('.zoom-controls')) return;
+      var target = wrap.querySelector('.mermaid');
+      if (parseFloat(target.dataset.zoom || '1') <= 1) return;
+      wrap.classList.add('is-panning');
+      startX = e.clientX; startY = e.clientY;
+      scrollL = wrap.scrollLeft; scrollT = wrap.scrollTop;
+    });
+    window.addEventListener('mousemove', function(e) {
+      if (!wrap.classList.contains('is-panning')) return;
+      wrap.scrollLeft = scrollL - (e.clientX - startX);
+      wrap.scrollTop  = scrollT - (e.clientY - startY);
+    });
+    window.addEventListener('mouseup', function() { wrap.classList.remove('is-panning'); });
+  });
+</script>
+
+</body>
+</html>

@@ -1,3 +1,8 @@
+---
+name: workspace
+description: Multi-repo and monorepo awareness — topology analysis, API contract tracking, cross-repo context
+---
+
 # Workspace Analysis Skill
 
 > Dynamic multi-repo and monorepo awareness for Claude Code. Analyze workspace topology, track API contracts, and maintain cross-repo context.
@@ -963,3 +968,7 @@ ln -s ../../backend .workspace/repos/backend
 # Or configure in workspace
 /analyze-workspace --repo-path backend=../myapp-backend
 ```
+
+## Diagram
+
+[View diagram](diagram.html)

@@ -826,3 +826,7 @@ Write-Host ""
 ### When to use native processes instead of Docker Compose
 
 If `docker-compose.yml` does not exist in the project root, replace the Docker Compose blocks with native process management (see the commented `NATIVE PROCESS VARIANT` section in the template above). Use `Start-Job` for background services and run the UI in the foreground so `Ctrl-C` is the natural stop mechanism.
+
+## Diagram
+
+[View diagram](diagram.html)

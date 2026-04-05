@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Project Manager — Automated Project Orchestrator</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@300;400;500;600;700&family=Fragment+Mono&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <style>
+    :root {
+      --font-body: 'Bricolage Grotesque', system-ui, sans-serif;
+      --font-mono: 'Fragment Mono', 'Courier New', monospace;
+      --bg: #0e0f11;
+      --surface: #16181c;
+      --surface-elevated: #1e2128;
+      --surface-recessed: #0b0c0e;
+      --border: rgba(255,255,255,0.06);
+      --border-bright: rgba(255,255,255,0.12);
+      --text: #e8eaf0;
+      --text-dim: #6e7280;
+      --accent: #e8a04a;
+      --accent-dim: rgba(232, 160, 74, 0.10);
+      --green: #4ade80;
+      --green-dim: rgba(74, 222, 128, 0.10);
+      --blue: #60a5fa;
+      --blue-dim: rgba(96, 165, 250, 0.10);
+      --red: #f87171;
+      --red-dim: rgba(248, 113, 113, 0.10);
+      --purple: #c084fc;
+      --purple-dim: rgba(192, 132, 252, 0.10);
+    }
+    @media (prefers-color-scheme: light) {
+      :root {
+        --bg: #f7f6f4;
+        --surface: #ffffff;
+        --surface-elevated: #ffffff;
+        --surface-recessed: #eeece8;
+        --border: rgba(0,0,0,0.07);
+        --border-bright: rgba(0,0,0,0.14);
+        --text: #1a1810;
+        --text-dim: #6b6454;
+        --accent: #b45309;
+        --accent-dim: rgba(180, 83, 9, 0.08);
+        --green: #16a34a;
+        --green-dim: rgba(22, 163, 74, 0.08);
+        --blue: #1d4ed8;
+        --blue-dim: rgba(29, 78, 216, 0.08);
+        --red: #dc2626;
+        --red-dim: rgba(220, 38, 38, 0.08);
+        --purple: #9333ea;
+        --purple-dim: rgba(147, 51, 234, 0.08);
+      }
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: var(--font-body);
+      background: var(--bg);
+      background-image: repeating-linear-gradient(
+        -45deg, transparent, transparent 40px,
+        rgba(232,160,74,0.02) 40px, rgba(232,160,74,0.02) 41px
+      );
+      color: var(--text);
+      min-height: 100vh;
+      padding: 48px 24px;
+    }
+    .page-wrap { max-width: 1100px; margin: 0 auto; }
+    .page-label {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 10px;
+    }
+    h1 { font-size: clamp(28px, 4vw, 46px); font-weight: 700; margin-bottom: 10px; line-height: 1.1; }
+    .subtitle { font-size: 15px; color: var(--text-dim); max-width: 680px; line-height: 1.65; margin-bottom: 48px; }
+    .section { margin-bottom: 44px; }
+    .section-label {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .section-label::after { content:''; flex:1; height:1px; background:var(--border-bright); }
+    /* Command cards */
+    .cmd-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 16px;
+    }
+    .cmd-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 20px;
+      min-width: 0;
+    }
+    .cmd-name {
+      font-family: var(--font-mono);
+      font-size: 14px;
+      color: var(--accent);
+      margin-bottom: 8px;
+      font-weight: 500;
+    }
+    .cmd-tagline { font-size: 14px; font-weight: 600; margin-bottom: 8px; }
+    .cmd-desc { font-size: 13px; color: var(--text-dim); line-height: 1.55; overflow-wrap: break-word; }
+    /* Main orchestration flow */
+    .mermaid-wrap {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 20px;
+      overflow: hidden;
+      position: relative;
+    }
+    .zoom-controls {
+      position: absolute; top: 12px; right: 12px;
+      display: flex; gap: 4px; z-index: 10;
+    }
+    .zoom-btn {
+      width: 28px; height: 28px;
+      background: var(--surface-elevated);
+      border: 1px solid var(--border-bright);
+      border-radius: 6px; cursor: pointer;
+      font-size: 14px; display: flex; align-items: center; justify-content: center;
+      color: var(--text); font-family: var(--font-mono);
+    }
+    .zoom-btn:hover { background: var(--accent-dim); }
+    .mermaid-inner { transform-origin: top left; transition: transform 0.15s ease; }
+    /* Directory structure */
+    .dir-tree {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px 20px;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      line-height: 1.9;
+      overflow-x: auto;
+    }
+    .dir-folder { color: var(--accent); }
+    .dir-file { color: var(--text-dim); }
+    .dir-comment { color: var(--text-dim); opacity: 0.5; }
+    /* Error recovery */
+    .recovery-steps {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 8px;
+    }
+    @media (max-width: 700px) { .recovery-steps { grid-template-columns: 1fr 1fr; } }
+    .recovery-step {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px;
+      text-align: center;
+      position: relative;
+    }
+    .recovery-step::after {
+      content: '→';
+      position: absolute; right: -10px; top: 50%; transform: translateY(-50%);
+      font-family: var(--font-mono); font-size: 12px; color: var(--text-dim);
+    }
+    .recovery-step:last-child::after { display: none; }
+    .recovery-num {
+      font-family: var(--font-mono); font-size: 10px; color: var(--accent);
+      margin-bottom: 4px; letter-spacing: 0.08em;
+    }
+    .recovery-action { font-size: 12px; line-height: 1.4; color: var(--text); }
+    /* Agent role table */
+    .role-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .role-table th {
+      background: var(--surface-recessed);
+      font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.10em;
+      text-transform: uppercase; color: var(--text-dim);
+      padding: 10px 14px; text-align: left;
+      border-bottom: 1px solid var(--border-bright);
+    }
+    .role-table td {
+      padding: 10px 14px; border-bottom: 1px solid var(--border);
+      min-width: 0; overflow-wrap: break-word; vertical-align: top;
+    }
+    .role-table tr:last-child td { border-bottom: none; }
+    .role-table tr:hover td { background: var(--accent-dim); }
+    .badge {
+      display: inline-block; font-family: var(--font-mono); font-size: 10px;
+      padding: 2px 7px; border-radius: 4px; font-weight: 500;
+    }
+    /* Principles */
+    .principle-list {
+      list-style: none; padding: 0;
+      display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+    }
+    @media (max-width: 640px) { .principle-list { grid-template-columns: 1fr; } }
+    .principle-list li {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px 14px;
+      font-size: 13px; color: var(--text-dim);
+      line-height: 1.5; min-width: 0; overflow-wrap: break-word;
+    }
+    .principle-list li strong { color: var(--text); display: block; margin-bottom: 2px; }
+    @keyframes fadeUp { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
+    .a1 { animation: fadeUp 0.4s ease both; }
+    .a2 { animation: fadeUp 0.4s 0.08s ease both; }
+    .a3 { animation: fadeUp 0.4s 0.16s ease both; }
+    .a4 { animation: fadeUp 0.4s 0.24s ease both; }
+    .a5 { animation: fadeUp 0.4s 0.32s ease both; }
+    @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+  </style>
+</head>
+<body>
+<div class="page-wrap">
+  <div class="a1">
+    <div class="page-label">Skill Reference · project-manager</div>
+    <h1>Project Manager</h1>
+    <p class="subtitle">Self-driving project pipeline. Feature specs → Plans → Tasks → Agents → Completion. Markdown files in <span style="font-family:var(--font-mono);font-size:13px;color:var(--accent)">docs/</span> are the single source of truth, persisting across sessions.</p>
+  </div>
+
+  <!-- Commands -->
+  <section class="section a2">
+    <div class="section-label">Available Commands</div>
+    <div class="cmd-grid">
+      <div class="cmd-card" style="border-left: 3px solid var(--accent);">
+        <div class="cmd-name">/continue-tasks</div>
+        <div class="cmd-tagline">Full Orchestration Loop</div>
+        <div class="cmd-desc">Bootstrap → Plan → Find Next Task → Write Task File → Spawn Agent → Monitor Completion. Main driver.</div>
+      </div>
+      <div class="cmd-card" style="border-left: 3px solid var(--blue);">
+        <div class="cmd-name">/review-tasks</div>
+        <div class="cmd-tagline">Dry-Run Status Report</div>
+        <div class="cmd-desc">Read-only project snapshot. Counts specs, plans, task statuses, active files, issues. No file modifications.</div>
+      </div>
+      <div class="cmd-card" style="border-left: 3px solid var(--green);">
+        <div class="cmd-name">/update-tasks</div>
+        <div class="cmd-tagline">Sync Completed Tasks</div>
+        <div class="cmd-desc">Scan active task files for Completion sentinels. Archive completed tasks, update plan statuses. Idempotent.</div>
+      </div>
+      <div class="cmd-card" style="border-left: 3px solid var(--purple);">
+        <div class="cmd-name">/reinit</div>
+        <div class="cmd-tagline">Archive Legacy + Launch</div>
+        <div class="cmd-desc">Archive old plans/tasks, normalize feature specs to template, then run /continue-tasks. Recovers from inconsistent state.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Orchestration Flow -->
+  <section class="section a3">
+    <div class="section-label">Orchestration Loop — /continue-tasks</div>
+    <div class="mermaid-wrap">
+      <div class="zoom-controls">
+        <button class="zoom-btn" id="zIn">+</button>
+        <button class="zoom-btn" id="zOut">−</button>
+        <button class="zoom-btn" id="zReset">⟳</button>
+      </div>
+      <div class="mermaid-inner" id="mm1">
+        <div class="mermaid">
+%%{init: {'theme': 'base', 'themeVariables': {'primaryColor': '#1e2128', 'primaryTextColor': '#e8eaf0', 'primaryBorderColor': '#e8a04a', 'lineColor': '#6e7280', 'fontFamily': 'Fragment Mono', 'edgeLabelBackground': '#0e0f11', 'clusterBkg': '#16181c', 'background': '#0e0f11', 'secondaryColor': '#1e2128', 'tertiaryColor': '#1e2128'}}}%%
+flowchart TD
+    Start(["Start"]) --> Step1{"Step 1\ndocs/features/ empty?"}
+    Step1 -->|"Empty"| Interview["Feature Interview\nExtract areas from INITIAL_PROMPT.md\nInterview one area at a time\nWrite specs immediately"]
+    Step1 -->|"Has specs"| Step2["Step 2 — Plan Generation\nFor each spec without a plan:\nGenerate phased plan\nWrite to docs/plans/"]
+    Interview --> Step2
+    Step2 --> Step3{"Step 3\nFind next task\nwith status: todo"}
+    Step3 -->|"None found"| Done(["All plans complete"])
+    Step3 -->|"Found task"| Step4["Step 4 — Write Task File\ndocs/tasks/active/{slug}-pN-tM.md\nInclude full context + completion sentinel\nMark plan: in-progress"]
+    Step4 --> Step5["Step 5 — Spawn Agent\nMap role → agent type\nPass task file path"]
+    Step5 --> Step6{"Step 6 — Monitor\n## Completion found?"}
+    Step6 -->|"No"| Step6
+    Step6 -->|"Status: success"| Archive["Archive task\nUpdate plan → done\nReturn to Step 3"]
+    Step6 -->|"Status: failure"| Recovery["Error Recovery Loop\n(up to 5 iterations)"]
+    Archive --> Step3
+    Recovery --> Diagnose["Diagnose root cause\nAdd 1–3 corrective tasks\nMark original → todo\nIncrement failures counter"]
+    Diagnose --> Check{"failures >= 5?"}
+    Check -->|"No"| Step3
+    Check -->|"Yes"| Pause["Pause loop\nWrite issue to docs/issues/\nReport to user"]
+
+    classDef default fill:#16181c,stroke:#3a3d45,color:#e8eaf0
+    classDef decision fill:#1e2128,stroke:#e8a04a,color:#e8a04a
+    classDef success fill:#162310,stroke:#4ade80,color:#4ade80
+    classDef danger fill:#200f0f,stroke:#f87171,color:#f87171
+    classDef terminal fill:#0e0f11,stroke:#6e7280,color:#e8eaf0
+    class Step1,Step3,Step6,Check decision
+    class Archive,Done success
+    class Recovery,Diagnose,Pause danger
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Directory Structure -->
+  <section class="section a3">
+    <div class="section-label">Directory Conventions</div>
+    <div class="dir-tree">
+      <div><span class="dir-folder">docs/</span></div>
+      <div>&nbsp;&nbsp;<span class="dir-folder">INITIAL_PROMPT.md</span>&nbsp;&nbsp;<span class="dir-comment">← source of truth (never modified)</span></div>
+      <div>&nbsp;&nbsp;<span class="dir-folder">features/</span>&nbsp;&nbsp;<span class="dir-comment">← feature specs (final authority on scope)</span></div>
+      <div>&nbsp;&nbsp;&nbsp;&nbsp;<span class="dir-file">{feature-slug}.md</span></div>
+      <div>&nbsp;&nbsp;<span class="dir-folder">plans/</span>&nbsp;&nbsp;<span class="dir-comment">← one plan per feature spec</span></div>
+      <div>&nbsp;&nbsp;&nbsp;&nbsp;<span class="dir-file">{feature-slug}-plan.md</span></div>
+      <div>&nbsp;&nbsp;<span class="dir-folder">tasks/</span></div>
+      <div>&nbsp;&nbsp;&nbsp;&nbsp;<span class="dir-folder">active/</span>&nbsp;&nbsp;<span class="dir-comment">← at most one file per work stream</span></div>
+      <div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="dir-file">{feature-slug}-p{N}-t{M}.md</span></div>
+      <div>&nbsp;&nbsp;&nbsp;&nbsp;<span class="dir-folder">archive/</span>&nbsp;&nbsp;<span class="dir-comment">← completed tasks move here immediately</span></div>
+      <div>&nbsp;&nbsp;<span class="dir-folder">issues/</span>&nbsp;&nbsp;<span class="dir-comment">← logged failures &amp; blockers</span></div>
+      <div>&nbsp;&nbsp;<span class="dir-folder">guides/</span>&nbsp;&nbsp;<span class="dir-comment">← supporting docs, architecture notes</span></div>
+    </div>
+  </section>
+
+  <!-- Agent Role Mapping -->
+  <section class="section a4">
+    <div class="section-label">Agent Role Mapping — Task Role → Agent Type</div>
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;">
+      <table class="role-table">
+        <thead>
+          <tr>
+            <th>Task Role</th>
+            <th>Agent Type</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="badge" style="background:var(--blue-dim);color:var(--blue)">architecture</span> <span class="badge" style="background:var(--blue-dim);color:var(--blue)">design</span> <span class="badge" style="background:var(--blue-dim);color:var(--blue)">planning</span></td>
+            <td style="font-family:var(--font-mono);font-size:12px;color:var(--accent)">planner</td>
+          </tr>
+          <tr>
+            <td><span class="badge" style="background:var(--green-dim);color:var(--green)">feature</span> <span class="badge" style="background:var(--green-dim);color:var(--green)">implementation</span> <span class="badge" style="background:var(--green-dim);color:var(--green)">api</span></td>
+            <td style="font-family:var(--font-mono);font-size:12px;color:var(--accent)">tdd-guide</td>
+          </tr>
+          <tr>
+            <td><span class="badge" style="background:var(--accent-dim);color:var(--accent)">review</span> <span class="badge" style="background:var(--accent-dim);color:var(--accent)">quality</span></td>
+            <td style="font-family:var(--font-mono);font-size:12px;color:var(--accent)">code-reviewer</td>
+          </tr>
+          <tr>
+            <td><span class="badge" style="background:var(--red-dim);color:var(--red)">security</span></td>
+            <td style="font-family:var(--font-mono);font-size:12px;color:var(--accent)">security-reviewer</td>
+          </tr>
+          <tr>
+            <td><span class="badge" style="background:var(--purple-dim);color:var(--purple)">build</span> <span class="badge" style="background:var(--purple-dim);color:var(--purple)">types</span> <span class="badge" style="background:var(--purple-dim);color:var(--purple)">errors</span></td>
+            <td style="font-family:var(--font-mono);font-size:12px;color:var(--accent)">build-error-resolver</td>
+          </tr>
+          <tr>
+            <td><span class="badge" style="background:var(--blue-dim);color:var(--blue)">e2e</span> <span class="badge" style="background:var(--blue-dim);color:var(--blue)">testing</span></td>
+            <td style="font-family:var(--font-mono);font-size:12px;color:var(--accent)">e2e-runner</td>
+          </tr>
+          <tr>
+            <td><span class="badge" style="background:var(--green-dim);color:var(--green)">docs</span> <span class="badge" style="background:var(--green-dim);color:var(--green)">documentation</span></td>
+            <td style="font-family:var(--font-mono);font-size:12px;color:var(--accent)">doc-updater</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Error Recovery -->
+  <section class="section a4">
+    <div class="section-label">Error Recovery Loop — Up to 5 Iterations</div>
+    <div class="recovery-steps">
+      <div class="recovery-step">
+        <div class="recovery-num">01</div>
+        <div class="recovery-action">Read failure message from sentinel Error: field</div>
+      </div>
+      <div class="recovery-step">
+        <div class="recovery-num">02</div>
+        <div class="recovery-action">Diagnose root cause</div>
+      </div>
+      <div class="recovery-step">
+        <div class="recovery-num">03</div>
+        <div class="recovery-action">Add 1–3 corrective tasks before failed task</div>
+      </div>
+      <div class="recovery-step">
+        <div class="recovery-num">04</div>
+        <div class="recovery-action">Increment failures counter on plan</div>
+      </div>
+      <div class="recovery-step">
+        <div class="recovery-num">05</div>
+        <div class="recovery-action">If &ge;5: Pause, write issue file, ask user</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Working Principles -->
+  <section class="section a5">
+    <div class="section-label">Working Principles</div>
+    <ul class="principle-list">
+      <li><strong>One task at a time</strong>Parallel tasks in the same feature create merge conflicts and make failure harder to diagnose.</li>
+      <li><strong>Plans are living checklists</strong>A plan file is both the specification and the progress tracker.</li>
+      <li><strong>Task files carry full context</strong>An agent reads only its task file. Embed all relevant spec excerpts.</li>
+      <li><strong>Archive aggressively</strong>Completed tasks move immediately to archive/. Active/ has at most one file per stream.</li>
+      <li><strong>Specs before plans, plans before tasks</strong>Never generate a task without an approved spec. Pipeline flows one direction only.</li>
+      <li><strong>Spec authority rule</strong>Specs are the final authority. Never silently update specs during implementation.</li>
+    </ul>
+  </section>
+</div>
+
+<script>
+  mermaid.initialize({ startOnLoad: true, theme: 'base' });
+  let s = 1;
+  const mm = document.getElementById('mm1');
+  document.getElementById('zIn').addEventListener('click', () => { s = Math.min(s+0.2,3); mm.style.transform=`scale(${s})`; });
+  document.getElementById('zOut').addEventListener('click', () => { s = Math.max(s-0.2,0.5); mm.style.transform=`scale(${s})`; });
+  document.getElementById('zReset').addEventListener('click', () => { s=1; mm.style.transform='scale(1)'; });
+  document.querySelector('.mermaid-wrap').addEventListener('wheel', (e) => {
+    if (e.ctrlKey||e.metaKey) { e.preventDefault(); s=Math.max(0.5,Math.min(3,s+(e.deltaY<0?0.1:-0.1))); mm.style.transform=`scale(${s})`; }
+  }, { passive: false });
+</script>
+</body>
+</html>

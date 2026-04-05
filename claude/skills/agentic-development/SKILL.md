@@ -851,3 +851,7 @@ thinking_level: "high" | "low"
 temperature: 1.0 (keep at 1.0 for reasoning)
 thoughtSignature: <pass back for function calling>
 ```
+
+## Diagram
+
+[View diagram](diagram.html)

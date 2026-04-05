@@ -297,3 +297,7 @@ describe('POST /users', () => {
 - ❌ Console.log in production - use proper logger
 - ❌ No graceful shutdown - handle SIGTERM
 - ❌ Monolithic route files - split by resource
+
+## Diagram
+
+[View diagram](diagram.html)

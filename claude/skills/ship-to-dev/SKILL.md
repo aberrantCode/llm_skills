@@ -879,3 +879,7 @@ PYEOF
 | `local changes would be overwritten by checkout` | Stash before `gh pr merge` (Step 8 now does this automatically); the PR may have already merged on GitHub even if the command errored — check with `gh pr view` before retrying |
 | PR already merged (second `gh pr merge` attempt) | Verify with `gh pr view $BRANCH --json state --jq '.state'`; if `"MERGED"`, skip to cleanup |
 | `gh pr create` exits 1: "already exists" | Step 7 detects this automatically, extracts the existing PR URL, and continues to Step 8 — no manual intervention needed |
+
+## Diagram
+
+[View diagram](diagram.html)

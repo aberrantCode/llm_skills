@@ -956,3 +956,7 @@ npx playwright codegen localhost:3000
   }
 }
 ```
+
+## Diagram
+
+[View diagram](diagram.html)

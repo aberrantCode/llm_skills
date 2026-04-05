@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Guide Assistant — Step-by-Step Walkthrough</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700;900&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --font-body: 'Lato', system-ui, sans-serif;
+    --font-mono: 'IBM Plex Mono', 'SF Mono', Consolas, monospace;
+    --bg: #fef7f0; --surface: #ffffff; --surface2: #fdf0e4; --surface-elevated: #fffbf5;
+    --border: rgba(100,40,0,0.07); --border-bright: rgba(100,40,0,0.15);
+    --text: #1a0f05; --text-dim: #7a5a45;
+    --copper: #c2410c; --copper-dim: rgba(194,65,12,0.08);
+    --gold: #b45309; --gold-dim: rgba(180,83,9,0.08);
+    --sage: #4d7c0f; --sage-dim: rgba(77,124,15,0.08);
+    --sky: #0369a1; --sky-dim: rgba(3,105,161,0.08);
+    --plum: #7e22ce; --plum-dim: rgba(126,34,206,0.08);
+    --teal: #0f766e; --teal-dim: rgba(15,118,110,0.08);
+    --red: #991b1b; --red-dim: rgba(153,27,27,0.08);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #120a02; --surface: #1e1208; --surface2: #2a1a0d; --surface-elevated: #321f10;
+      --border: rgba(255,160,80,0.07); --border-bright: rgba(255,160,80,0.15);
+      --text: #f0e0d0; --text-dim: #a07858;
+      --copper: #fb923c; --copper-dim: rgba(251,146,60,0.1);
+      --gold: #fbbf24; --gold-dim: rgba(251,191,36,0.1);
+      --sage: #a3e635; --sage-dim: rgba(163,230,53,0.1);
+      --sky: #7dd3fc; --sky-dim: rgba(125,211,252,0.1);
+      --plum: #d8b4fe; --plum-dim: rgba(216,180,254,0.1);
+      --teal: #5eead4; --teal-dim: rgba(94,234,212,0.1);
+      --red: #fca5a5; --red-dim: rgba(252,165,165,0.1);
+    }
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    background:var(--bg);
+    background-image:
+      radial-gradient(ellipse at 30% 0%, var(--copper-dim) 0%, transparent 55%),
+      radial-gradient(ellipse at 80% 90%, var(--gold-dim) 0%, transparent 50%);
+    color:var(--text); font-family:var(--font-body); padding:48px 40px; min-height:100vh;
+  }
+  @keyframes fadeUp { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+  .section,.flow-arrow { animation:fadeUp 0.35s ease-out both; animation-delay:calc(var(--i,0)*0.06s); }
+  @media (prefers-reduced-motion:reduce) { *,*::before,*::after { animation-duration:0.01ms!important; animation-delay:0ms!important; } }
+
+  h1 { font-size:36px; font-weight:900; letter-spacing:-0.5px; margin-bottom:4px; }
+  .subtitle { font-family:var(--font-mono); font-size:11px; color:var(--text-dim); margin-bottom:44px; }
+  .section-label { font-family:var(--font-mono); font-size:10px; font-weight:600; text-transform:uppercase; letter-spacing:2px; margin-bottom:14px; display:flex; align-items:center; gap:8px; }
+  .dot { width:7px; height:7px; border-radius:50%; display:inline-block; }
+
+  .diagram { display:grid; grid-template-columns:1fr; gap:20px; max-width:1100px; margin:0 auto; }
+  .section { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:20px 24px; }
+  .section--hero { background:var(--surface-elevated); border-color:var(--border-bright); box-shadow:0 4px 24px rgba(0,0,0,0.07); padding:28px 32px; }
+  .section--recessed { background:var(--surface2); }
+
+  .section--copper .section-label{color:var(--copper)} .section--copper .dot{background:var(--copper)} .section--copper{border-color:var(--copper-dim)}
+  .section--gold   .section-label{color:var(--gold)}   .section--gold .dot{background:var(--gold)}   .section--gold{border-color:var(--gold-dim)}
+  .section--sage   .section-label{color:var(--sage)}   .section--sage .dot{background:var(--sage)}   .section--sage{border-color:var(--sage-dim)}
+  .section--sky    .section-label{color:var(--sky)}    .section--sky .dot{background:var(--sky)}    .section--sky{border-color:var(--sky-dim)}
+  .section--plum   .section-label{color:var(--plum)}   .section--plum .dot{background:var(--plum)}   .section--plum{border-color:var(--plum-dim)}
+  .section--teal   .section-label{color:var(--teal)}   .section--teal .dot{background:var(--teal)}   .section--teal{border-color:var(--teal-dim)}
+  .section--red    .section-label{color:var(--red)}    .section--red .dot{background:var(--red)}    .section--red{border-color:var(--red-dim)}
+
+  .two-col   { display:grid; grid-template-columns:1fr 1fr;     gap:12px; }
+  .three-col { display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; }
+
+  .ve-card { background:var(--surface2); border:1px solid var(--border); border-radius:8px; padding:12px 14px; }
+  .ve-card .title { font-weight:700; font-size:12px; margin-bottom:5px; }
+  .ve-card .desc { font-size:11px; color:var(--text-dim); line-height:1.55; }
+  .ve-card--copper { border-left:3px solid var(--copper); }
+  .ve-card--gold   { border-left:3px solid var(--gold); }
+  .ve-card--sage   { border-left:3px solid var(--sage); }
+  .ve-card--sky    { border-left:3px solid var(--sky); }
+  .ve-card--plum   { border-left:3px solid var(--plum); }
+  .ve-card--teal   { border-left:3px solid var(--teal); }
+
+  /* Phase flow */
+  .phase-flow { display:flex; flex-direction:column; gap:0; }
+  .phase-item {
+    display:grid; grid-template-columns:36px 1fr; gap:14px;
+    padding:14px 0; border-bottom:1px solid var(--border); align-items:start;
+  }
+  .phase-item:last-child { border-bottom:none; }
+  .phase-icon {
+    width:34px; height:34px; border-radius:8px;
+    display:flex; align-items:center; justify-content:center;
+    font-family:var(--font-mono); font-size:11px; font-weight:700;
+    flex-shrink:0;
+  }
+  .phase-icon--1 { background:var(--copper-dim); color:var(--copper); border:1px solid var(--copper); }
+  .phase-icon--2 { background:var(--gold-dim);   color:var(--gold);   border:1px solid var(--gold); }
+  .phase-icon--3 { background:var(--sage-dim);   color:var(--sage);   border:1px solid var(--sage); }
+  .phase-icon--4 { background:var(--sky-dim);    color:var(--sky);    border:1px solid var(--sky); }
+  .phase-icon--5 { background:var(--plum-dim);   color:var(--plum);   border:1px solid var(--plum); }
+  .phase-icon--6 { background:var(--teal-dim);   color:var(--teal);   border:1px solid var(--teal); }
+  .phase-title { font-weight:700; font-size:13px; margin-bottom:4px; }
+  .phase-desc { font-size:11px; color:var(--text-dim); line-height:1.55; }
+  .phase-desc code { font-family:var(--font-mono); font-size:10px; background:var(--copper-dim); color:var(--copper); padding:1px 5px; border-radius:3px; }
+
+  /* Sub-steps */
+  .substeps { list-style:none; margin-top:6px; }
+  .substep { font-size:11px; color:var(--text-dim); padding:3px 0 3px 14px; position:relative; line-height:1.4; }
+  .substep::before { content:'→'; position:absolute; left:0; color:var(--text-dim); font-size:10px; }
+
+  /* Decision branch */
+  .decision-box {
+    background:var(--gold-dim); border:1px solid var(--gold); border-radius:8px;
+    padding:10px 14px; font-size:12px;
+  }
+  .decision-box .q { font-weight:700; margin-bottom:8px; color:var(--gold); font-family:var(--font-mono); font-size:11px; }
+  .decision-option { display:flex; align-items:flex-start; gap:8px; margin-bottom:4px; }
+  .option-label { font-family:var(--font-mono); font-size:10px; font-weight:700; background:var(--gold-dim); color:var(--gold); border:1px solid var(--gold); padding:1px 7px; border-radius:4px; white-space:nowrap; }
+  .option-text { font-size:11px; color:var(--text-dim); line-height:1.4; padding-top:1px; }
+
+  .flow-arrow { display:flex; justify-content:center; align-items:center; gap:8px; color:var(--text-dim); font-family:var(--font-mono); font-size:11px; padding:2px 0; }
+  .flow-arrow svg { width:18px; height:18px; fill:none; stroke:var(--border-bright); stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
+  .callout { background:var(--surface2); border:1px solid var(--border); border-left:3px solid var(--copper); border-radius:0 8px 8px 0; padding:12px 16px; font-size:12px; line-height:1.6; color:var(--text-dim); }
+  .callout strong { color:var(--text); }
+
+  /* Critical rule banner */
+  .critical-banner {
+    background:var(--red-dim); border:1px solid var(--red); border-radius:8px;
+    padding:12px 16px; display:flex; align-items:flex-start; gap:12px;
+  }
+  .critical-banner .icon { font-size:20px; flex-shrink:0; }
+  .critical-banner .text { font-size:12px; color:var(--text-dim); line-height:1.55; }
+  .critical-banner .text strong { color:var(--red); }
+
+  @media (max-width:860px) { body{padding:24px 16px;} .two-col,.three-col{grid-template-columns:1fr;} }
+</style>
+</head>
+<body>
+
+<h1>Guide Assistant</h1>
+<p class="subtitle">step-by-step walkthroughs · interactive document execution · changelog tracking</p>
+
+<div class="diagram">
+
+  <!-- Critical Rule -->
+  <div class="section section--copper section--hero" style="--i:0">
+    <div class="section-label"><span class="dot"></span> Critical Rule</div>
+    <div class="critical-banner">
+      <div class="icon">⚠</div>
+      <div class="text">
+        <strong>AskUserQuestion for EVERY prompt to the user.</strong>
+        Never print a question as plain text and wait. Every prompt is a tool call.
+        This rule has zero exceptions — not even "just a quick check".
+      </div>
+    </div>
+    <div class="three-col" style="margin-top:14px">
+      <div class="ve-card ve-card--copper">
+        <div class="title">One Step at a Time</div>
+        <div class="desc">Never present multiple steps together. Work through the document sequentially — never jump ahead.</div>
+      </div>
+      <div class="ve-card ve-card--gold">
+        <div class="title">Lazy File Creation</div>
+        <div class="desc">Don't create the notes file until it's actually needed. Never create files proactively "just in case".</div>
+      </div>
+      <div class="ve-card ve-card--sage">
+        <div class="title">Preserve the Document</div>
+        <div class="desc">Minimal edits only — checkboxes, inline notes, and changelog. Never reformat or rewrite content not requested.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="flow-arrow" style="--i:1">
+    <svg viewBox="0 0 20 20"><path d="M10 4 L10 16 M6 12 L10 16 L14 12"/></svg>
+    executed in 3 phases
+  </div>
+
+  <!-- Phase 1: Setup -->
+  <div class="section section--gold" style="--i:2">
+    <div class="section-label"><span class="dot"></span> Phase 1 — Setup</div>
+    <div class="two-col">
+      <div class="phase-flow">
+        <div class="phase-item">
+          <div class="phase-icon phase-icon--1">1.1</div>
+          <div>
+            <div class="phase-title">Identify Source File</div>
+            <div class="phase-desc">If no file path provided → AskUserQuestion. Then read with Read tool.</div>
+          </div>
+        </div>
+        <div class="phase-item">
+          <div class="phase-icon phase-icon--2">1.2</div>
+          <div>
+            <div class="phase-title">Check Checklist Format</div>
+            <div class="phase-desc">Does document use <code>- [ ]</code> / <code>- [x]</code> checkboxes?</div>
+            <div class="decision-box" style="margin-top:8px">
+              <div class="q">If NOT a checklist:</div>
+              <div class="decision-option"><span class="option-label">A</span><span class="option-text">Convert in-place (add checkboxes to source)</span></div>
+              <div class="decision-option"><span class="option-label">B</span><span class="option-text">Create new checklist file alongside source</span></div>
+              <div class="decision-option"><span class="option-label">C</span><span class="option-text">Keep as-is, track mentally (no edits)</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="phase-flow">
+        <div class="phase-item">
+          <div class="phase-icon phase-icon--3">1.3</div>
+          <div>
+            <div class="phase-title">Ask About Value Capture</div>
+            <div class="phase-desc">Should values (IPs, usernames, config settings) be recorded in notes?</div>
+            <ul class="substeps">
+              <li class="substep">Yes — record in source or notes file</li>
+              <li class="substep">No — only check steps off</li>
+              <li class="substep">Ask me each time — prompt per step</li>
+            </ul>
+          </div>
+        </div>
+        <div class="phase-item">
+          <div class="phase-icon phase-icon--4">1.5</div>
+          <div>
+            <div class="phase-title">Changelog Setup</div>
+            <div class="phase-desc">All edits to source file must be recorded in a <code>## Changelog</code> appended at the very end.</div>
+            <ul class="substeps">
+              <li class="substep">Date · change description</li>
+              <li class="substep">Never silently modify files</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Phase 2: Walkthrough -->
+  <div class="section section--sky" style="--i:3">
+    <div class="section-label"><span class="dot"></span> Phase 2 — Step-by-Step Walkthrough</div>
+    <div class="two-col">
+      <div>
+        <div class="phase-flow">
+          <div class="phase-item">
+            <div class="phase-icon phase-icon--1">2.1</div>
+            <div>
+              <div class="phase-title">Explain the Step</div>
+              <div class="phase-desc">What it involves · Why it matters · Prerequisites / warnings</div>
+            </div>
+          </div>
+          <div class="phase-item">
+            <div class="phase-icon phase-icon--2">2.2</div>
+            <div>
+              <div class="phase-title">Prompt via AskUserQuestion</div>
+              <div class="decision-box" style="margin-top:4px;background:var(--sky-dim);border-color:var(--sky)">
+                <div class="q" style="color:var(--sky)">Options presented:</div>
+                <div class="decision-option"><span class="option-label" style="background:var(--sky-dim);color:var(--sky);border-color:var(--sky)">✓</span><span class="option-text">Done — it worked</span></div>
+                <div class="decision-option"><span class="option-label" style="background:var(--sky-dim);color:var(--sky);border-color:var(--sky)">⚠</span><span class="option-text">Done — with issues</span></div>
+                <div class="decision-option"><span class="option-label" style="background:var(--sky-dim);color:var(--sky);border-color:var(--sky)">→</span><span class="option-text">Skip this step</span></div>
+                <div class="decision-option"><span class="option-label" style="background:var(--sky-dim);color:var(--sky);border-color:var(--sky)">✗</span><span class="option-text">Instructions seem wrong/outdated</span></div>
+              </div>
+            </div>
+          </div>
+          <div class="phase-item">
+            <div class="phase-icon phase-icon--3">2.3</div>
+            <div>
+              <div class="phase-title">On Completion</div>
+              <div class="phase-desc">Change <code>- [ ]</code> to <code>- [x]</code>. Record any captured values. Add changelog entry if file was edited.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="ve-card ve-card--plum" style="margin-bottom:8px">
+          <div class="title">2.4 Issue Flow</div>
+          <div class="desc">
+            If issues reported:<br>
+            1. AskUserQuestion: describe what went wrong<br>
+            2. Ask where to record: source file or notes file<br>
+            3. Write issue + resolution to chosen location<br>
+            4. Add changelog entry<br>
+            5. Re-ask: complete or blocked?
+          </div>
+        </div>
+        <div class="ve-card ve-card--copper">
+          <div class="title">2.5 Invalid/Outdated Instructions Flow</div>
+          <div class="desc">
+            1. AskUserQuestion: confirm update needed<br>
+            2. Ask for corrected instructions (or infer)<br>
+            3. Edit source file in-place — replace outdated content<br>
+            4. Add changelog entry with what changed and why<br>
+            5. Continue from corrected step
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Phase 3: Completion -->
+  <div class="section section--sage" style="--i:4">
+    <div class="section-label"><span class="dot"></span> Phase 3 — Completion</div>
+    <div class="three-col">
+      <div class="ve-card ve-card--sage">
+        <div class="title">1. Summarize</div>
+        <div class="desc">Steps completed · Steps skipped · Issues noted and resolved</div>
+      </div>
+      <div class="ve-card ve-card--sky">
+        <div class="title">2. Report Locations</div>
+        <div class="desc">Tell user where notes or captured values were recorded</div>
+      </div>
+      <div class="ve-card ve-card--gold">
+        <div class="title">3. Final Changelog Entry</div>
+        <div class="desc"><code>Walkthrough completed — all steps processed</code></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Files produced -->
+  <div class="section section--recessed section--teal" style="--i:5">
+    <div class="section-label"><span class="dot"></span> Files Produced (Lazy Creation)</div>
+    <div class="three-col">
+      <div class="ve-card ve-card--copper">
+        <div class="title">Source File (modified)</div>
+        <div class="desc"><code>original.md</code> — checkboxes added, steps checked off, inline notes, changelog section appended</div>
+      </div>
+      <div class="ve-card ve-card--teal">
+        <div class="title">Notes File (optional)</div>
+        <div class="desc"><code>original-notes.md</code> — only created when first needed: issues arise, values captured, etc.</div>
+      </div>
+      <div class="ve-card ve-card--sage">
+        <div class="title">Checklist File (optional)</div>
+        <div class="desc"><code>original-checklist.md</code> — only if user chose Option B (separate checklist)</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

@@ -423,3 +423,7 @@ jobs:
 - **Committing .env** - Add to .gitignore
 - **Skipping migration review** - Always check generated SQL
 - **No seed data** - Use seed.sql for consistent local dev
+
+## Diagram
+
+[View diagram](diagram.html)

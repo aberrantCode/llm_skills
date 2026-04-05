@@ -380,3 +380,7 @@ Report: PR complete, version tagged, dev synced.
 | `gh` not authenticated | `gh auth login` — pause until authenticated |
 | Release notes empty after `git log` | Fallback message already set — check git log manually; do not suppress with `2>/dev/null` in note generation |
 | dev ahead count wrong after rebase | Re-run `git fetch origin` and recount before proceeding |
+
+## Diagram
+
+[View diagram](diagram.html)

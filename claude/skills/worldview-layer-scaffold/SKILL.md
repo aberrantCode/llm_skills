@@ -115,3 +115,7 @@ After scaffolding a new layer:
 - Add a `FR-N — <Layer Name>` requirement block to `docs/PRD.md` section 4 under the appropriate subsection.
 - Add the data source row to `docs/PRD.md` section 7 (Data Sources Summary).
 - Add an entry to the section 12 Modification Summary table.
+
+## Diagram
+
+[View diagram](diagram.html)

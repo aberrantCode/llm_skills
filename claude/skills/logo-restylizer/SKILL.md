@@ -267,3 +267,7 @@ Update `docs/assets.md` to reflect any new files created during propagation and 
 | Multiple reasonable interpretations of the style | Pick the most literal/direct one, apply it, and note the interpretation in your response |
 | `cairosvg` unavailable during propagation | Notify the user for that specific format; continue with formats that are achievable |
 | File is opened but user can't see it (headless/remote env) | Note that the file was saved at `$PATH` and they can open it manually; continue with the review prompt |
+
+## Diagram
+
+[View diagram](diagram.html)

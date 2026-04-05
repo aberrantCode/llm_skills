@@ -217,3 +217,7 @@ class Result[T]:
 - ❌ Using `type: ignore` without explanation
 - ❌ Global variables for state
 - ❌ Classes when functions suffice
+
+## Diagram
+
+[View diagram](diagram.html)

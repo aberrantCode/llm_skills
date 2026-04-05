@@ -235,6 +235,12 @@ If they say yes, invoke the `superpowers:writing-plans` skill via the Skill tool
 
 ---
 
+## Diagram
+
+[View diagram](diagram.html)
+
+---
+
 ## Principles
 
 - **Summarize after every phase.** A brief "here's what I captured" before moving on catches

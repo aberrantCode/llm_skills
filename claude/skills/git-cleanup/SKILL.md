@@ -238,3 +238,7 @@ Example rows:
 Append rows directly after the last row in each section's table. Do not rewrite the entire file — use the Edit tool to insert rows at the correct location within each section.
 
 If a section has no new entries for this run, leave it untouched.
+
+## Diagram
+
+[View diagram](diagram.html)

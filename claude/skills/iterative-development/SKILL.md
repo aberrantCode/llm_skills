@@ -597,3 +597,7 @@ project/
 - [ ] Run full test suite
 - [ ] Check coverage threshold
 - [ ] Commit changes
+
+## Diagram
+
+[View diagram](diagram.html)

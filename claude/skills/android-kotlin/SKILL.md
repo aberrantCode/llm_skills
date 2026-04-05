@@ -453,3 +453,7 @@ coroutines:
 - ❌ **Side effects in Composables** - Use `LaunchedEffect`/`SideEffect`
 - ❌ **Unstable Compose parameters** - Use stable/immutable types or `@Stable`
 
+## Diagram
+
+[View diagram](diagram.html)
+

@@ -243,3 +243,7 @@ type User = z.infer<typeof UserSchema>;
 - ❌ Enums - use const objects or union types
 - ❌ Classes for data - use interfaces/types
 - ❌ Default exports - use named exports
+
+## Diagram
+
+[View diagram](diagram.html)

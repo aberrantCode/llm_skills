@@ -679,3 +679,7 @@ When models update:
 - [Replicate FLUX.2](https://replicate.com/blog/run-flux-2-on-replicate)
 - [Mistral Models](https://docs.mistral.ai/getting-started/models)
 - [Voyage AI](https://docs.voyageai.com)
+
+## Diagram
+
+[View diagram](diagram.html)

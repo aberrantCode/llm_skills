@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>YouTube PRD Forensics — Skill Diagram</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --font-body: 'Inter', system-ui, sans-serif;
+    --font-display: 'Unbounded', sans-serif;
+    --font-mono: 'JetBrains Mono', Consolas, monospace;
+    --bg: #0c0c0c;
+    --surface: #141414;
+    --surface2: #1c1c1c;
+    --border: rgba(255,0,0,0.1);
+    --border-bright: rgba(255,80,80,0.25);
+    --text: #f5f5f5;
+    --text-dim: #888888;
+    --red: #ff4444;
+    --red-dim: rgba(255,68,68,0.1);
+    --pink: #ff6b9d;
+    --pink-dim: rgba(255,107,157,0.1);
+    --amber: #ffb300;
+    --amber-dim: rgba(255,179,0,0.1);
+    --blue: #4da6ff;
+    --blue-dim: rgba(77,166,255,0.1);
+    --green: #44cc88;
+    --green-dim: rgba(68,204,136,0.1);
+  }
+  *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
+  body {
+    font-family: var(--font-body);
+    background: var(--bg);
+    background-image:
+      radial-gradient(at 50% -5%, rgba(255,68,68,0.08) 0%, transparent 55%),
+      radial-gradient(at 90% 95%, rgba(77,166,255,0.05) 0%, transparent 40%);
+    color: var(--text);
+    padding: 48px 24px 80px;
+    min-height: 100vh;
+  }
+  .page { max-width: 880px; margin: 0 auto; }
+
+  .header { text-align: center; margin-bottom: 56px; }
+  .yt-icon {
+    width: 52px; height: 52px; background: var(--red);
+    border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 18px;
+    box-shadow: 0 4px 24px rgba(255,68,68,0.3);
+  }
+  .yt-icon svg { fill: white; width: 26px; height: 26px; }
+  h1 {
+    font-family: var(--font-display);
+    font-size: 32px; font-weight: 700; letter-spacing: -0.02em;
+    margin-bottom: 12px; line-height: 1.2;
+  }
+  .subtitle { color: var(--text-dim); font-size: 14px; line-height: 1.7; max-width: 580px; margin: 0 auto; }
+
+  /* WORKFLOW STEPS — horizontal timeline for first row */
+  .timeline {
+    position: relative;
+    display: flex; gap: 0;
+    margin-bottom: 28px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+  }
+  .timeline::before {
+    content: '';
+    position: absolute; top: 24px; left: 0; right: 0; height: 2px;
+    background: linear-gradient(to right, var(--red), var(--pink), var(--amber), var(--green), var(--blue));
+    z-index: 0;
+  }
+  .tl-step {
+    display: flex; flex-direction: column; align-items: center;
+    flex: 1; min-width: 90px;
+    position: relative; z-index: 1;
+    animation: fadeUp 0.4s ease both;
+    animation-delay: calc(var(--i,0) * 0.07s);
+  }
+  .tl-dot {
+    width: 48px; height: 48px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 700;
+    margin-bottom: 12px; flex-shrink: 0;
+    border: 2px solid;
+  }
+  .tl-label { font-size: 11px; text-align: center; color: var(--text-dim); line-height: 1.45; max-width: 80px; }
+
+  /* DETAIL CARDS */
+  .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 28px; }
+  .detail-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px; padding: 20px;
+    animation: fadeUp 0.4s ease both;
+    animation-delay: calc(var(--di,0) * 0.07s);
+  }
+  .detail-card:hover { border-color: var(--border-bright); }
+  .dc-head { display: flex; align-items: center; gap: 9px; margin-bottom: 10px; }
+  .dc-num {
+    width: 24px; height: 24px; border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-mono); font-size: 11px; font-weight: 600;
+    flex-shrink: 0;
+  }
+  .dc-title { font-size: 13px; font-weight: 600; }
+  .dc-body { font-size: 12.5px; color: var(--text-dim); line-height: 1.6; margin-bottom: 10px; }
+  .dc-code {
+    font-family: var(--font-mono); font-size: 10.5px;
+    background: var(--surface2); border-radius: 6px;
+    padding: 10px 12px; color: var(--text-dim); line-height: 1.65;
+    overflow-x: auto;
+  }
+  .dc-code span { color: var(--text); }
+
+  /* colors */
+  .c-red    .dc-num { background: var(--red-dim); color: var(--red); }
+  .c-red    .dc-title { color: var(--red); }
+  .c-pink   .dc-num { background: var(--pink-dim); color: var(--pink); }
+  .c-pink   .dc-title { color: var(--pink); }
+  .c-amber  .dc-num { background: var(--amber-dim); color: var(--amber); }
+  .c-amber  .dc-title { color: var(--amber); }
+  .c-blue   .dc-num { background: var(--blue-dim); color: var(--blue); }
+  .c-blue   .dc-title { color: var(--blue); }
+  .c-green  .dc-num { background: var(--green-dim); color: var(--green); }
+  .c-green  .dc-title { color: var(--green); }
+
+  /* ARTIFACTS */
+  .artifacts {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+    margin-bottom: 24px;
+  }
+  .art-header {
+    padding: 14px 20px; border-bottom: 1px solid var(--border);
+    font-size: 13px; font-weight: 600; color: var(--amber);
+    display: flex; align-items: center; gap: 8px;
+  }
+  .art-grid { display: grid; grid-template-columns: repeat(3, 1fr); }
+  .art-item {
+    padding: 14px 18px;
+    border-right: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+  .art-item:nth-child(3n) { border-right: none; }
+  .art-item:nth-last-child(-n+3) { border-bottom: none; }
+  .art-filename { font-family: var(--font-mono); font-size: 11px; color: var(--green); margin-bottom: 4px; }
+  .art-desc { font-size: 11.5px; color: var(--text-dim); line-height: 1.5; }
+
+  /* PRD REQUIREMENTS */
+  .prd-section {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px; padding: 22px 24px;
+  }
+  .prd-title { font-size: 14px; font-weight: 600; color: var(--pink); margin-bottom: 14px; }
+  .prd-items { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .prd-item {
+    display: flex; align-items: flex-start; gap: 8px;
+    font-size: 12.5px; color: var(--text-dim); line-height: 1.5;
+  }
+  .prd-item::before { content: "✓"; color: var(--pink); flex-shrink: 0; font-weight: 700; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @media (prefers-reduced-motion: reduce) { * { animation: none !important; } }
+  @media (max-width: 660px) {
+    .detail-grid { grid-template-columns: 1fr; }
+    .art-grid { grid-template-columns: 1fr 1fr; }
+    .prd-items { grid-template-columns: 1fr; }
+    h1 { font-size: 24px; }
+    .timeline { gap: 0; }
+    .tl-step { min-width: 70px; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="header">
+    <div class="yt-icon">
+      <svg viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 00-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 00.502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 002.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 002.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+    </div>
+    <h1>YouTube PRD Forensics</h1>
+    <p class="subtitle">Create or update a detailed Product Requirements Document from a YouTube demo video — evidence-first analysis with timestamps, keyframes, and embedded screenshots.</p>
+  </div>
+
+  <!-- WORKFLOW TIMELINE -->
+  <div class="timeline">
+    <div class="tl-step" style="--i:0">
+      <div class="tl-dot" style="background:var(--red-dim);color:var(--red);border-color:var(--red)">1</div>
+      <div class="tl-label">Prepare output dirs</div>
+    </div>
+    <div class="tl-step" style="--i:1">
+      <div class="tl-dot" style="background:var(--red-dim);color:var(--red);border-color:var(--red)">2</div>
+      <div class="tl-label">Download video 1080p</div>
+    </div>
+    <div class="tl-step" style="--i:2">
+      <div class="tl-dot" style="background:var(--pink-dim);color:var(--pink);border-color:var(--pink)">3</div>
+      <div class="tl-label">Extract YT artifacts</div>
+    </div>
+    <div class="tl-step" style="--i:3">
+      <div class="tl-dot" style="background:var(--amber-dim);color:var(--amber);border-color:var(--amber)">4</div>
+      <div class="tl-label">Get transcript</div>
+    </div>
+    <div class="tl-step" style="--i:4">
+      <div class="tl-dot" style="background:var(--amber-dim);color:var(--amber);border-color:var(--amber)">5</div>
+      <div class="tl-label">Extract keyframes 5s</div>
+    </div>
+    <div class="tl-step" style="--i:5">
+      <div class="tl-dot" style="background:var(--blue-dim);color:var(--blue);border-color:var(--blue)">6</div>
+      <div class="tl-label">Analyze frames + transcript</div>
+    </div>
+    <div class="tl-step" style="--i:6">
+      <div class="tl-dot" style="background:var(--blue-dim);color:var(--blue);border-color:var(--blue)">7</div>
+      <div class="tl-label">Persist screenshots</div>
+    </div>
+    <div class="tl-step" style="--i:7">
+      <div class="tl-dot" style="background:var(--green-dim);color:var(--green);border-color:var(--green)">8</div>
+      <div class="tl-label">Write PRD.md</div>
+    </div>
+    <div class="tl-step" style="--i:8">
+      <div class="tl-dot" style="background:var(--green-dim);color:var(--green);border-color:var(--green)">9</div>
+      <div class="tl-label">Delete temp keyframes</div>
+    </div>
+  </div>
+
+  <!-- DETAIL CARDS -->
+  <div class="detail-grid">
+    <div class="detail-card c-red" style="--di:0">
+      <div class="dc-head"><div class="dc-num">2</div><div class="dc-title">Download Video</div></div>
+      <div class="dc-body">Download at up to 1080p using yt-dlp with best video + audio merge.</div>
+      <div class="dc-code"><span>yt-dlp</span> -f "bv*[height&lt;=1080]+ba/b[height&lt;=1080]"<br>-o "docs/&lt;BASENAME&gt;_reference_1080p.%(ext)s" &lt;URL&gt;</div>
+    </div>
+    <div class="detail-card c-pink" style="--di:1">
+      <div class="dc-head"><div class="dc-num">3</div><div class="dc-title">Extract YT Artifacts</div></div>
+      <div class="dc-body">Pulls metadata JSON, description text, and comments JSON without re-downloading video.</div>
+      <div class="dc-code"><span>yt-dlp</span> --skip-download --write-info-json<br>--write-description --write-comments</div>
+    </div>
+    <div class="detail-card c-amber" style="--di:2">
+      <div class="dc-head"><div class="dc-num">4</div><div class="dc-title">Transcript / Subtitles</div></div>
+      <div class="dc-body">Try YouTube's auto-subtitles first (VTT format). Fall back to Whisper/whisper.cpp generation from local video if unavailable.</div>
+      <div class="dc-code"><span>yt-dlp</span> --write-auto-subs --write-subs<br>--sub-langs "en.*" --sub-format "vtt"</div>
+    </div>
+    <div class="detail-card c-amber" style="--di:3">
+      <div class="dc-head"><div class="dc-num">5</div><div class="dc-title">Keyframe Extraction</div></div>
+      <div class="dc-body">Extract one frame every 5 seconds and build a timestamped index for the analysis phase. Temporary — deleted at the end.</div>
+      <div class="dc-code">extract-keyframes-5s.ps1<br>-VideoPath &lt;file&gt; -OutputDir docs/images/video_frames_5s</div>
+    </div>
+    <div class="detail-card c-blue" style="--di:4">
+      <div class="dc-head"><div class="dc-num">6</div><div class="dc-title">Analysis Phase</div></div>
+      <div class="dc-body">Cross-reference keyframes and transcript together to derive requirements. Distinguish observed facts from inferences. Identify UI controls, data flows, layer toggles, and failure states.</div>
+    </div>
+    <div class="detail-card c-green" style="--di:5">
+      <div class="dc-head"><div class="dc-num">8</div><div class="dc-title">PRD.md Generation</div></div>
+      <div class="dc-body">Write requirements tied to explicit timestamps, embed screenshots per section, include source metadata. Append change-summary table when editing existing PRD.</div>
+    </div>
+  </div>
+
+  <!-- ARTIFACTS -->
+  <div class="artifacts">
+    <div class="art-header">📁 Required Persisted Artifacts (kept after keyframe cleanup)</div>
+    <div class="art-grid">
+      <div class="art-item">
+        <div class="art-filename">docs/&lt;project&gt;_reference_1080p.*</div>
+        <div class="art-desc">Downloaded video source at up to 1080p resolution</div>
+      </div>
+      <div class="art-item">
+        <div class="art-filename">docs/transcript_notes.md</div>
+        <div class="art-desc">Curated transcript with timestamps</div>
+      </div>
+      <div class="art-item">
+        <div class="art-filename">docs/PRD.md</div>
+        <div class="art-desc">Final requirements document with embedded images</div>
+      </div>
+      <div class="art-item">
+        <div class="art-filename">docs/images/screenshots/*</div>
+        <div class="art-desc">Selected full-frame or cropped screenshots used by PRD</div>
+      </div>
+      <div class="art-item">
+        <div class="art-filename">docs/youtube_metadata.json</div>
+        <div class="art-desc">Video metadata, title, creator, publish date, duration</div>
+      </div>
+      <div class="art-item">
+        <div class="art-filename">docs/youtube_comments.json</div>
+        <div class="art-desc">Comment data for notable insights and feedback</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PRD REQUIREMENTS -->
+  <div class="prd-section">
+    <div class="prd-title">PRD Content Requirements</div>
+    <div class="prd-items">
+      <div class="prd-item">Source metadata (URL, title, creator, date, duration)</div>
+      <div class="prd-item">Requirements mapped to explicit timestamps</div>
+      <div class="prd-item">Screenshots embedded under each major section</div>
+      <div class="prd-item">Facts vs inferred requirements clearly labeled</div>
+      <div class="prd-item">UI controls, data sources, layer toggles captured</div>
+      <div class="prd-item">Failure states and workflow behavior documented</div>
+      <div class="prd-item">Notable comments included in metadata section</div>
+      <div class="prd-item">Change-summary table on edits to existing PRD</div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

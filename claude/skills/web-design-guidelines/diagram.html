@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Web Design Guidelines Skill</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0a0f1a;
+      --surface: #111827;
+      --surface-2: #1a2435;
+      --border: rgba(255,255,255,0.06);
+      --border-bright: rgba(255,255,255,0.12);
+      --text: #e2e8f0;
+      --text-dim: #94a3b8;
+      --accent: #3b82f6;
+      --accent-dim: rgba(59,130,246,0.12);
+      --green: #10b981;
+      --green-dim: rgba(16,185,129,0.12);
+      --amber: #f59e0b;
+      --amber-dim: rgba(245,158,11,0.12);
+      --red: #ef4444;
+      --red-dim: rgba(239,68,68,0.12);
+      --font-body: 'DM Sans', system-ui, sans-serif;
+      --font-mono: 'DM Mono', 'Courier New', monospace;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--font-body);
+      background: var(--bg);
+      background-image:
+        radial-gradient(at 20% 20%, var(--accent-dim) 0%, transparent 50%),
+        radial-gradient(at 80% 80%, var(--green-dim) 0%, transparent 45%);
+      color: var(--text);
+      padding: 44px 24px 80px;
+    }
+
+    header {
+      max-width: 880px;
+      margin: 0 auto 48px;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: start;
+      gap: 24px;
+    }
+
+    .skill-tag {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 14px;
+    }
+
+    h1 {
+      font-size: 2.6rem;
+      font-weight: 700;
+      letter-spacing: -0.04em;
+      line-height: 1.1;
+      margin-bottom: 12px;
+    }
+
+    .tagline {
+      font-size: 0.92rem;
+      color: var(--text-dim);
+      max-width: 460px;
+      line-height: 1.6;
+    }
+
+    .author-badge {
+      background: var(--surface);
+      border: 1px solid var(--border-bright);
+      border-radius: 10px;
+      padding: 12px 16px;
+      text-align: right;
+      white-space: nowrap;
+    }
+
+    .author-badge .author-label {
+      font-family: var(--font-mono);
+      font-size: 9px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin-bottom: 4px;
+    }
+
+    .author-badge .author-name {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--accent);
+    }
+
+    .author-badge .author-version {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      color: var(--text-dim);
+      margin-top: 2px;
+    }
+
+    main {
+      max-width: 880px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    /* How it works */
+    .how-it-works {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+      animation: fadeUp 0.35s ease both;
+    }
+
+    .how-step {
+      background: var(--surface);
+      border: 1px solid var(--border-bright);
+      border-radius: 10px;
+      padding: 16px 18px;
+      position: relative;
+      min-width: 0;
+    }
+
+    .how-step::after {
+      content: '→';
+      position: absolute;
+      right: -12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-dim);
+      font-size: 1rem;
+      z-index: 1;
+    }
+    .how-step:last-child::after { display: none; }
+
+    .how-step .step-n {
+      font-family: var(--font-mono);
+      font-size: 1.6rem;
+      font-weight: 500;
+      color: var(--accent);
+      opacity: 0.4;
+      line-height: 1;
+      margin-bottom: 8px;
+    }
+
+    .how-step h3 {
+      font-size: 0.85rem;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .how-step p {
+      font-size: 0.74rem;
+      color: var(--text-dim);
+      line-height: 1.5;
+      min-width: 0;
+      overflow-wrap: break-word;
+    }
+
+    /* Trigger phrases */
+    .triggers-section {
+      background: var(--surface);
+      border: 1px solid var(--border-bright);
+      border-radius: 10px;
+      padding: 18px 22px;
+      animation: fadeUp 0.35s 0.10s ease both;
+    }
+
+    .triggers-section h2 {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--green);
+      margin-bottom: 12px;
+    }
+
+    .trigger-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .trigger-tag {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      padding: 4px 12px;
+      background: var(--green-dim);
+      border: 1px solid rgba(16,185,129,0.25);
+      border-radius: 20px;
+      color: var(--green);
+    }
+
+    /* Live guideline source */
+    .source-section {
+      background: var(--surface);
+      border: 1px solid var(--border-bright);
+      border-left: 3px solid var(--accent);
+      border-radius: 10px;
+      padding: 18px 22px;
+      animation: fadeUp 0.35s 0.15s ease both;
+    }
+
+    .source-section h2 {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 12px;
+    }
+
+    .source-url {
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      color: var(--text);
+      background: var(--surface-2);
+      border-radius: 6px;
+      padding: 8px 12px;
+      word-break: break-all;
+      margin-bottom: 10px;
+    }
+
+    .source-notes {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .source-note {
+      font-size: 0.76rem;
+      color: var(--text-dim);
+      padding-left: 12px;
+      position: relative;
+      min-width: 0;
+      overflow-wrap: break-word;
+    }
+
+    .source-note::before {
+      content: '·';
+      position: absolute;
+      left: 0;
+      color: var(--accent);
+    }
+
+    /* Output format */
+    .output-section {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      animation: fadeUp 0.35s 0.20s ease both;
+    }
+
+    .ve-card {
+      background: var(--surface);
+      border: 1px solid var(--border-bright);
+      border-radius: 10px;
+      padding: 18px 20px;
+      min-width: 0;
+    }
+
+    .ve-card h3 {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--amber);
+      margin-bottom: 12px;
+    }
+
+    .format-block {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      background: var(--surface-2);
+      border-radius: 6px;
+      padding: 10px 12px;
+      color: var(--text-dim);
+      line-height: 1.6;
+      white-space: pre-wrap;
+      overflow-wrap: break-word;
+    }
+
+    .format-block .highlight { color: var(--red); }
+    .format-block .dim { color: rgba(148,163,184,0.5); }
+
+    .rule-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .rule-list li {
+      font-size: 0.77rem;
+      color: var(--text-dim);
+      padding: 6px 10px;
+      background: var(--surface-2);
+      border-radius: 5px;
+      min-width: 0;
+      overflow-wrap: break-word;
+    }
+
+    /* When to use */
+    .when-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      animation: fadeUp 0.35s 0.30s ease both;
+    }
+
+    .when-card {
+      background: var(--surface);
+      border: 1px solid var(--border-bright);
+      border-radius: 10px;
+      padding: 16px 18px;
+      min-width: 0;
+    }
+
+    .when-card h3 {
+      font-size: 0.85rem;
+      font-weight: 700;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .status-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .dot-full { background: var(--accent); }
+    .dot-solo { background: var(--amber); }
+
+    .use-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .use-list li {
+      font-size: 0.76rem;
+      color: var(--text-dim);
+      padding: 5px 10px;
+      background: var(--surface-2);
+      border-radius: 5px;
+      min-width: 0;
+      overflow-wrap: break-word;
+    }
+
+    @media (max-width: 680px) {
+      header { grid-template-columns: 1fr; }
+      .how-it-works { grid-template-columns: 1fr 1fr; }
+      .output-section { grid-template-columns: 1fr; }
+      .when-grid { grid-template-columns: 1fr; }
+      h1 { font-size: 2rem; }
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(12px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @media (prefers-reduced-motion: reduce) { * { animation: none !important; } }
+  </style>
+</head>
+<body>
+
+<header>
+  <div>
+    <div class="skill-tag">web-design-guidelines skill</div>
+    <h1>Web Interface<br>Guidelines Review</h1>
+    <p class="tagline">Reviews UI code against Vercel's Web Interface Guidelines — fetches live rules from source, checks specified files, and outputs findings in terse file:line format.</p>
+  </div>
+  <div class="author-badge">
+    <div class="author-label">Author</div>
+    <div class="author-name">Vercel</div>
+    <div class="author-version">v1.0.0</div>
+  </div>
+</header>
+
+<main>
+
+  <!-- How it works -->
+  <div class="how-it-works">
+    <div class="how-step">
+      <div class="step-n">01</div>
+      <h3>Receive Trigger</h3>
+      <p>User invokes with file pattern or asks to review UI / check accessibility / audit design</p>
+    </div>
+    <div class="how-step">
+      <div class="step-n">02</div>
+      <h3>Fetch Guidelines</h3>
+      <p>WebFetch retrieves latest rules from vercel-labs/web-interface-guidelines on GitHub</p>
+    </div>
+    <div class="how-step">
+      <div class="step-n">03</div>
+      <h3>Read Target Files</h3>
+      <p>Read specified files or ask user which files/pattern to review if none provided</p>
+    </div>
+    <div class="how-step">
+      <div class="step-n">04</div>
+      <h3>Output Findings</h3>
+      <p>Check against all fetched rules, output in terse file:line format specified in guidelines</p>
+    </div>
+  </div>
+
+  <!-- Trigger phrases -->
+  <div class="triggers-section">
+    <h2>Trigger Phrases</h2>
+    <div class="trigger-tags">
+      <span class="trigger-tag">"review my UI"</span>
+      <span class="trigger-tag">"check accessibility"</span>
+      <span class="trigger-tag">"audit design"</span>
+      <span class="trigger-tag">"review UX"</span>
+      <span class="trigger-tag">"check my site against best practices"</span>
+      <span class="trigger-tag">/web-design-guidelines src/</span>
+      <span class="trigger-tag">/web-design-guidelines *.tsx</span>
+    </div>
+  </div>
+
+  <!-- Live source -->
+  <div class="source-section">
+    <h2>Live Guidelines Source — Always Fresh</h2>
+    <div class="source-url">https://raw.githubusercontent.com/vercel-labs/web-interface-guidelines/main/command.md</div>
+    <div class="source-notes">
+      <div class="source-note">Fetched before each review — never cached, always latest rules</div>
+      <div class="source-note">Output format is defined inside the fetched guidelines themselves</div>
+      <div class="source-note">If no files specified, ask user for target files or pattern</div>
+    </div>
+  </div>
+
+  <!-- Output format + what gets checked -->
+  <div class="output-section">
+    <div class="ve-card">
+      <h3>Output Format — Terse file:line</h3>
+      <div class="format-block"><span class="highlight">src/components/Button.tsx:42</span> missing aria-label on icon button
+<span class="highlight">src/pages/Home.tsx:118</span> contrast ratio 2.6:1 fails WCAG AA
+<span class="highlight">src/styles/globals.css:77</span> outline: none without focus-visible ring
+<span class="dim">
+# Format defined in fetched guidelines
+# Claude applies all fetched rules to
+# each specified file, outputs each
+# violation as file:line message</span></div>
+    </div>
+
+    <div class="ve-card">
+      <h3>Typical Rule Categories Checked</h3>
+      <ul class="rule-list">
+        <li>Color contrast ratios (WCAG AA/AAA)</li>
+        <li>Missing ARIA labels on interactive elements</li>
+        <li>Focus indicator removal without replacement</li>
+        <li>Touch target sizes below minimum</li>
+        <li>Semantic HTML structure violations</li>
+        <li>Keyboard navigation gaps</li>
+        <li>Missing alt text on images</li>
+        <li>Responsive layout breakpoints</li>
+        <li>Animation/motion safety (prefers-reduced-motion)</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- When to use -->
+  <div class="when-grid">
+    <div class="when-card">
+      <h3><span class="status-dot dot-full"></span>Full Review — Component Libraries</h3>
+      <ul class="use-list">
+        <li>Component libraries with multiple developers</li>
+        <li>Design system enforcement</li>
+        <li>Pre-launch accessibility audit</li>
+        <li>Frequent UI changes requiring regression checks</li>
+        <li>Use with Playwright for automated CI coverage</li>
+      </ul>
+    </div>
+
+    <div class="when-card">
+      <h3><span class="status-dot dot-solo"></span>Quick Check — Solo / MVP</h3>
+      <ul class="use-list">
+        <li>Pre-PR UI review on specific changed files</li>
+        <li>Spot check a single component</li>
+        <li>Verify after dark mode implementation</li>
+        <li>Confirm accessibility on new form</li>
+        <li>Manual checklist + this skill = sufficient for MVP</li>
+      </ul>
+    </div>
+  </div>
+
+</main>
+
+</body>
+</html>

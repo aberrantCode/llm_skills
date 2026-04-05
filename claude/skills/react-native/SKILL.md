@@ -243,3 +243,7 @@ Component/
 - ❌ Mixing business logic with UI - keep core/ pure
 - ❌ Ignoring TypeScript errors - fix them
 - ❌ Large components - split into smaller pieces
+
+## Diagram
+
+[View diagram](diagram.html)

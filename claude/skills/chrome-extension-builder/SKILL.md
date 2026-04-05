@@ -528,3 +528,7 @@ USE_MOCK_NATIVE=false
 
 - [Template: Side Panel React](./assets/templates/sidepanel/) - Side panel starter
 - [Template: Content Script](./assets/templates/content-script/) - Content script starter
+
+## Diagram
+
+[View diagram](diagram.html)

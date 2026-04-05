@@ -158,3 +158,7 @@ When all steps are complete:
 - **Lazy file creation.** Don't create the notes file until it's actually needed.
 - **Preserve the user's document.** Make minimal edits — only checkboxes, inline notes, and
   the changelog. Don't reformat or rewrite content the user didn't ask you to change.
+
+## Diagram
+
+[View diagram](diagram.html)

@@ -524,3 +524,7 @@ Task completed?
 | decisions.md | When deciding | Architectural choices |
 | code-landmarks.md | When patterns change | Code navigation |
 | archive/*.md | End of session/feature | Historical record |
+
+## Diagram
+
+[View diagram](diagram.html)

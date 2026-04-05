@@ -147,3 +147,7 @@ powershell -ExecutionPolicy Bypass -File `
 After adding a new preset:
 - Add a row to the FR-3 style preset table in `docs/PRD.md` if the preset is externally visible.
 - Update section 12 Modification Summary table.
+
+## Diagram
+
+[View diagram](diagram.html)

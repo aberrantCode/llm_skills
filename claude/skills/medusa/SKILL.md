@@ -762,3 +762,7 @@ npm run start                  # Start production server
 - **Skipping workflows for complex ops** - Workflows provide rollback
 - **Hardcoding URLs** - Use environment variables
 - **Ignoring TypeScript errors** - Framework relies on types
+
+## Diagram
+
+[View diagram](diagram.html)
