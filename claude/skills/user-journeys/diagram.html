@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>User Journeys Skill — UX Flow Mapping</title>
+  <link href="https://fonts.googleapis.com/css2?family=Literata:ital,wght@0,400;0,500;0,600;1,400;1,600&family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #fdfcf8;
+      --surface: #ffffff;
+      --surface-2: #f6f4ef;
+      --border: rgba(0,0,0,0.08);
+      --border-bright: rgba(0,0,0,0.15);
+      --text: #1a1710;
+      --text-dim: #7a7060;
+      --critical: #b5190e;
+      --critical-dim: rgba(181,25,14,0.09);
+      --high: #b5681e;
+      --high-dim: rgba(181,104,30,0.09);
+      --medium: #1e7a4a;
+      --medium-dim: rgba(30,122,74,0.09);
+      --blue: #1a3d7a;
+      --blue-dim: rgba(26,61,122,0.09);
+      --font-serif: 'Literata', Georgia, serif;
+      --font-sans: 'DM Sans', system-ui, sans-serif;
+      --font-mono: 'DM Mono', 'Courier New', monospace;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--font-sans);
+      background: var(--bg);
+      background-image:
+        radial-gradient(at 10% 5%, var(--blue-dim) 0%, transparent 50%);
+      color: var(--text);
+      padding: 48px 24px 80px;
+    }
+
+    header {
+      max-width: 920px;
+      margin: 0 auto 52px;
+    }
+
+    .skill-tag {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--text-dim);
+      letter-spacing: 0.10em;
+      margin-bottom: 16px;
+    }
+
+    h1 {
+      font-family: var(--font-serif);
+      font-size: 3.2rem;
+      font-weight: 600;
+      font-style: italic;
+      line-height: 1.08;
+      letter-spacing: -0.02em;
+      margin-bottom: 14px;
+      color: var(--blue);
+    }
+
+    .tagline {
+      font-size: 1rem;
+      color: var(--text-dim);
+      max-width: 520px;
+      line-height: 1.65;
+    }
+
+    .philosophy-quote {
+      font-family: var(--font-serif);
+      font-style: italic;
+      font-size: 1.1rem;
+      color: var(--text-dim);
+      max-width: 480px;
+      line-height: 1.5;
+      margin-top: 18px;
+      padding-left: 16px;
+      border-left: 3px solid var(--blue-dim);
+      /* border-left color will be rendered from var, using direct color instead */
+      border-left: 3px solid rgba(26,61,122,0.25);
+    }
+
+    main {
+      max-width: 920px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    /* Priority tiers */
+    .priority-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      animation: fadeUp 0.35s ease both;
+    }
+
+    .priority-card {
+      background: var(--surface);
+      border: 1px solid var(--border-bright);
+      border-radius: 10px;
+      padding: 16px 18px;
+      min-width: 0;
+    }
+
+    .priority-card h3 {
+      font-size: 0.82rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .priority-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .dot-critical { background: var(--critical); }
+    .dot-high     { background: var(--high); }
+    .dot-medium   { background: var(--medium); }
+    .dot-low      { background: var(--text-dim); }
+
+    .priority-card .freq {
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      color: var(--text-dim);
+      margin-bottom: 8px;
+    }
+
+    .priority-examples {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .priority-examples li {
+      font-size: 0.74rem;
+      color: var(--text-dim);
+      padding: 4px 8px;
+      background: var(--surface-2);
+      border-radius: 4px;
+      min-width: 0;
+      overflow-wrap: break-word;
+    }
+
+    /* Journey anatomy */
+    .anatomy-section {
+      background: var(--surface);
+      border: 1px solid var(--border-bright);
+      border-radius: 12px;
+      padding: 22px 26px;
+      animation: fadeUp 0.35s 0.10s ease both;
+    }
+
+    .anatomy-section h2 {
+      font-family: var(--font-serif);
+      font-size: 1.2rem;
+      font-style: italic;
+      color: var(--blue);
+      margin-bottom: 18px;
+    }
+
+    .anatomy-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 10px;
+    }
+
+    .anatomy-block {
+      background: var(--surface-2);
+      border-radius: 8px;
+      padding: 12px 14px;
+      min-width: 0;
+    }
+
+    .anatomy-block h4 {
+      font-family: var(--font-mono);
+      font-size: 9px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin-bottom: 6px;
+    }
+
+    .anatomy-block ul {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .anatomy-block li {
+      font-size: 0.74rem;
+      color: var(--text-dim);
+      padding-left: 10px;
+      position: relative;
+      min-width: 0;
+      overflow-wrap: break-word;
+    }
+
+    .anatomy-block li::before {
+      content: '→';
+      position: absolute;
+      left: 0;
+      font-size: 0.65rem;
+      color: var(--blue);
+    }
+
+    /* UX Checklist */
+    .ux-checklist {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      animation: fadeUp 0.35s 0.2s ease both;
+    }
+
+    .ux-group {
+      background: var(--surface);
+      border: 1px solid var(--border-bright);
+      border-radius: 10px;
+      padding: 14px 16px;
+      min-width: 0;
+    }
+
+    .ux-group h4 {
+      font-family: var(--font-serif);
+      font-size: 0.88rem;
+      font-style: italic;
+      color: var(--blue);
+      margin-bottom: 8px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .ux-group ul {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .ux-group li {
+      font-size: 0.73rem;
+      color: var(--text-dim);
+      padding: 4px 0 4px 12px;
+      position: relative;
+      min-width: 0;
+      overflow-wrap: break-word;
+    }
+
+    .ux-group li::before {
+      content: '□';
+      position: absolute;
+      left: 0;
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      color: var(--medium);
+    }
+
+    /* Journey patterns */
+    .patterns-section {
+      background: var(--surface);
+      border: 1px solid var(--border-bright);
+      border-radius: 12px;
+      padding: 22px 26px;
+      animation: fadeUp 0.35s 0.3s ease both;
+    }
+
+    .patterns-section h2 {
+      font-family: var(--font-serif);
+      font-size: 1.2rem;
+      font-style: italic;
+      color: var(--blue);
+      margin-bottom: 18px;
+    }
+
+    .pattern-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+
+    .pattern-card {
+      border-radius: 8px;
+      padding: 14px 16px;
+      min-width: 0;
+    }
+
+    .pattern-card.progressive { background: var(--blue-dim); border: 1px solid rgba(26,61,122,0.18); }
+    .pattern-card.guided      { background: var(--medium-dim); border: 1px solid rgba(30,122,74,0.18); }
+    .pattern-card.recovery    { background: var(--high-dim); border: 1px solid rgba(181,104,30,0.18); }
+
+    .pattern-card h4 {
+      font-size: 0.85rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    .pattern-card.progressive h4 { color: var(--blue); }
+    .pattern-card.guided h4      { color: var(--medium); }
+    .pattern-card.recovery h4    { color: var(--high); }
+
+    .step-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      counter-reset: steps;
+    }
+
+    .step-list li {
+      font-size: 0.73rem;
+      color: var(--text-dim);
+      padding: 4px 8px 4px 22px;
+      background: rgba(255,255,255,0.5);
+      border-radius: 4px;
+      position: relative;
+      counter-increment: steps;
+      min-width: 0;
+      overflow-wrap: break-word;
+    }
+
+    .step-list li::before {
+      content: counter(steps);
+      position: absolute;
+      left: 6px;
+      font-family: var(--font-mono);
+      font-size: 0.62rem;
+      color: inherit;
+      opacity: 0.7;
+    }
+
+    /* Anti-patterns */
+    .anti-section {
+      background: var(--critical-dim);
+      border: 1px solid rgba(181,25,14,0.18);
+      border-radius: 10px;
+      padding: 16px 20px;
+      animation: fadeUp 0.35s 0.4s ease both;
+    }
+
+    .anti-section h2 {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--critical);
+      margin-bottom: 12px;
+    }
+
+    .anti-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+      gap: 6px;
+    }
+
+    .anti-item {
+      font-size: 0.76rem;
+      color: var(--text-dim);
+      padding: 5px 10px;
+      background: rgba(255,255,255,0.6);
+      border-radius: 5px;
+      min-width: 0;
+      overflow-wrap: break-word;
+    }
+
+    @media (max-width: 760px) {
+      .priority-row  { grid-template-columns: 1fr 1fr; }
+      .anatomy-grid  { grid-template-columns: 1fr; }
+      .ux-checklist  { grid-template-columns: 1fr 1fr; }
+      .pattern-grid  { grid-template-columns: 1fr; }
+      h1 { font-size: 2.3rem; }
+    }
+    @media (max-width: 480px) {
+      .priority-row  { grid-template-columns: 1fr; }
+      .ux-checklist  { grid-template-columns: 1fr; }
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(14px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @media (prefers-reduced-motion: reduce) { * { animation: none !important; } }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="skill-tag">user-journeys skill</div>
+  <h1>User Journeys</h1>
+  <p class="tagline">User experience flows — journey mapping, UX validation, and error recovery. Tests real experiences, not just specifications.</p>
+  <p class="philosophy-quote">"Specs test features. Journeys test experiences. A feature can pass all specs but still deliver a terrible experience."</p>
+</header>
+
+<main>
+
+  <!-- Priority Tiers -->
+  <div class="priority-row">
+    <div class="priority-card">
+      <h3><span class="priority-dot dot-critical"></span>Critical</h3>
+      <div class="freq">Test every deploy</div>
+      <ul class="priority-examples">
+        <li>Signup to First Value</li>
+        <li>Checkout Purchase</li>
+        <li>Login to Dashboard</li>
+      </ul>
+    </div>
+
+    <div class="priority-card">
+      <h3><span class="priority-dot dot-high"></span>High</h3>
+      <div class="freq">Test daily</div>
+      <ul class="priority-examples">
+        <li>Browse and Search</li>
+        <li>Update Profile</li>
+        <li>Invite Team Member</li>
+      </ul>
+    </div>
+
+    <div class="priority-card">
+      <h3><span class="priority-dot dot-medium"></span>Medium</h3>
+      <div class="freq">Test weekly</div>
+      <ul class="priority-examples">
+        <li>Weekly features</li>
+        <li>Secondary flows</li>
+        <li>Admin paths</li>
+      </ul>
+    </div>
+
+    <div class="priority-card">
+      <h3><span class="priority-dot dot-low"></span>Edge Cases</h3>
+      <div class="freq">Test on change</div>
+      <ul class="priority-examples">
+        <li>Payment failure retry</li>
+        <li>Session timeout recovery</li>
+        <li>Offline reconnection</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Journey Anatomy -->
+  <div class="anatomy-section">
+    <h2>Journey Documentation Anatomy</h2>
+    <div class="anatomy-grid">
+      <div class="anatomy-block">
+        <h4>Overview Attributes</h4>
+        <ul>
+          <li>Priority: Critical / High / Medium</li>
+          <li>User Type: New / Returning / Admin</li>
+          <li>Frequency: Daily / Weekly / One-time</li>
+          <li>Success Metric: conversion, time, drop-off</li>
+        </ul>
+      </div>
+      <div class="anatomy-block">
+        <h4>Per-Step Structure</h4>
+        <ul>
+          <li>User Action: what they do</li>
+          <li>System Response: what they see</li>
+          <li>Success Criteria: measurable checkboxes</li>
+          <li>Potential Friction: blockers + mitigations</li>
+        </ul>
+      </div>
+      <div class="anatomy-block">
+        <h4>Error Scenarios</h4>
+        <ul>
+          <li>Trigger: what causes the error</li>
+          <li>User Sees: exact error state</li>
+          <li>Recovery Path: back on track</li>
+          <li>Test: linked Playwright spec file</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- UX Checklist per step -->
+  <div class="ux-checklist">
+    <div class="ux-group">
+      <h4>Clarity</h4>
+      <ul>
+        <li>User knows where they are</li>
+        <li>User knows next step</li>
+        <li>User knows what just happened</li>
+      </ul>
+    </div>
+    <div class="ux-group">
+      <h4>Speed</h4>
+      <ul>
+        <li>Page loads &lt;2 seconds</li>
+        <li>Actions complete &lt;3 seconds</li>
+        <li>Progress shown for longer ops</li>
+      </ul>
+    </div>
+    <div class="ux-group">
+      <h4>Forgiveness</h4>
+      <ul>
+        <li>Mistakes easy to undo</li>
+        <li>Errors explain what went wrong</li>
+        <li>Recovery path is clear</li>
+      </ul>
+    </div>
+    <div class="ux-group">
+      <h4>Accessibility</h4>
+      <ul>
+        <li>Keyboard navigation works</li>
+        <li>Screen reader announces changes</li>
+        <li>Focus management correct</li>
+        <li>Touch targets 44px+</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Journey Patterns -->
+  <div class="patterns-section">
+    <h2>Common Journey Patterns</h2>
+    <div class="pattern-grid">
+      <div class="pattern-card progressive">
+        <h4>Progressive Disclosure</h4>
+        <ol class="step-list">
+          <li>Show basic options only</li>
+          <li>"Advanced" expands more options</li>
+          <li>Expert mode unlocks everything</li>
+        </ol>
+      </div>
+      <div class="pattern-card guided">
+        <h4>Guided Setup</h4>
+        <ol class="step-list">
+          <li>Welcome + single choice</li>
+          <li>Core preference question</li>
+          <li>Optional integrations (skippable)</li>
+          <li>First action with guidance</li>
+          <li>Success + remove training wheels</li>
+        </ol>
+      </div>
+      <div class="pattern-card recovery">
+        <h4>Recovery Journey</h4>
+        <ol class="step-list">
+          <li>Recognize returning user</li>
+          <li>Restore previous state</li>
+          <li>Acknowledge what happened</li>
+          <li>Offer clear path forward</li>
+          <li>Complete original goal</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+
+  <!-- Anti-patterns -->
+  <div class="anti-section">
+    <h2>Journey Anti-Patterns — Avoid</h2>
+    <div class="anti-list">
+      <div class="anti-item">Happy path only — test error recovery</div>
+      <div class="anti-item">Spec-driven — test user goals not features</div>
+      <div class="anti-item">Ignoring time — measure journey duration</div>
+      <div class="anti-item">Desktop-only — mobile journeys separately</div>
+      <div class="anti-item">No metrics — track completion and drop-off</div>
+      <div class="anti-item">Static journeys — update as behavior evolves</div>
+      <div class="anti-item">Skipping emotions — note frustration points</div>
+    </div>
+  </div>
+
+</main>
+
+</body>
+</html>

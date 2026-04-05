@@ -11,3 +11,7 @@ When explaining code, always include:
 4. **Highlight a gotcha**: What's a common mistake or misconception?
 
 Keep explanations conversational. For complex concepts, use multiple analogies.
+
+## Diagram
+
+[View diagram](diagram.html)

@@ -955,3 +955,7 @@ Offline-only assets                 → Cache Only
   Load app    Cache assets  Clean old   Serve requests
                             caches      from cache/network
 ```
+
+## Diagram
+
+[View diagram](diagram.html)

@@ -575,3 +575,7 @@ Run before every release:
 - ❌ Running as root / admin in production
 - ❌ Hardcoded credentials for any environment
 - ❌ Disabling SSL/TLS verification
+
+## Diagram
+
+[View diagram](diagram.html)

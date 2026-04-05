@@ -110,3 +110,7 @@ Deployment failed due to network restrictions. To fix this:
 2. Add *.vercel.com to the allowed domains
 3. Try deploying again
 ```
+
+## Diagram
+
+[View diagram](diagram.html)

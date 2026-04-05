@@ -506,3 +506,7 @@ For public repos, use `drop-sudo` safety strategy to prevent Codex from reading 
 - **Skipping sandbox in CI** - Always use `--sandbox read-only`
 - **Ignoring findings** - Review and address or document exceptions
 - **Running on every commit** - Use on PRs only to save costs
+
+## Diagram
+
+[View diagram](diagram.html)

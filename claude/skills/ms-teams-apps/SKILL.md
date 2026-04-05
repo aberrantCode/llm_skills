@@ -1248,3 +1248,7 @@ app.start();
 - [Microsoft Graph Explorer](https://developer.microsoft.com/en-us/graph/graph-explorer)
 - [Teams Toolkit](https://learn.microsoft.com/en-us/microsoftteams/platform/toolkit/teams-toolkit-fundamentals)
 - [Bot Framework Emulator](https://github.com/Microsoft/BotFramework-Emulator)
+
+## Diagram
+
+[View diagram](diagram.html)

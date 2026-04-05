@@ -776,3 +776,7 @@ Add to `credentials.md`:
 - **Large single requests** - Use pagination for bulk operations
 - **Storing keys in code** - Use environment variables
 - **Skipping webhook verification** - Always verify signatures
+
+## Diagram
+
+[View diagram](diagram.html)

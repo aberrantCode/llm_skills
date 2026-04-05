@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Base Skill — Universal Coding Patterns</title>
+<!--
+  Aesthetic: deep navy + electric blue engineering feel.
+  Monospace-heavy, terminal-inspired, structured rule system.
+  Distinct from terracotta (architecture) and teal (other) templates.
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  /* ============ THEME ============ */
+  :root {
+    --font-body: 'Inter', system-ui, sans-serif;
+    --font-mono: 'JetBrains Mono', 'SF Mono', Consolas, monospace;
+
+    --bg: #f0f2f8;
+    --surface: #ffffff;
+    --surface2: #eef0f8;
+    --surface-elevated: #ffffff;
+    --border: rgba(30, 41, 100, 0.08);
+    --border-bright: rgba(30, 41, 100, 0.18);
+    --text: #0f1535;
+    --text-dim: #5a6480;
+
+    --blue: #1e40af;
+    --blue-dim: rgba(30, 64, 175, 0.08);
+    --cyan: #0e7490;
+    --cyan-dim: rgba(14, 116, 144, 0.08);
+    --green: #166534;
+    --green-dim: rgba(22, 101, 52, 0.08);
+    --red: #991b1b;
+    --red-dim: rgba(153, 27, 27, 0.08);
+    --amber: #92400e;
+    --amber-dim: rgba(146, 64, 14, 0.08);
+    --violet: #4c1d95;
+    --violet-dim: rgba(76, 29, 149, 0.08);
+    --pink: #9d174d;
+    --pink-dim: rgba(157, 23, 77, 0.08);
+    --slate: #1e293b;
+    --slate-dim: rgba(30, 41, 59, 0.06);
+
+    --tag-red: #fee2e2;
+    --tag-red-text: #991b1b;
+    --tag-green: #dcfce7;
+    --tag-green-text: #166534;
+    --tag-amber: #fef3c7;
+    --tag-amber-text: #92400e;
+    --tag-blue: #dbeafe;
+    --tag-blue-text: #1e40af;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #080c1a;
+      --surface: #0d1225;
+      --surface2: #111830;
+      --surface-elevated: #161e38;
+      --border: rgba(100, 140, 255, 0.08);
+      --border-bright: rgba(100, 140, 255, 0.18);
+      --text: #e2e8ff;
+      --text-dim: #7b88b0;
+
+      --blue: #93c5fd;
+      --blue-dim: rgba(147, 197, 253, 0.10);
+      --cyan: #67e8f9;
+      --cyan-dim: rgba(103, 232, 249, 0.10);
+      --green: #86efac;
+      --green-dim: rgba(134, 239, 172, 0.10);
+      --red: #fca5a5;
+      --red-dim: rgba(252, 165, 165, 0.10);
+      --amber: #fcd34d;
+      --amber-dim: rgba(252, 211, 77, 0.10);
+      --violet: #c4b5fd;
+      --violet-dim: rgba(196, 181, 253, 0.10);
+      --pink: #f9a8d4;
+      --pink-dim: rgba(249, 168, 212, 0.10);
+      --slate: #94a3b8;
+      --slate-dim: rgba(148, 163, 184, 0.06);
+
+      --tag-red: rgba(252, 165, 165, 0.12);
+      --tag-red-text: #fca5a5;
+      --tag-green: rgba(134, 239, 172, 0.12);
+      --tag-green-text: #86efac;
+      --tag-amber: rgba(252, 211, 77, 0.12);
+      --tag-amber-text: #fcd34d;
+      --tag-blue: rgba(147, 197, 253, 0.12);
+      --tag-blue-text: #93c5fd;
+    }
+  }
+
+  /* ============ RESET ============ */
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    background-image:
+      radial-gradient(ellipse at 15% 0%, var(--blue-dim) 0%, transparent 55%),
+      radial-gradient(ellipse at 85% 85%, var(--violet-dim) 0%, transparent 50%),
+      radial-gradient(circle, var(--border) 1px, transparent 1px);
+    background-size: auto, auto, 28px 28px;
+    color: var(--text);
+    font-family: var(--font-body);
+    padding: 48px 40px;
+    min-height: 100vh;
+  }
+
+  /* ============ ANIMATION ============ */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .section, .flow-arrow, .two-col > *, .three-col > *, .four-col > * {
+    animation: fadeUp 0.35s ease-out both;
+    animation-delay: calc(var(--i, 0) * 0.055s);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: 0.01ms !important; animation-delay: 0ms !important; }
+  }
+
+  /* ============ TYPOGRAPHY ============ */
+  h1 {
+    font-size: 36px;
+    font-weight: 700;
+    letter-spacing: -1.2px;
+    margin-bottom: 4px;
+    font-family: var(--font-body);
+  }
+  .subtitle {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--text-dim);
+    margin-bottom: 44px;
+    letter-spacing: 0.5px;
+  }
+  .section-label {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .section-label .dot {
+    width: 7px; height: 7px; border-radius: 50%;
+  }
+  h3 {
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 6px;
+  }
+
+  /* ============ LAYOUT ============ */
+  .diagram {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 20px;
+    max-width: 1140px;
+    margin: 0 auto;
+  }
+
+  /* ============ SECTION CARD ============ */
+  .section {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px 24px;
+  }
+  .section--hero {
+    background: var(--surface-elevated);
+    border-color: var(--border-bright);
+    box-shadow: 0 4px 24px rgba(0,0,0,0.07);
+    padding: 28px 32px;
+  }
+  .section--recessed {
+    background: var(--surface2);
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.04);
+  }
+
+  .section--blue  { border-color: var(--blue-dim); }
+  .section--blue .section-label { color: var(--blue); }
+  .section--blue .dot { background: var(--blue); }
+
+  .section--cyan  { border-color: var(--cyan-dim); }
+  .section--cyan .section-label { color: var(--cyan); }
+  .section--cyan .dot { background: var(--cyan); }
+
+  .section--green { border-color: var(--green-dim); }
+  .section--green .section-label { color: var(--green); }
+  .section--green .dot { background: var(--green); }
+
+  .section--red   { border-color: var(--red-dim); }
+  .section--red .section-label { color: var(--red); }
+  .section--red .dot { background: var(--red); }
+
+  .section--amber { border-color: var(--amber-dim); }
+  .section--amber .section-label { color: var(--amber); }
+  .section--amber .dot { background: var(--amber); }
+
+  .section--violet { border-color: var(--violet-dim); }
+  .section--violet .section-label { color: var(--violet); }
+  .section--violet .dot { background: var(--violet); }
+
+  .section--pink  { border-color: var(--pink-dim); }
+  .section--pink .section-label { color: var(--pink); }
+  .section--pink .dot { background: var(--pink); }
+
+  /* ============ GRIDS ============ */
+  .two-col   { display: grid; grid-template-columns: 1fr 1fr;       gap: 12px; }
+  .three-col { display: grid; grid-template-columns: 1fr 1fr 1fr;   gap: 12px; }
+  .four-col  { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 10px; }
+
+  /* ============ INNER CARD ============ */
+  .ve-card {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 14px;
+  }
+  .ve-card .title {
+    font-weight: 600;
+    font-size: 12px;
+    margin-bottom: 5px;
+  }
+  .ve-card .desc {
+    font-size: 11px;
+    color: var(--text-dim);
+    line-height: 1.55;
+  }
+  .ve-card--blue  { border-left: 3px solid var(--blue); }
+  .ve-card--green { border-left: 3px solid var(--green); }
+  .ve-card--red   { border-left: 3px solid var(--red); }
+  .ve-card--amber { border-left: 3px solid var(--amber); }
+  .ve-card--cyan  { border-left: 3px solid var(--cyan); }
+  .ve-card--violet { border-left: 3px solid var(--violet); }
+
+  /* ============ RULE BADGE ============ */
+  .rule-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 5px 10px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 500;
+    margin: 3px;
+  }
+  .rule-badge .val { font-weight: 700; }
+  .rule-badge--red   { border-color: var(--red-dim); color: var(--red); }
+  .rule-badge--blue  { border-color: var(--blue-dim); color: var(--blue); }
+  .rule-badge--green { border-color: var(--green-dim); color: var(--green); }
+  .rule-badge--amber { border-color: var(--amber-dim); color: var(--amber); }
+
+  .badges { display: flex; flex-wrap: wrap; gap: 0; margin-top: 8px; }
+
+  /* ============ TDD PIPELINE ============ */
+  .tdd-pipeline {
+    display: flex;
+    gap: 0;
+    align-items: stretch;
+    overflow-x: auto;
+    padding-bottom: 2px;
+    margin-top: 12px;
+  }
+  .tdd-step {
+    flex: 1;
+    min-width: 110px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 12px 10px;
+    text-align: center;
+    background: var(--surface2);
+  }
+  .tdd-step .phase-label {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    margin-bottom: 4px;
+  }
+  .tdd-step .phase-desc {
+    font-size: 10px;
+    color: var(--text-dim);
+    line-height: 1.5;
+  }
+  .tdd-step--red    { border-color: var(--red-dim);    background: var(--red-dim); }
+  .tdd-step--red    .phase-label { color: var(--red); }
+  .tdd-step--green  { border-color: var(--green-dim);  background: var(--green-dim); }
+  .tdd-step--green  .phase-label { color: var(--green); }
+  .tdd-step--amber  { border-color: var(--amber-dim);  background: var(--amber-dim); }
+  .tdd-step--amber  .phase-label { color: var(--amber); }
+  .tdd-step--blue   { border-color: var(--blue-dim);   background: var(--blue-dim); }
+  .tdd-step--blue   .phase-label { color: var(--blue); }
+
+  .tdd-arrow {
+    display: flex;
+    align-items: center;
+    padding: 0 4px;
+    color: var(--border-bright);
+    font-size: 16px;
+    flex-shrink: 0;
+  }
+
+  /* ============ DECISION FLOW ============ */
+  .decision-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 10px;
+  }
+  .decision-diamond {
+    background: var(--amber-dim);
+    border: 1px solid var(--amber);
+    border-radius: 6px;
+    padding: 6px 12px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--amber);
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .decision-branches {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .decision-branch {
+    font-size: 11px;
+    color: var(--text-dim);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .decision-branch .arrow { color: var(--text-dim); font-family: var(--font-mono); }
+  .decision-branch .dest {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 2px 8px;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 500;
+  }
+  .dest--green  { border-color: var(--green-dim); color: var(--green); background: var(--green-dim); }
+  .dest--blue   { border-color: var(--blue-dim); color: var(--blue); background: var(--blue-dim); }
+  .dest--cyan   { border-color: var(--cyan-dim); color: var(--cyan); background: var(--cyan-dim); }
+  .dest--violet { border-color: var(--violet-dim); color: var(--violet); background: var(--violet-dim); }
+
+  /* ============ FLOW ARROW ============ */
+  .flow-arrow {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    color: var(--text-dim);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    padding: 2px 0;
+  }
+  .flow-arrow svg {
+    width: 18px; height: 18px;
+    fill: none; stroke: var(--border-bright);
+    stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
+  }
+
+  /* ============ TAG ============ */
+  .tag {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 7px;
+    border-radius: 4px;
+    margin-right: 3px;
+  }
+  .tag--red   { background: var(--tag-red);   color: var(--tag-red-text); }
+  .tag--green { background: var(--tag-green); color: var(--tag-green-text); }
+  .tag--amber { background: var(--tag-amber); color: var(--tag-amber-text); }
+  .tag--blue  { background: var(--tag-blue);  color: var(--tag-blue-text); }
+
+  /* ============ LIST ============ */
+  .ve-list {
+    list-style: none;
+    font-size: 12px;
+    line-height: 1.85;
+    color: var(--text-dim);
+  }
+  .ve-list li { padding-left: 14px; position: relative; }
+  .ve-list li::before { content: '›'; font-weight: 700; position: absolute; left: 0; color: var(--text-dim); }
+  .ve-list li strong { color: var(--text); font-weight: 600; }
+  .ve-list code {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    background: var(--blue-dim);
+    color: var(--blue);
+    padding: 1px 5px; border-radius: 3px;
+  }
+
+  /* ============ CALLOUT ============ */
+  .callout {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--blue);
+    border-radius: 0 8px 8px 0;
+    padding: 12px 16px;
+    font-size: 12px;
+    line-height: 1.6;
+    color: var(--text-dim);
+  }
+  .callout strong { color: var(--text); }
+  .callout code {
+    font-family: var(--font-mono); font-size: 10px;
+    background: var(--blue-dim); color: var(--blue);
+    padding: 1px 5px; border-radius: 3px;
+  }
+
+  /* ============ LIMIT ROW ============ */
+  .limit-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 10px;
+  }
+  .limit-pill {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 14px;
+    min-width: 90px;
+    flex: 1;
+  }
+  .limit-pill .lp-val {
+    font-family: var(--font-mono);
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--blue);
+    letter-spacing: -1px;
+    line-height: 1;
+  }
+  .limit-pill .lp-unit {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-top: 3px;
+  }
+  .limit-pill .lp-label {
+    font-size: 10px;
+    color: var(--text-dim);
+    margin-top: 5px;
+    text-align: center;
+    line-height: 1.3;
+  }
+  .limit-pill--red .lp-val { color: var(--red); }
+  .limit-pill--amber .lp-val { color: var(--amber); }
+  .limit-pill--green .lp-val { color: var(--green); }
+
+  /* ============ ANTI-PATTERN GRID ============ */
+  .anti-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 6px;
+  }
+  .anti-item {
+    background: var(--red-dim);
+    border: 1px solid rgba(153, 27, 27, 0.15);
+    border-radius: 6px;
+    padding: 4px 10px;
+    font-size: 11px;
+    color: var(--red);
+    font-family: var(--font-mono);
+  }
+
+  /* ============ SEPARATOR ============ */
+  .sep { width: 100%; height: 1px; background: var(--border); margin: 4px 0; }
+
+  /* ============ RESPONSIVE ============ */
+  @media (max-width: 900px) {
+    body { padding: 24px 20px; }
+    .four-col  { grid-template-columns: 1fr 1fr; }
+    .three-col { grid-template-columns: 1fr 1fr; }
+    .two-col   { grid-template-columns: 1fr; }
+    .tdd-pipeline { flex-wrap: wrap; gap: 6px; }
+    .tdd-arrow { display: none; }
+    .limit-pill { min-width: 72px; }
+  }
+  @media (max-width: 600px) {
+    .four-col  { grid-template-columns: 1fr; }
+    .three-col { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<h1>Base Skill</h1>
+<p class="subtitle">universal coding patterns · constraints · tdd workflow · atomic todos</p>
+
+<div class="diagram">
+
+  <!-- ── SIMPLICITY RULES ── -->
+  <div class="section section--blue section--hero" style="--i:0">
+    <div class="section-label"><span class="dot"></span> Simplicity Rules — Hard Limits</div>
+    <div class="limit-row">
+      <div class="limit-pill limit-pill--red">
+        <div class="lp-val">20</div>
+        <div class="lp-unit">lines</div>
+        <div class="lp-label">max per<br>function</div>
+      </div>
+      <div class="limit-pill limit-pill--red">
+        <div class="lp-val">3</div>
+        <div class="lp-unit">params</div>
+        <div class="lp-label">max per<br>function</div>
+      </div>
+      <div class="limit-pill limit-pill--amber">
+        <div class="lp-val">2</div>
+        <div class="lp-unit">levels</div>
+        <div class="lp-label">max nesting<br>depth</div>
+      </div>
+      <div class="limit-pill limit-pill--amber">
+        <div class="lp-val">200</div>
+        <div class="lp-unit">lines</div>
+        <div class="lp-label">max per<br>file</div>
+      </div>
+      <div class="limit-pill limit-pill--amber">
+        <div class="lp-val">10</div>
+        <div class="lp-unit">functions</div>
+        <div class="lp-label">max per<br>file</div>
+      </div>
+      <div class="limit-pill limit-pill--green">
+        <div class="lp-val">3</div>
+        <div class="lp-unit">levels</div>
+        <div class="lp-label">max dir<br>nesting</div>
+      </div>
+    </div>
+    <div class="callout" style="margin-top:14px">
+      <strong>Enforcement protocol:</strong> Before completing ANY file — count lines, count functions, check each function length, check param counts. If any limit is exceeded → <strong>STOP and refactor immediately.</strong> Never defer refactoring.
+    </div>
+  </div>
+
+  <div class="flow-arrow" style="--i:1">
+    <svg viewBox="0 0 20 20"><path d="M10 4 L10 16 M6 12 L10 16 L14 12"/></svg>
+    guided by
+  </div>
+
+  <!-- ── ARCHITECTURAL PATTERNS ── -->
+  <div class="section section--cyan" style="--i:2">
+    <div class="section-label"><span class="dot"></span> Architectural Patterns</div>
+    <div class="three-col">
+      <div class="ve-card ve-card--cyan">
+        <div class="title">Functional Core / Imperative Shell</div>
+        <div class="desc">Pure functions for business logic — no side effects, deterministic. Side effects only at boundaries (API, DB, FS).</div>
+      </div>
+      <div class="ve-card ve-card--blue">
+        <div class="title">Composition over Inheritance</div>
+        <div class="desc">No inheritance deeper than 1 level. Small, composable utilities. Dependency injection — pass deps, don't import directly.</div>
+      </div>
+      <div class="ve-card ve-card--amber">
+        <div class="title">Error Handling</div>
+        <div class="desc">Fail fast, fail loud. No silent failures. Every error is logged or thrown. Design APIs where misuse is impossible.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="flow-arrow" style="--i:3">
+    <svg viewBox="0 0 20 20"><path d="M10 4 L10 16 M6 12 L10 16 L14 12"/></svg>
+    implemented via
+  </div>
+
+  <!-- ── TDD WORKFLOW ── -->
+  <div class="section section--green" style="--i:4">
+    <div class="section-label"><span class="dot"></span> TDD Execution Workflow — Mandatory</div>
+    <div class="tdd-pipeline">
+      <div class="tdd-step tdd-step--red">
+        <div class="phase-label">1 · RED</div>
+        <div class="phase-desc">Write tests first.<br>Cover all criteria.<br>Run → ALL FAIL ✓</div>
+      </div>
+      <div class="tdd-arrow">→</div>
+      <div class="tdd-step tdd-step--green">
+        <div class="phase-label">2 · GREEN</div>
+        <div class="phase-desc">Write minimum code<br>to make tests pass.<br>Run → ALL PASS ✓</div>
+      </div>
+      <div class="tdd-arrow">→</div>
+      <div class="tdd-step tdd-step--amber">
+        <div class="phase-label">3 · VALIDATE</div>
+        <div class="phase-desc">Lint · Typecheck · Full<br>test suite · Coverage<br>≥ 80% threshold ✓</div>
+      </div>
+      <div class="tdd-arrow">→</div>
+      <div class="tdd-step tdd-step--blue">
+        <div class="phase-label">4 · COMPLETE</div>
+        <div class="phase-desc">All validations pass.<br>Move todo to<br>completed.md ✓</div>
+      </div>
+    </div>
+    <div class="callout" style="margin-top:14px">
+      <strong>Blocking conditions:</strong> Never mark complete if tests were skipped, tests didn't fail first, any test is failing, linter has errors, type checker has errors, or coverage dropped below threshold.
+    </div>
+  </div>
+
+  <!-- ── BUG FIX + DECISION FLOWS ── -->
+  <div class="two-col" style="--i:5">
+    <!-- Bug Fix Workflow -->
+    <div class="section section--amber">
+      <div class="section-label"><span class="dot"></span> Bug Fix Workflow</div>
+      <div class="tdd-pipeline" style="margin-top:0">
+        <div class="tdd-step tdd-step--blue" style="min-width:85px">
+          <div class="phase-label" style="font-size:10px">DIAGNOSE</div>
+          <div class="phase-desc">Run tests.<br>All pass but<br>bug exists?</div>
+        </div>
+        <div class="tdd-arrow">→</div>
+        <div class="tdd-step tdd-step--red" style="min-width:80px">
+          <div class="phase-label" style="font-size:10px">RED</div>
+          <div class="phase-desc">Write failing<br>test for the<br>exact bug</div>
+        </div>
+        <div class="tdd-arrow">→</div>
+        <div class="tdd-step tdd-step--green" style="min-width:80px">
+          <div class="phase-label" style="font-size:10px">GREEN</div>
+          <div class="phase-desc">Fix bug,<br>test must<br>now pass</div>
+        </div>
+        <div class="tdd-arrow">→</div>
+        <div class="tdd-step tdd-step--amber" style="min-width:80px">
+          <div class="phase-label" style="font-size:10px">VALIDATE</div>
+          <div class="phase-desc">Full suite,<br>no regression,<br>lint clean</div>
+        </div>
+      </div>
+      <div style="margin-top:10px; font-size:11px; color:var(--text-dim);">
+        <span class="tag tag--red">NEVER</span> fix a bug without writing a test first. If tests pass but bug exists → test gap identified.
+      </div>
+    </div>
+
+    <!-- Decision Checkpoints -->
+    <div class="section section--violet">
+      <div class="section-label"><span class="dot"></span> Session Checkpoint Decision Tree</div>
+      <div style="margin-top:4px">
+        <div class="decision-row">
+          <div class="decision-diamond">Decision made?</div>
+          <div class="decision-branches">
+            <div class="decision-branch"><span class="arrow">→ yes</span> <span class="dest dest--cyan">log to decisions.md</span></div>
+          </div>
+        </div>
+        <div class="decision-row">
+          <div class="decision-diamond">&gt;10 tool calls?</div>
+          <div class="decision-branches">
+            <div class="decision-branch"><span class="arrow">→ yes</span> <span class="dest dest--blue">full checkpoint</span></div>
+          </div>
+        </div>
+        <div class="decision-row">
+          <div class="decision-diamond">Major feature done?</div>
+          <div class="decision-branches">
+            <div class="decision-branch"><span class="arrow">→ yes</span> <span class="dest dest--violet">archive session</span></div>
+          </div>
+        </div>
+        <div class="decision-row">
+          <div class="decision-diamond">Otherwise?</div>
+          <div class="decision-branches">
+            <div class="decision-branch"><span class="arrow">→</span> <span class="dest dest--green">quick update</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── RALPH WIGGUM + QUALITY GATES ── -->
+  <div class="two-col" style="--i:6">
+    <!-- Automatic Iterative Mode -->
+    <div class="section section--cyan">
+      <div class="section-label"><span class="dot"></span> Auto Iterative Mode (Ralph Wiggum)</div>
+      <div class="decision-row" style="margin-top:4px">
+        <div class="decision-diamond">Task trivial?</div>
+        <div class="decision-branches">
+          <div class="decision-branch"><span class="arrow">→ yes</span> <span class="dest dest--green">normal response</span></div>
+          <div class="decision-branch"><span class="arrow">→ no</span> <span class="dest dest--blue">/ralph-loop</span></div>
+        </div>
+      </div>
+      <div class="sep" style="margin:12px 0"></div>
+      <ul class="ve-list">
+        <li><strong>New feature</strong> → <code>/ralph-loop</code> with TDD template</li>
+        <li><strong>Bug fix</strong> → <code>/ralph-loop</code> with bug fix template</li>
+        <li><strong>Refactoring</strong> → <code>/ralph-loop</code> with refactor template</li>
+        <li><strong>API development</strong> → <code>/ralph-loop</code> with API template</li>
+        <li><strong>Simple question</strong> → normal response, no loop</li>
+      </ul>
+      <div style="margin-top:10px; font-size:11px; color:var(--text-dim);">
+        Opt-out: <span class="tag tag--blue">"Just explain…"</span> <span class="tag tag--blue">"Quick fix…"</span> <span class="tag tag--blue">"Don't loop…"</span>
+      </div>
+    </div>
+
+    <!-- Quality Gates -->
+    <div class="section section--green">
+      <div class="section-label"><span class="dot"></span> Quality Gates</div>
+      <div class="two-col" style="gap:8px; margin-top:4px">
+        <div class="ve-card ve-card--green">
+          <div class="title">Coverage Threshold</div>
+          <div class="desc">Minimum <strong>80%</strong> code coverage. Business logic core aims for 100%. CI must fail below threshold.</div>
+        </div>
+        <div class="ve-card ve-card--blue">
+          <div class="title">Pre-Commit Hooks</div>
+          <div class="desc">All projects must run: linting (auto-fix), type checking, affected tests. Catches issues before CI.</div>
+        </div>
+        <div class="ve-card ve-card--amber">
+          <div class="title">Security Checks</div>
+          <div class="desc">No secrets in code. <code>.env</code> in <code>.gitignore</code>. Validate inputs with Zod. Parameterized queries only.</div>
+        </div>
+        <div class="ve-card ve-card--cyan">
+          <div class="title">Testing Layers</div>
+          <div class="desc">Unit · Integration · E2E. Test behavior not implementation. Each test runs in isolation.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── ANTI-PATTERNS ── -->
+  <div class="section section--red section--recessed" style="--i:7">
+    <div class="section-label"><span class="dot"></span> Anti-Patterns — Never Do These</div>
+    <div class="anti-list">
+      <div class="anti-item">global state</div>
+      <div class="anti-item">magic numbers / strings</div>
+      <div class="anti-item">deep nesting</div>
+      <div class="anti-item">long parameter lists</div>
+      <div class="anti-item">comments explaining "what"</div>
+      <div class="anti-item">dead code</div>
+      <div class="anti-item">copy-paste duplication</div>
+      <div class="anti-item">god objects / files</div>
+      <div class="anti-item">circular dependencies</div>
+      <div class="anti-item">premature optimization</div>
+      <div class="anti-item">large PRs</div>
+      <div class="anti-item">mixing refactoring with features</div>
+      <div class="anti-item">silent failures</div>
+      <div class="anti-item">untested code in CI</div>
+    </div>
+  </div>
+
+  <!-- ── ATOMIC TODOS ── -->
+  <div class="section section--violet" style="--i:8">
+    <div class="section-label"><span class="dot"></span> Atomic Todo Format</div>
+    <div class="four-col">
+      <div class="ve-card ve-card--violet">
+        <div class="title">Status</div>
+        <div class="desc"><code>pending</code> · <code>in-progress</code><br><code>blocked</code> · <code>done</code></div>
+      </div>
+      <div class="ve-card ve-card--blue">
+        <div class="title">Priority</div>
+        <div class="desc"><code>high</code> · <code>medium</code> · <code>low</code><br>drives sprint order</div>
+      </div>
+      <div class="ve-card ve-card--amber">
+        <div class="title">Estimate</div>
+        <div class="desc"><code>XS</code> · <code>S</code> · <code>M</code> · <code>L</code> · <code>XL</code><br>if &gt; M → break down</div>
+      </div>
+      <div class="ve-card ve-card--green">
+        <div class="title">Validation</div>
+        <div class="desc">Manual steps + automated test command. Every todo has measurable criteria.</div>
+      </div>
+    </div>
+    <div class="callout" style="margin-top:12px">
+      <strong>Rules:</strong> Each todo is atomic · testable · sized · independent · tracked. Move between <code>active.md</code> → <code>completed.md</code> only after all TDD validations pass.
+    </div>
+  </div>
+
+</div><!-- /diagram -->
+
+</body>
+</html>

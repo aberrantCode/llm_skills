@@ -632,3 +632,7 @@ Step 5: Complete original goal
 - [ ] Recovery paths defined
 - [ ] Metrics identified
 - [ ] E2E test linked
+
+## Diagram
+
+[View diagram](diagram.html)

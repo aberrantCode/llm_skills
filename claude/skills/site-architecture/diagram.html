@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Site Architecture — Skill Diagram</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --font-body: 'Nunito', system-ui, sans-serif;
+    --font-mono: 'Fira Code', 'SF Mono', Consolas, monospace;
+
+    --bg: #f2f7f5;
+    --surface: #ffffff;
+    --surface2: #eaf1ee;
+    --surface-elevated: #f8fbfa;
+    --border: rgba(10, 120, 80, 0.1);
+    --border-bright: rgba(10, 120, 80, 0.22);
+    --text: #0f2318;
+    --text-dim: #5a7668;
+
+    --green: #0a7850;
+    --green-dim: rgba(10, 120, 80, 0.08);
+    --teal: #0887a8;
+    --teal-dim: rgba(8, 135, 168, 0.08);
+    --sage: #4a8c5c;
+    --sage-dim: rgba(74, 140, 92, 0.08);
+    --amber: #c07800;
+    --amber-dim: rgba(192, 120, 0, 0.08);
+    --blue: #2058b8;
+    --blue-dim: rgba(32, 88, 184, 0.08);
+    --rose: #b83048;
+    --rose-dim: rgba(184, 48, 72, 0.08);
+    --violet: #6e3ab0;
+    --violet-dim: rgba(110, 58, 176, 0.08);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #091610;
+      --surface: #102018;
+      --surface2: #182e22;
+      --surface-elevated: #1e362a;
+      --border: rgba(80, 200, 140, 0.1);
+      --border-bright: rgba(80, 200, 140, 0.2);
+      --text: #d8ede4;
+      --text-dim: #7aaa90;
+      --green: #4ade80;
+      --green-dim: rgba(74, 222, 128, 0.12);
+      --teal: #22d3ee;
+      --teal-dim: rgba(34, 211, 238, 0.12);
+      --sage: #86efac;
+      --sage-dim: rgba(134, 239, 172, 0.12);
+      --amber: #fbbf24;
+      --amber-dim: rgba(251, 191, 36, 0.12);
+      --blue: #60a5fa;
+      --blue-dim: rgba(96, 165, 250, 0.12);
+      --rose: #fb7185;
+      --rose-dim: rgba(251, 113, 133, 0.12);
+      --violet: #c084fc;
+      --violet-dim: rgba(192, 132, 252, 0.12);
+    }
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    background-image:
+      radial-gradient(ellipse at 0% 30%, var(--green-dim) 0%, transparent 50%),
+      radial-gradient(ellipse at 100% 70%, var(--teal-dim) 0%, transparent 45%);
+    color: var(--text);
+    font-family: var(--font-body);
+    padding: 44px 40px;
+    min-height: 100vh;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .animate { animation: fadeUp 0.45s ease-out both; animation-delay: calc(var(--i, 0) * 0.07s); }
+  @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: 0.01ms !important; animation-delay: 0ms !important; } }
+
+  .header { max-width: 1100px; margin: 0 auto 40px; display: flex; align-items: flex-start; gap: 18px; }
+  .icon-box {
+    width: 54px; height: 54px;
+    background: linear-gradient(135deg, var(--green) 0%, var(--teal) 100%);
+    border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 26px; flex-shrink: 0;
+    box-shadow: 0 4px 16px var(--green-dim);
+  }
+  h1 { font-size: 36px; font-weight: 800; letter-spacing: -0.5px; line-height: 1.1; margin-bottom: 6px; }
+  .subtitle { color: var(--text-dim); font-size: 13px; font-family: var(--font-mono); }
+
+  .diagram { display: grid; grid-template-columns: 1fr; gap: 20px; max-width: 1100px; margin: 0 auto; }
+
+  .section { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 22px 26px; }
+  .section--hero { background: var(--surface-elevated); border-color: var(--border-bright); box-shadow: 0 4px 20px var(--green-dim); padding: 28px 32px; }
+  .section--recessed { background: var(--surface2); box-shadow: inset 0 1px 4px rgba(0,0,0,0.04); }
+
+  .section-label { font-family: var(--font-mono); font-size: 10.5px; font-weight: 500; text-transform: uppercase; letter-spacing: 1.6px; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
+
+  .section--green  { border-left: 3px solid var(--green); }  .section--green  .section-label { color: var(--green); }  .section--green  .dot { background: var(--green); }
+  .section--teal   { border-left: 3px solid var(--teal); }   .section--teal   .section-label { color: var(--teal); }   .section--teal   .dot { background: var(--teal); }
+  .section--sage   { border-left: 3px solid var(--sage); }   .section--sage   .section-label { color: var(--sage); }   .section--sage   .dot { background: var(--sage); }
+  .section--amber  { border-left: 3px solid var(--amber); }  .section--amber  .section-label { color: var(--amber); }  .section--amber  .dot { background: var(--amber); }
+  .section--blue   { border-left: 3px solid var(--blue); }   .section--blue   .section-label { color: var(--blue); }   .section--blue   .dot { background: var(--blue); }
+  .section--rose   { border-left: 3px solid var(--rose); }   .section--rose   .section-label { color: var(--rose); }   .section--rose   .dot { background: var(--rose); }
+  .section--violet { border-left: 3px solid var(--violet); } .section--violet .section-label { color: var(--violet); } .section--violet .dot { background: var(--violet); }
+
+  /* Bot discovery grid */
+  .crawlers { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+  .crawler-card { background: var(--surface2); border: 1px solid var(--border); border-radius: 9px; padding: 13px 14px; text-align: center; }
+  .crawler-card .bot-emoji { font-size: 22px; margin-bottom: 6px; }
+  .crawler-card .bot-name { font-weight: 700; font-size: 12px; margin-bottom: 3px; }
+  .crawler-card .bot-ua { font-family: var(--font-mono); font-size: 10px; color: var(--text-dim); }
+  .crawler-card--allow { border-top: 3px solid var(--green); }
+  .crawler-card--block  { border-top: 3px solid var(--rose); opacity: 0.7; }
+  .crawler-card--opt    { border-top: 3px solid var(--amber); }
+
+  /* Checklist group */
+  .check-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+  .check-col .check-title { font-family: var(--font-mono); font-size: 10.5px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; color: var(--text-dim); margin-bottom: 10px; }
+  .checklist { list-style: none; font-size: 12px; line-height: 1.9; }
+  .checklist li { padding-left: 18px; position: relative; color: var(--text-dim); }
+  .checklist li::before { content: '☐'; position: absolute; left: 0; color: var(--green); font-size: 11px; }
+
+  /* Two-col / three-col */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+
+  .inner-card { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 13px 16px; margin-bottom: 10px; }
+  .inner-card:last-child { margin-bottom: 0; }
+  .inner-card .ic-title { font-weight: 700; font-size: 12.5px; margin-bottom: 5px; }
+  .inner-card .ic-desc { color: var(--text-dim); font-size: 11.5px; line-height: 1.55; }
+  .inner-card code { font-family: var(--font-mono); font-size: 10.5px; background: var(--green-dim); color: var(--green); padding: 1px 5px; border-radius: 3px; }
+
+  /* Metric table */
+  .metric-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  .metric-card { background: var(--surface2); border: 1px solid var(--border); border-radius: 9px; padding: 14px; text-align: center; }
+  .metric-card .metric-label { font-family: var(--font-mono); font-size: 10.5px; color: var(--text-dim); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.8px; }
+  .metric-card .metric-good { font-size: 18px; font-weight: 800; color: var(--green); }
+  .metric-card .metric-warn { font-size: 13px; color: var(--amber); margin-top: 2px; }
+  .metric-card .metric-bad  { font-size: 13px; color: var(--rose); margin-top: 2px; }
+
+  .node-list { list-style: none; font-size: 12px; line-height: 1.9; }
+  .node-list li { padding-left: 16px; position: relative; color: var(--text-dim); }
+  .node-list li::before { content: '›'; color: var(--green); font-weight: 700; position: absolute; left: 0; }
+  .node-list code { font-family: var(--font-mono); font-size: 10.5px; background: var(--green-dim); color: var(--green); padding: 1px 5px; border-radius: 3px; }
+  .node-list strong { color: var(--text); }
+
+  .flow-arrow { display: flex; justify-content: center; align-items: center; gap: 8px; color: var(--text-dim); font-family: var(--font-mono); font-size: 11px; padding: 2px 0; }
+  .flow-arrow svg { width: 18px; height: 18px; fill: none; stroke: var(--border-bright); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+  .callout { background: var(--surface2); border: 1px solid var(--border); border-left: 3px solid var(--green); border-radius: 0 9px 9px 0; padding: 13px 18px; font-size: 12.5px; line-height: 1.65; color: var(--text-dim); }
+  .callout strong { color: var(--text); }
+  .callout code { font-family: var(--font-mono); font-size: 11px; background: var(--green-dim); color: var(--green); padding: 1px 5px; border-radius: 3px; }
+
+  @media (max-width: 768px) {
+    body { padding: 20px; }
+    .crawlers { grid-template-columns: 1fr 1fr; }
+    .check-grid, .three-col, .metric-row { grid-template-columns: 1fr; }
+    .two-col { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header animate" style="--i:0">
+  <div class="icon-box">🏗️</div>
+  <div>
+    <h1>Site Architecture</h1>
+    <p class="subtitle">site-architecture skill &mdash; robots.txt, sitemap, meta tags, Core Web Vitals, AI crawlers</p>
+  </div>
+</div>
+
+<div class="diagram">
+
+  <!-- Philosophy -->
+  <div class="section section--hero animate" style="--i:1">
+    <div class="section-label"><span class="dot" style="background:var(--text-dim)"></span> Philosophy</div>
+    <div style="font-size:15px; font-weight:700; margin-bottom:8px">Content is king. Architecture is the kingdom.</div>
+    <div style="color:var(--text-dim); font-size:13px; line-height:1.7">
+      Great content buried in poor architecture won't be discovered. This skill covers the technical foundation that makes your content findable by
+      <strong style="color:var(--green)">Google, Bing</strong> (traditional search),
+      <strong style="color:var(--teal)">GPTBot, ClaudeBot, PerplexityBot</strong> (AI assistants), and
+      <strong style="color:var(--blue)">social platforms</strong> (Open Graph, Twitter Cards).
+    </div>
+  </div>
+
+  <!-- AI Crawlers -->
+  <div class="section section--teal animate" style="--i:2">
+    <div class="section-label"><span class="dot"></span> Known AI &amp; Search Crawlers — robots.txt Config</div>
+    <div class="crawlers">
+      <div class="crawler-card crawler-card--allow">
+        <div class="bot-emoji">🤖</div>
+        <div class="bot-name">GPTBot</div>
+        <div class="bot-ua">ChatGPT browsing</div>
+      </div>
+      <div class="crawler-card crawler-card--allow">
+        <div class="bot-emoji">🔵</div>
+        <div class="bot-name">ClaudeBot</div>
+        <div class="bot-ua">Claude web access</div>
+      </div>
+      <div class="crawler-card crawler-card--allow">
+        <div class="bot-emoji">🔍</div>
+        <div class="bot-name">PerplexityBot</div>
+        <div class="bot-ua">Perplexity search</div>
+      </div>
+      <div class="crawler-card crawler-card--allow">
+        <div class="bot-emoji">✨</div>
+        <div class="bot-name">Google-Extended</div>
+        <div class="bot-ua">Gemini / Bard</div>
+      </div>
+      <div class="crawler-card crawler-card--allow">
+        <div class="bot-emoji">🌐</div>
+        <div class="bot-name">Googlebot</div>
+        <div class="bot-ua">Google Search</div>
+      </div>
+      <div class="crawler-card crawler-card--allow">
+        <div class="bot-emoji">🔎</div>
+        <div class="bot-name">Bingbot</div>
+        <div class="bot-ua">Bing Search</div>
+      </div>
+      <div class="crawler-card crawler-card--opt">
+        <div class="bot-emoji">🗄️</div>
+        <div class="bot-name">CCBot</div>
+        <div class="bot-ua">Common Crawl (training)</div>
+      </div>
+      <div class="crawler-card crawler-card--block">
+        <div class="bot-emoji">🚫</div>
+        <div class="bot-name">AhrefsBot</div>
+        <div class="bot-ua">SEO scraper — block</div>
+      </div>
+    </div>
+    <div style="margin-top:12px; font-size:11.5px; color:var(--text-dim)">
+      Allow AI discovery bots &mdash; optionally block CCBot to prevent training data inclusion. Always include <code style="font-family:var(--font-mono);font-size:10.5px;background:var(--teal-dim);color:var(--teal);padding:1px 5px;border-radius:3px">Sitemap:</code> directive.
+    </div>
+  </div>
+
+  <div class="flow-arrow animate" style="--i:3">
+    <svg viewBox="0 0 20 20"><path d="M10 4 L10 16 M6 12 L10 16 L14 12"/></svg>
+    sitemap + meta tags
+  </div>
+
+  <!-- Sitemap + Meta Tags -->
+  <div class="two-col animate" style="--i:4">
+    <div class="section section--green">
+      <div class="section-label"><span class="dot"></span> Sitemap</div>
+      <div class="inner-card">
+        <div class="ic-title">Dynamic Next.js Sitemap</div>
+        <div class="ic-desc"><code>app/sitemap.ts</code> returns <code>MetadataRoute.Sitemap</code>. Static pages + dynamic blog posts with <code>lastModified</code>, <code>changeFrequency</code>, <code>priority</code>.</div>
+      </div>
+      <div class="inner-card">
+        <div class="ic-title">Sitemap Index (Large Sites)</div>
+        <div class="ic-desc">Split into <code>sitemap-pages.xml</code>, <code>sitemap-blog.xml</code>, <code>sitemap-products.xml</code>. Reference all from root <code>sitemapindex</code>.</div>
+      </div>
+      <div class="inner-card" style="margin-bottom:0">
+        <div class="ic-title">Priority Guidelines</div>
+        <div class="ic-desc">Homepage: 1.0 · Pricing: 0.9 · About: 0.8 · Contact: 0.7 · Blog posts: 0.8 · Tags/categories: 0.6</div>
+      </div>
+    </div>
+    <div class="section section--blue">
+      <div class="section-label"><span class="dot"></span> Meta Tags</div>
+      <div class="inner-card">
+        <div class="ic-title">Essential Tags</div>
+        <div class="ic-desc">charset, viewport, title (50–60 chars), description (150–160 chars), canonical, lang, robots.</div>
+      </div>
+      <div class="inner-card">
+        <div class="ic-title">Open Graph</div>
+        <div class="ic-desc">og:type, og:url, og:title, og:description, og:image (1200×630), og:site_name. Article: +published_time, modified_time.</div>
+      </div>
+      <div class="inner-card" style="margin-bottom:0">
+        <div class="ic-title">Twitter Cards</div>
+        <div class="ic-desc"><code>summary_large_image</code> card type. twitter:site, twitter:creator, title, description, image.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- URL Structure + Redirects -->
+  <div class="two-col animate" style="--i:5">
+    <div class="section section--sage">
+      <div class="section-label"><span class="dot"></span> URL Structure</div>
+      <ul class="node-list">
+        <li><strong>Lowercase only</strong> — <code>/blog/my-post</code> not <code>/Blog/My-Post</code></li>
+        <li><strong>Hyphens not underscores</strong> — <code>/my-page</code> not <code>/my_page</code></li>
+        <li><strong>No trailing slashes</strong> — configure 301 redirect</li>
+        <li><strong>Descriptive slugs</strong> — <code>/pricing</code> not <code>/p</code></li>
+        <li><strong>No query params for content</strong> — <code>/blog/title</code> not <code>?id=123</code></li>
+        <li><strong>Max 3–4 levels deep</strong> — <code>/blog/category/post</code></li>
+      </ul>
+    </div>
+    <div class="section section--amber">
+      <div class="section-label"><span class="dot"></span> Canonical &amp; Redirects</div>
+      <ul class="node-list">
+        <li><strong>Every page</strong> needs a canonical — even if it's the primary URL</li>
+        <li><strong>UTM params</strong> — canonical to clean URL (<code>?utm_source</code> stripped)</li>
+        <li><strong>HTTP → HTTPS</strong> — 301 redirect + canonical to HTTPS</li>
+        <li><strong>www vs non-www</strong> — pick one, canonical everywhere</li>
+        <li><strong>Pagination</strong> — canonical page 2+ to page 1 or use rel=prev/next</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="flow-arrow animate" style="--i:6">
+    <svg viewBox="0 0 20 20"><path d="M10 4 L10 16 M6 12 L10 16 L14 12"/></svg>
+    core web vitals
+  </div>
+
+  <!-- Core Web Vitals -->
+  <div class="section section--rose animate" style="--i:7">
+    <div class="section-label"><span class="dot"></span> Core Web Vitals Targets</div>
+    <div class="metric-row" style="margin-bottom:16px">
+      <div class="metric-card">
+        <div class="metric-label">LCP — Largest Contentful Paint</div>
+        <div class="metric-good">≤ 2.5s</div>
+        <div class="metric-warn">≤ 4.0s needs work</div>
+        <div class="metric-bad">&gt; 4.0s poor</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">INP — Interaction to Next Paint</div>
+        <div class="metric-good">≤ 200ms</div>
+        <div class="metric-warn">≤ 500ms needs work</div>
+        <div class="metric-bad">&gt; 500ms poor</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-label">CLS — Cumulative Layout Shift</div>
+        <div class="metric-good">≤ 0.1</div>
+        <div class="metric-warn">≤ 0.25 needs work</div>
+        <div class="metric-bad">&gt; 0.25 poor</div>
+      </div>
+    </div>
+    <div class="check-grid">
+      <div class="check-col">
+        <div class="check-title">LCP Fixes</div>
+        <ul class="checklist">
+          <li>Optimize largest image (WebP)</li>
+          <li>Preload critical assets</li>
+          <li>CDN for static assets</li>
+          <li>Enable gzip/brotli compression</li>
+          <li>Minimize render-blocking JS</li>
+        </ul>
+      </div>
+      <div class="check-col">
+        <div class="check-title">INP Fixes</div>
+        <ul class="checklist">
+          <li>Minimize JS execution time</li>
+          <li>Break up long tasks</li>
+          <li>Web workers for heavy compute</li>
+          <li>Optimize event handlers</li>
+          <li>Lazy load non-critical JS</li>
+        </ul>
+      </div>
+      <div class="check-col">
+        <div class="check-title">CLS Fixes</div>
+        <ul class="checklist">
+          <li>Set dimensions on images/videos</li>
+          <li>Reserve space for dynamic content</li>
+          <li>Avoid inserting content above fold</li>
+          <li>Use transform for animations</li>
+          <li>Preload fonts with display: swap</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Security Headers + Verification -->
+  <div class="two-col animate" style="--i:8">
+    <div class="section section--violet">
+      <div class="section-label"><span class="dot"></span> Security Headers</div>
+      <ul class="node-list">
+        <li><code>Strict-Transport-Security</code> — HSTS, includeSubDomains, preload</li>
+        <li><code>X-Frame-Options</code> — SAMEORIGIN (prevent clickjacking)</li>
+        <li><code>X-Content-Type-Options</code> — nosniff</li>
+        <li><code>Referrer-Policy</code> — strict-origin-when-cross-origin</li>
+        <li><code>Permissions-Policy</code> — restrict camera, mic, geolocation</li>
+      </ul>
+    </div>
+    <div class="section section--teal">
+      <div class="section-label"><span class="dot"></span> Verification &amp; Submission</div>
+      <ul class="node-list">
+        <li><strong>Google Search Console</strong> — verify via DNS TXT or HTML file</li>
+        <li><strong>Submit sitemap</strong> — GSC → Sitemaps → Add <code>/sitemap.xml</code></li>
+        <li><strong>Bing Webmaster</strong> — submit sitemap separately</li>
+        <li><strong>Rich Results Test</strong> — validate structured data</li>
+        <li><strong>robots.txt tester</strong> — use Google's built-in tester</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Callout -->
+  <div class="section section--recessed animate" style="--i:9">
+    <div class="callout">
+      <strong>Required public files:</strong> <code>public/robots.txt</code> or <code>app/robots.ts</code> &mdash; <code>public/sitemap.xml</code> or <code>app/sitemap.ts</code> &mdash; <code>public/favicon.ico</code> &mdash; <code>public/og-image.jpg</code> (1200×630) &mdash; <code>public/apple-touch-icon.png</code> (180×180) &mdash; <code>public/manifest.webmanifest</code>.
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

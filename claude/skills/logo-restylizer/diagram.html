@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Logo Restylizer Skill — Workflow</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=Syne+Mono&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #f0ede8;
+      --surface: #ffffff;
+      --surface-2: #ebe7e0;
+      --border: rgba(0,0,0,0.10);
+      --border-bright: rgba(0,0,0,0.18);
+      --text: #1a1510;
+      --text-dim: #7a6e5e;
+      --ink: #2a2018;
+      --red: #c0392b;
+      --red-dim: rgba(192,57,43,0.10);
+      --blue: #1a4d7a;
+      --blue-dim: rgba(26,77,122,0.10);
+      --green: #1a6640;
+      --green-dim: rgba(26,102,64,0.10);
+      --amber: #b5821a;
+      --amber-dim: rgba(181,130,26,0.10);
+      --font-body: 'Syne', system-ui, sans-serif;
+      --font-mono: 'Syne Mono', 'Courier New', monospace;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--font-body);
+      background: var(--bg);
+      background-image: repeating-linear-gradient(
+        -45deg, transparent, transparent 30px,
+        rgba(0,0,0,0.025) 30px, rgba(0,0,0,0.025) 31px
+      );
+      color: var(--text);
+      padding: 48px 24px 80px;
+    }
+
+    header {
+      max-width: 860px;
+      margin: 0 auto 52px;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: start;
+      gap: 24px;
+    }
+
+    h1 {
+      font-size: 3.2rem;
+      font-weight: 800;
+      letter-spacing: -0.05em;
+      line-height: 1.0;
+      margin-bottom: 14px;
+    }
+
+    .tagline {
+      font-size: 0.95rem;
+      color: var(--text-dim);
+      max-width: 420px;
+      line-height: 1.6;
+    }
+
+    .format-badges {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      align-items: flex-end;
+    }
+
+    .format-badge {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      padding: 4px 12px;
+      border-radius: 4px;
+      font-weight: 400;
+    }
+
+    .format-badge.svg { background: var(--blue-dim); color: var(--blue); border: 1px solid var(--blue); }
+    .format-badge.raster { background: var(--green-dim); color: var(--green); border: 1px solid var(--green); }
+
+    main {
+      max-width: 860px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    /* Numbered pipeline steps */
+    .pipeline {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      animation: fadeUp 0.35s ease both;
+    }
+
+    .step {
+      display: grid;
+      grid-template-columns: 52px 1fr;
+      background: var(--surface);
+      border: 1px solid var(--border-bright);
+      border-radius: 10px;
+      overflow: hidden;
+      min-width: 0;
+    }
+
+    .step-num {
+      background: var(--ink);
+      color: #f0ede8;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      flex-shrink: 0;
+    }
+
+    .step-body {
+      padding: 14px 18px;
+      min-width: 0;
+    }
+
+    .step-title {
+      font-size: 0.9rem;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .step-detail {
+      font-size: 0.76rem;
+      color: var(--text-dim);
+      line-height: 1.5;
+      min-width: 0;
+      overflow-wrap: break-word;
+    }
+
+    .step-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      margin-top: 6px;
+    }
+
+    .step-tag {
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      padding: 2px 8px;
+      border-radius: 3px;
+      background: var(--surface-2);
+      color: var(--text-dim);
+    }
+
+    /* Decision branches */
+    .branches {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      animation: fadeUp 0.35s 0.1s ease both;
+    }
+
+    .branch-card {
+      background: var(--surface);
+      border: 1px solid var(--border-bright);
+      border-radius: 10px;
+      padding: 16px 18px;
+      min-width: 0;
+    }
+
+    .branch-card h3 {
+      font-size: 0.88rem;
+      font-weight: 700;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .branch-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .branch-dot.svg { background: var(--blue); }
+    .branch-dot.raster { background: var(--green); }
+
+    .branch-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .branch-list li {
+      font-size: 0.76rem;
+      color: var(--text-dim);
+      padding: 5px 10px;
+      background: var(--surface-2);
+      border-radius: 5px;
+      min-width: 0;
+      overflow-wrap: break-word;
+    }
+
+    /* Review loop states */
+    .review-loop {
+      background: var(--surface);
+      border: 1px solid var(--border-bright);
+      border-radius: 10px;
+      padding: 20px 22px;
+      animation: fadeUp 0.35s 0.2s ease both;
+    }
+
+    .review-loop h2 {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--amber);
+      margin-bottom: 14px;
+    }
+
+    .review-states {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+
+    .state-card {
+      border-radius: 8px;
+      padding: 12px 14px;
+      min-width: 0;
+    }
+    .state-card.ok { background: var(--green-dim); border: 1px solid rgba(26,102,64,0.2); }
+    .state-card.change { background: var(--amber-dim); border: 1px solid rgba(181,130,26,0.2); }
+    .state-card.abandon { background: var(--red-dim); border: 1px solid rgba(192,57,43,0.2); }
+
+    .state-card .state-label {
+      font-family: var(--font-mono);
+      font-size: 9px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+    .state-card.ok .state-label { color: var(--green); }
+    .state-card.change .state-label { color: var(--amber); }
+    .state-card.abandon .state-label { color: var(--red); }
+
+    .state-card h4 {
+      font-size: 0.84rem;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .state-card p {
+      font-size: 0.72rem;
+      color: var(--text-dim);
+      line-height: 1.4;
+      min-width: 0;
+      overflow-wrap: break-word;
+    }
+
+    /* Edge cases */
+    .edge-cases {
+      background: var(--surface);
+      border: 1px solid var(--border-bright);
+      border-radius: 10px;
+      padding: 20px 22px;
+      animation: fadeUp 0.35s 0.3s ease both;
+    }
+
+    .edge-cases h2 {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--red);
+      margin-bottom: 14px;
+    }
+
+    .edge-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 6px;
+    }
+
+    .edge-item {
+      background: var(--surface-2);
+      border-radius: 6px;
+      padding: 8px 12px;
+      font-size: 0.75rem;
+      color: var(--text-dim);
+      min-width: 0;
+      overflow-wrap: break-word;
+    }
+
+    .edge-item strong {
+      display: block;
+      font-size: 0.78rem;
+      color: var(--text);
+      margin-bottom: 2px;
+    }
+
+    @media (max-width: 640px) {
+      header { grid-template-columns: 1fr; }
+      .format-badges { align-items: flex-start; flex-direction: row; }
+      .branches { grid-template-columns: 1fr; }
+      .review-states { grid-template-columns: 1fr; }
+      h1 { font-size: 2.2rem; }
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(12px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @media (prefers-reduced-motion: reduce) { * { animation: none !important; } }
+  </style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>Logo<br>Restylizer</h1>
+    <p class="tagline">Creates styled variants of existing logos and icons, previews with the user, iterates on feedback, and propagates accepted designs across the codebase.</p>
+  </div>
+  <div class="format-badges">
+    <div class="format-badge svg">SVG (preferred)</div>
+    <div class="format-badge raster">PNG/JPG/WebP</div>
+  </div>
+</header>
+
+<main>
+
+  <!-- Pipeline steps -->
+  <div class="pipeline">
+    <div class="step">
+      <div class="step-num">01</div>
+      <div class="step-body">
+        <div class="step-title">Extract Intent from Prompt</div>
+        <div class="step-detail">Two required signals: source image path + transformation intent. If either is absent, use AskUserQuestion — never ask as plain text. Ask once, combining all missing questions.</div>
+        <div class="step-tags">
+          <span class="step-tag">AskUserQuestion</span>
+          <span class="step-tag">source image path</span>
+          <span class="step-tag">transformation intent</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">02</div>
+      <div class="step-body">
+        <div class="step-title">Locate and Read Source File</div>
+        <div class="step-detail">Use Glob or Read to find the file. If ambiguous, search assets/ recursively. Determine type: SVG (read contents, transform directly) or raster (Python/Pillow script).</div>
+        <div class="step-tags">
+          <span class="step-tag">Glob</span>
+          <span class="step-tag">Read</span>
+          <span class="step-tag">SVG vs raster decision</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">03</div>
+      <div class="step-body">
+        <div class="step-title">Apply Transformation</div>
+        <div class="step-detail">SVG: edit XML directly (fill/stroke replacements, filter elements, gradient stops). Raster: Python + Pillow script. Preserve viewBox, xmlns, all geometry.</div>
+        <div class="step-tags">
+          <span class="step-tag">Edit SVG XML</span>
+          <span class="step-tag">Pillow for raster</span>
+          <span class="step-tag">Preserve filter IDs</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">04</div>
+      <div class="step-body">
+        <div class="step-title">Determine Output Path</div>
+        <div class="step-detail">Default: same dir as source + descriptive suffix (e.g., -dark, -amber-neon). Revision passes: overwrite working file, no new copy per iteration.</div>
+        <div class="step-tags">
+          <span class="step-tag">homeradar-logo-dark.svg</span>
+          <span class="step-tag">app-icon-restyled.png</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">05</div>
+      <div class="step-body">
+        <div class="step-title">Write Output + Update Assets Registry</div>
+        <div class="step-detail">Write file via Write tool. Locate docs/assets.md — add/update row in category table, or create the registry if it doesn't exist. Skip registry on revision passes.</div>
+        <div class="step-tags">
+          <span class="step-tag">Write tool</span>
+          <span class="step-tag">docs/assets.md</span>
+          <span class="step-tag">table format</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">06</div>
+      <div class="step-body">
+        <div class="step-title">Preview and Review Loop</div>
+        <div class="step-detail">Open file with system viewer (cmd.exe start / open / xdg-open). Use AskUserQuestion with 3 choices: Looks good / I'd like changes / Abandon. Repeat until accepted or abandoned.</div>
+        <div class="step-tags">
+          <span class="step-tag">AskUserQuestion</span>
+          <span class="step-tag">cmd.exe start</span>
+          <span class="step-tag">iterate until satisfied</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">07</div>
+      <div class="step-body">
+        <div class="step-title">Propagate to All Usages (Optional)</div>
+        <div class="step-detail">If user accepts: search for all references via Grep, generate each required variant (SVG copies, PNG sizes for manifests, cairosvg for raster exports), update all source file references.</div>
+        <div class="step-tags">
+          <span class="step-tag">Grep all references</span>
+          <span class="step-tag">manifest.json icons</span>
+          <span class="step-tag">cairosvg for PNG</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SVG vs Raster branches -->
+  <div class="branches">
+    <div class="branch-card">
+      <h3><span class="branch-dot svg"></span>SVG Path — Preferred</h3>
+      <ul class="branch-list">
+        <li>Color: replace fill/stroke/stop-color values</li>
+        <li>Neon/glow: add feGaussianBlur + feMerge filter</li>
+        <li>Dark/light: swap background fills, invert foreground</li>
+        <li>Theme: replace entire color palette</li>
+        <li>Preserve viewBox, xmlns, all geometry</li>
+        <li>Update filter="url(#...)" references if renamed</li>
+      </ul>
+    </div>
+
+    <div class="branch-card">
+      <h3><span class="branch-dot raster"></span>Raster Path — PNG/JPG/WebP</h3>
+      <ul class="branch-list">
+        <li>Write Python script using Pillow</li>
+        <li>Run via Bash tool</li>
+        <li>If Pillow unavailable: inform user, suggest SVG conversion</li>
+        <li>Propagation: cairosvg for SVG-to-PNG at specific sizes</li>
+        <li>Resize with aspect-ratio preservation</li>
+        <li>Handles manifest icon arrays (16/32/48/128px)</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Review loop outcomes -->
+  <div class="review-loop">
+    <h2>Review Loop Outcomes</h2>
+    <div class="review-states">
+      <div class="state-card ok">
+        <div class="state-label">Accepted</div>
+        <h4>Looks Good</h4>
+        <p>Proceed to propagation prompt. Update assets registry. End turn if no propagation.</p>
+      </div>
+      <div class="state-card change">
+        <div class="state-label">Revision</div>
+        <h4>I'd Like Changes</h4>
+        <p>Return to Step 1. Working file is the new source. Changes accumulate, don't restart.</p>
+      </div>
+      <div class="state-card abandon">
+        <div class="state-label">Abandoned</div>
+        <h4>Delete File</h4>
+        <p>rm output file. Remove entry from docs/assets.md. Respond "Deleted. No changes kept."</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Edge cases -->
+  <div class="edge-cases">
+    <h2>Edge Cases</h2>
+    <div class="edge-grid">
+      <div class="edge-item">
+        <strong>Source not found</strong>
+        Use Glob to search; if still absent, AskUserQuestion
+      </div>
+      <div class="edge-item">
+        <strong>Ambiguous transformation</strong>
+        AskUserQuestion for visual direction
+      </div>
+      <div class="edge-item">
+        <strong>User wants to overwrite original</strong>
+        Confirm with AskUserQuestion first
+      </div>
+      <div class="edge-item">
+        <strong>Pillow unavailable</strong>
+        Inform user; suggest install or SVG conversion
+      </div>
+      <div class="edge-item">
+        <strong>cairosvg unavailable</strong>
+        Notify for that format; continue with others
+      </div>
+      <div class="edge-item">
+        <strong>Headless/remote environment</strong>
+        State file path; continue with review prompt
+      </div>
+    </div>
+  </div>
+
+</main>
+
+</body>
+</html>

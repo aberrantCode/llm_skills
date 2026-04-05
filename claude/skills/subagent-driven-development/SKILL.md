@@ -238,3 +238,7 @@ Done!
 
 **Alternative workflow:**
 - **superpowers:executing-plans** - Use for parallel session instead of same-session execution
+
+## Diagram
+
+[View diagram](diagram.html)

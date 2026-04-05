@@ -551,3 +551,7 @@ const ItemPage = lazy(() => import('./pages/Item'));
 - ❌ Large components (>100 lines) - split into smaller pieces
 - ❌ CSS in JS objects - use CSS modules or Tailwind
 - ❌ Ignoring TypeScript errors - fix them
+
+## Diagram
+
+[View diagram](diagram.html)

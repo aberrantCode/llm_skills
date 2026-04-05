@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Python Skill — ruff · mypy · pytest</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Red+Hat+Display:wght@400;500;600;700&family=Red+Hat+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ============ THEME — Gruvbox Dark ============ */
+:root {
+  --font-body: 'Red Hat Display', system-ui, sans-serif;
+  --font-mono: 'Red Hat Mono', 'SF Mono', Consolas, monospace;
+
+  --bg:        #282828;
+  --surface:   #32302f;
+  --surface2:  #3c3836;
+  --surface3:  #504945;
+  --border:    rgba(235,219,178,0.08);
+  --border-bright: rgba(235,219,178,0.18);
+  --text:      #ebdbb2;
+  --text-dim:  #a89984;
+
+  --yellow: #d79921;  /* Gruvbox yellow */
+  --yellow-dim: rgba(215,153,33,0.12);
+  --orange: #d65d0e;  /* Gruvbox orange */
+  --orange-dim: rgba(214,93,14,0.12);
+  --green:  #98971a;  /* Gruvbox green */
+  --green-dim: rgba(152,151,26,0.12);
+  --aqua:   #689d6a;  /* Gruvbox aqua */
+  --aqua-dim: rgba(104,157,106,0.12);
+  --blue:   #458588;  /* Gruvbox blue */
+  --blue-dim: rgba(69,133,136,0.12);
+  --red:    #cc241d;  /* Gruvbox red */
+  --red-dim: rgba(204,36,29,0.12);
+  --purple: #b16286;  /* Gruvbox purple */
+  --purple-dim: rgba(177,98,134,0.12);
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    --bg:        #fbf1c7;
+    --surface:   #f9f5d7;
+    --surface2:  #f2e5bc;
+    --surface3:  #ebdbb2;
+    --border:    rgba(60,56,54,0.10);
+    --border-bright: rgba(60,56,54,0.20);
+    --text:      #3c3836;
+    --text-dim:  #7c6f64;
+
+    --yellow: #b57614;
+    --yellow-dim: rgba(181,118,20,0.10);
+    --orange: #af3a03;
+    --orange-dim: rgba(175,58,3,0.10);
+    --green:  #79740e;
+    --green-dim: rgba(121,116,14,0.10);
+    --aqua:   #427b58;
+    --aqua-dim: rgba(66,123,88,0.10);
+    --blue:   #076678;
+    --blue-dim: rgba(7,102,120,0.10);
+    --red:    #9d0006;
+    --red-dim: rgba(157,0,6,0.10);
+    --purple: #8f3f71;
+    --purple-dim: rgba(143,63,113,0.10);
+  }
+}
+
+/* ============ RESET ============ */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  background-color: var(--bg);
+  background-image:
+    radial-gradient(ellipse at 15% 10%, var(--yellow-dim) 0%, transparent 45%),
+    radial-gradient(ellipse at 85% 85%, var(--blue-dim) 0%, transparent 40%);
+  color: var(--text);
+  font-family: var(--font-body);
+  padding: 48px 40px;
+  min-height: 100vh;
+  overflow-wrap: break-word;
+}
+
+/* ============ ANIMATIONS ============ */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.anim {
+  animation: fadeUp 0.45s ease-out both;
+  animation-delay: calc(var(--i, 0) * 0.06s);
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; animation-delay: 0ms !important; }
+}
+
+/* ============ LAYOUT ============ */
+.container { max-width: 1060px; margin: 0 auto; }
+
+/* ============ HEADER ============ */
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--yellow);
+  background: var(--yellow-dim);
+  border: 1px solid rgba(215,153,33,0.28);
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 4px;
+  margin-bottom: 14px;
+}
+
+h1 {
+  font-size: 42px;
+  font-weight: 700;
+  letter-spacing: -1px;
+  margin-bottom: 4px;
+  line-height: 1.05;
+}
+h1 .py { color: var(--yellow); }
+h1 .tools { font-size: 22px; font-weight: 400; color: var(--text-dim); }
+
+.tagline {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-dim);
+  margin-bottom: 36px;
+}
+
+/* ============ THREE-COL TOP ============ */
+.top-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 14px;
+  margin-bottom: 16px;
+}
+@media (max-width: 760px) { .top-row { grid-template-columns: 1fr; } }
+
+/* ============ SECTION CARD ============ */
+.sec {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 18px 20px;
+  min-width: 0;
+}
+
+.sec-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.sec-label .dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+
+/* ============ TOOL LIST ============ */
+.tool-list { display: flex; flex-direction: column; gap: 7px; }
+.tool-row {
+  display: flex; align-items: baseline; gap: 8px;
+  background: var(--surface2); border-radius: 6px; padding: 7px 10px; min-width: 0;
+}
+.tool-name { font-family: var(--font-mono); font-size: 11px; flex-shrink: 0; }
+.tool-detail { font-family: var(--font-mono); font-size: 11px; color: var(--text-dim); min-width: 0; overflow-wrap: break-word; }
+
+/* ============ FILE TREE ============ */
+.tree {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 1.9;
+  color: var(--text-dim);
+}
+.tree .dir { color: var(--aqua); font-weight: 500; }
+.tree .hl  { color: var(--yellow); }
+.tree .cm  { opacity: 0.5; }
+
+/* ============ CI PIPELINE ============ */
+.pipeline {
+  display: flex; align-items: stretch; gap: 0;
+  overflow-x: auto; padding-bottom: 4px;
+}
+.pipe-step {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 5px; background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 8px; padding: 12px 14px; flex-shrink: 0; min-width: 90px;
+}
+.pipe-label { font-family: var(--font-mono); font-size: 11px; color: var(--text-dim); text-align: center; line-height: 1.3; }
+.pipe-cmd   { font-family: var(--font-mono); font-size: 10px; text-align: center; }
+.pipe-arrow {
+  font-family: var(--font-mono); font-size: 18px; color: var(--text-dim);
+  padding: 0 5px; flex-shrink: 0; display: flex; align-items: center;
+}
+
+/* ============ PATTERNS GRID ============ */
+.patterns-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+@media (max-width: 720px) { .patterns-grid { grid-template-columns: 1fr; } }
+
+.pattern-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px 18px;
+  min-width: 0;
+}
+.pattern-title {
+  font-family: var(--font-mono); font-size: 11px; font-weight: 500;
+  margin-bottom: 7px;
+}
+.pattern-body { font-size: 13px; color: var(--text-dim); line-height: 1.6; }
+.pattern-body code {
+  font-family: var(--font-mono); font-size: 11px;
+  background: var(--surface3); color: var(--text); padding: 1px 5px; border-radius: 3px;
+}
+
+/* ============ ANTI-PATTERNS ============ */
+.anti-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px,1fr));
+  gap: 8px;
+}
+.anti {
+  display: flex; align-items: flex-start; gap: 8px;
+  background: var(--red-dim);
+  border: 1px solid rgba(204,36,29,0.28);
+  border-radius: 7px; padding: 8px 10px;
+  font-size: 12px; color: var(--text-dim); min-width: 0;
+}
+.anti .x { color: var(--red); font-family: var(--font-mono); font-size: 13px; flex-shrink: 0; margin-top: 1px; }
+.anti code { font-family: var(--font-mono); font-size: 11px; background: rgba(0,0,0,0.2); padding: 1px 4px; border-radius: 3px; color: var(--red); }
+
+/* ============ HOOK STEPS ============ */
+.hook-steps { display: flex; flex-direction: column; gap: 8px; }
+.hook-step {
+  display: flex; align-items: flex-start; gap: 10px;
+  font-size: 13px; color: var(--text-dim);
+}
+.hook-num {
+  font-family: var(--font-mono); font-size: 10px;
+  width: 20px; height: 20px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px;
+}
+.hook-step code {
+  font-family: var(--font-mono); font-size: 11px;
+  background: var(--surface3); color: var(--text); padding: 1px 5px; border-radius: 3px;
+}
+
+/* ============ TWO-COL MIDDLE ============ */
+.mid-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-bottom: 16px;
+}
+@media (max-width: 640px) { .mid-row { grid-template-columns: 1fr; } }
+
+.wide { grid-column: 1 / -1; }
+
+/* ============ COVERAGE STRIP ============ */
+.coverage-strip {
+  display: flex; align-items: center; gap: 20px;
+  background: var(--surface);
+  border: 1px solid var(--green);
+  border-radius: 10px; padding: 16px 22px;
+}
+.cov-num {
+  font-family: var(--font-mono); font-size: 40px; font-weight: 600;
+  color: var(--green); line-height: 1; flex-shrink: 0;
+}
+.cov-info { font-size: 13px; color: var(--text-dim); line-height: 1.6; }
+.cov-info strong { color: var(--text); }
+.cov-info code {
+  font-family: var(--font-mono); font-size: 11px;
+  background: var(--surface2); color: var(--text); padding: 1px 5px; border-radius: 3px;
+}
+
+.divider {
+  font-family: var(--font-mono); font-size: 10px;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--text-dim); margin: 4px 0 12px;
+  display: flex; align-items: center; gap: 10px;
+}
+.divider::after { content: ''; flex: 1; height: 1px; background: var(--border-bright); }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="eyebrow anim" style="--i:0">skill · python</div>
+  <h1 class="anim" style="--i:1">
+    <span class="py">Python</span>
+    <span class="tools"> ruff · mypy · pytest</span>
+  </h1>
+  <p class="tagline anim" style="--i:2">type safety · linting · test-driven development · 80%+ coverage</p>
+
+  <!-- Top 3-col: type hints + structure + pyproject -->
+  <div class="top-row anim" style="--i:3">
+
+    <div class="sec">
+      <div class="sec-label">
+        <div class="dot" style="background:var(--yellow)"></div>
+        <span style="color:var(--yellow)">type hints</span>
+      </div>
+      <div class="tool-list">
+        <div class="tool-row"><span class="tool-name" style="color:var(--yellow)">all sigs</span><span class="tool-detail">type hints on every function signature</span></div>
+        <div class="tool-row"><span class="tool-name" style="color:var(--aqua)">complex</span><span class="tool-detail">use <code style="font-family:var(--font-mono);font-size:11px;background:var(--surface3);padding:1px 4px;border-radius:3px">typing</code> module for generics</span></div>
+        <div class="tool-row"><span class="tool-name" style="color:var(--orange)">CI</span><span class="tool-detail">mypy --strict enforced in CI</span></div>
+        <div class="tool-row"><span class="tool-name" style="color:var(--blue)">3.12+</span><span class="tool-detail"><code style="font-family:var(--font-mono);font-size:11px;background:var(--surface3);padding:1px 4px;border-radius:3px">dict[str, Any] | None</code> syntax</span></div>
+      </div>
+    </div>
+
+    <div class="sec">
+      <div class="sec-label">
+        <div class="dot" style="background:var(--aqua)"></div>
+        <span style="color:var(--aqua)">project structure</span>
+      </div>
+      <div class="tree">
+        <div><span class="dir">src/package_name/</span></div>
+        <div>&nbsp; <span class="dir">core/</span> <span class="cm">← pure logic</span></div>
+        <div>&nbsp; &nbsp; <span class="hl">models.py</span></div>
+        <div>&nbsp; &nbsp; <span class="hl">services.py</span></div>
+        <div>&nbsp; <span class="dir">infra/</span> <span class="cm">← side effects</span></div>
+        <div>&nbsp; &nbsp; <span style="color:var(--blue)">api.py</span> <span class="cm">← FastAPI</span></div>
+        <div>&nbsp; &nbsp; <span style="color:var(--blue)">db.py</span></div>
+        <div><span class="dir">tests/</span> unit/ integration/</div>
+        <div><span class="hl">pyproject.toml</span></div>
+      </div>
+    </div>
+
+    <div class="sec">
+      <div class="sec-label">
+        <div class="dot" style="background:var(--blue)"></div>
+        <span style="color:var(--blue)">pyproject.toml config</span>
+      </div>
+      <div class="tool-list">
+        <div class="tool-row"><span class="tool-name" style="color:var(--orange)">ruff</span><span class="tool-detail">line-length=100, select E/F/I/N/W/UP</span></div>
+        <div class="tool-row"><span class="tool-name" style="color:var(--yellow)">mypy</span><span class="tool-detail">strict = true</span></div>
+        <div class="tool-row"><span class="tool-name" style="color:var(--green)">pytest</span><span class="tool-detail">--cov=src --cov-report=term-missing</span></div>
+        <div class="tool-row"><span class="tool-name" style="color:var(--red)">gate</span><span class="tool-detail">--cov-fail-under=80</span></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Mid: CI pipeline + pre-commit -->
+  <div class="mid-row anim" style="--i:4">
+
+    <div class="sec wide">
+      <div class="sec-label">
+        <div class="dot" style="background:var(--green)"></div>
+        <span style="color:var(--green)">GitHub Actions quality gate</span>
+      </div>
+      <div class="pipeline">
+        <div class="pipe-step">
+          <div class="pipe-label" style="color:var(--yellow)">Lint</div>
+          <div class="pipe-cmd" style="color:var(--orange)">ruff check .</div>
+        </div>
+        <div class="pipe-arrow">→</div>
+        <div class="pipe-step">
+          <div class="pipe-label" style="color:var(--yellow)">Format</div>
+          <div class="pipe-cmd" style="color:var(--orange)">ruff format --check .</div>
+        </div>
+        <div class="pipe-arrow">→</div>
+        <div class="pipe-step">
+          <div class="pipe-label" style="color:var(--aqua)">Type Check</div>
+          <div class="pipe-cmd" style="color:var(--blue)">mypy src/</div>
+        </div>
+        <div class="pipe-arrow">→</div>
+        <div class="pipe-step">
+          <div class="pipe-label" style="color:var(--green)">Tests</div>
+          <div class="pipe-cmd" style="color:var(--green)">pytest</div>
+        </div>
+        <div class="pipe-arrow">→</div>
+        <div class="pipe-step" style="border-color:var(--green)">
+          <div class="pipe-label" style="color:var(--green); font-size:20px; font-weight:700;">80%</div>
+          <div class="pipe-cmd" style="color:var(--text-dim)">coverage gate</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Pre-commit + pytest pattern side by side -->
+  <div class="mid-row anim" style="--i:5">
+
+    <div class="sec">
+      <div class="sec-label">
+        <div class="dot" style="background:var(--purple)"></div>
+        <span style="color:var(--purple)">pre-commit hooks</span>
+      </div>
+      <div class="hook-steps">
+        <div class="hook-step">
+          <div class="hook-num" style="background:var(--orange-dim);color:var(--orange);border:1px solid rgba(214,93,14,0.3)">1</div>
+          <span><code>ruff --fix</code> — lint + auto-fix staged files</span>
+        </div>
+        <div class="hook-step">
+          <div class="hook-num" style="background:var(--orange-dim);color:var(--orange);border:1px solid rgba(214,93,14,0.3)">2</div>
+          <span><code>ruff-format</code> — auto-format staged files</span>
+        </div>
+        <div class="hook-step">
+          <div class="hook-num" style="background:var(--blue-dim);color:var(--blue);border:1px solid rgba(69,133,136,0.3)">3</div>
+          <span><code>mypy --strict</code> — full type check</span>
+        </div>
+        <div class="hook-step">
+          <div class="hook-num" style="background:var(--green-dim);color:var(--green);border:1px solid rgba(152,151,26,0.3)">4</div>
+          <span><code>pytest tests/unit -x --tb=short</code> — fast unit gate</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="sec">
+      <div class="sec-label">
+        <div class="dot" style="background:var(--green)"></div>
+        <span style="color:var(--green)">pytest class structure (AAA)</span>
+      </div>
+      <div class="hook-steps">
+        <div class="hook-step">
+          <div class="hook-num" style="background:var(--blue-dim);color:var(--blue);border:1px solid rgba(69,133,136,0.3)">A</div>
+          <span><strong>Arrange</strong> — set up inputs, fixtures, mocks</span>
+        </div>
+        <div class="hook-step">
+          <div class="hook-num" style="background:var(--aqua-dim);color:var(--aqua);border:1px solid rgba(104,157,106,0.3)">A</div>
+          <span><strong>Act</strong> — call the function under test</span>
+        </div>
+        <div class="hook-step">
+          <div class="hook-num" style="background:var(--green-dim);color:var(--green);border:1px solid rgba(152,151,26,0.3)">A</div>
+          <span><strong>Assert</strong> — <code>assert result == expected</code></span>
+        </div>
+        <div class="hook-step" style="margin-top:6px;padding-top:8px;border-top:1px solid var(--border)">
+          <div class="hook-num" style="background:var(--red-dim);color:var(--red);border:1px solid rgba(204,36,29,0.3)">!</div>
+          <span>Error cases: <code>pytest.raises(ValueError)</code></span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Patterns row -->
+  <div class="divider anim" style="--i:6">patterns</div>
+  <div class="patterns-grid anim" style="--i:7">
+
+    <div class="pattern-card">
+      <div class="pattern-title" style="color:var(--yellow)">Pydantic — Data Validation</div>
+      <div class="pattern-body">
+        <code>BaseModel</code> with <code>Field</code> constraints.<br>
+        Validates at runtime; type annotation is the schema.
+        Use for request/response DTOs, config, and any external data boundary.
+      </div>
+    </div>
+
+    <div class="pattern-card">
+      <div class="pattern-title" style="color:var(--aqua)">Dependency Injection</div>
+      <div class="pattern-body">
+        Never import <code>db</code> or services directly in business logic — pass them as parameters.
+        <code>get_user(user_id, db: Database)</code> instead of importing a global.
+        Enables unit testing without patching.
+      </div>
+    </div>
+
+    <div class="pattern-card">
+      <div class="pattern-title" style="color:var(--blue)">Result Pattern</div>
+      <div class="pattern-body">
+        Core functions return <code>Result[T]</code> dataclass with <code>value | None</code> and <code>error | None</code>.
+        No exceptions in core layer. Exceptions are infrastructure concerns only.
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Anti-patterns -->
+  <div class="divider anim" style="--i:8">anti-patterns — never use these</div>
+  <div class="anti-row anim" style="--i:9">
+    <div class="anti"><span class="x">✕</span><span><code>from module import *</code></span></div>
+    <div class="anti"><span class="x">✕</span><span>Mutable default arguments (<code>def f(x=[])</code>)</span></div>
+    <div class="anti"><span class="x">✕</span><span>Bare <code>except:</code> clauses</span></div>
+    <div class="anti"><span class="x">✕</span><span><code># type: ignore</code> without explanation</span></div>
+    <div class="anti"><span class="x">✕</span><span>Global variables for state</span></div>
+    <div class="anti"><span class="x">✕</span><span>Classes when plain functions suffice</span></div>
+  </div>
+
+  <!-- Coverage -->
+  <div class="coverage-strip anim" style="--i:10; margin-top:16px;">
+    <div class="cov-num">80%</div>
+    <div class="cov-info">
+      <strong>Minimum test coverage enforced</strong> via <code>--cov-fail-under=80</code> in <code>pytest.ini_options</code>.<br>
+      Run locally with <code>pytest</code> — CI will fail the build if coverage drops below this threshold.
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

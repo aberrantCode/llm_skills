@@ -32,6 +32,24 @@ git checkout main   # return to main (or wherever you were)
 
 ---
 
+## Timing Setup (run before Step 0)
+
+Initialize the timing log before any other commands. Shell state does not persist
+between Bash invocations, so timestamps are written to a temp file that accumulates
+across the workflow:
+
+```bash
+mkdir -p /tmp
+# Derive the timing log filename from the repo directory name so it is
+# unique per project and not confused with artefacts from other solutions.
+REPO_NAME=$(basename "$(git rev-parse --show-toplevel 2>/dev/null || pwd)")
+TIMING_TMP="/tmp/${REPO_NAME}_timing.log"
+echo "" > "$TIMING_TMP"   # truncate/create for this run
+echo "workflow_start $(date +%s%3N)" >> "$TIMING_TMP"
+```
+
+---
+
 ## Workflow
 
 Follow every step in order. Do not skip steps, do not reorder them.
@@ -39,6 +57,10 @@ Follow every step in order. Do not skip steps, do not reorder them.
 ### Step 0 — Detect context and resolve the repo root
 
 Before anything else, determine where you are and whether the work is already committed.
+
+```bash
+echo "step_detect_start $(date +%s%3N)" >> "$TIMING_TMP"
+```
 
 **Resolve the repo root** — all git/gh commands in Steps 5–9 must run from the repo root,
 never from inside a worktree subdirectory:
@@ -72,6 +94,10 @@ echo "Current branch: $CURRENT_BRANCH  Commits ahead of dev: $AHEAD"
   infer `$MSG` from the most recent commit subject (`git log -1 --format=%s`), then
   **skip Steps 1–3 (Ask for branch/commit info, Pull latest if behind, Stage all changes)**, jumping to Step 4 (still run the test/coverage gate before pushing).
 - Otherwise → continue to Step 1 as normal.
+
+```bash
+echo "step_detect_end $(date +%s%3N)" >> "$TIMING_TMP"
+```
 
 ---
 
@@ -115,6 +141,10 @@ Store answers as `$BRANCH` and `$MSG` for the rest of the steps.
 
 ### Step 2 — Pull latest on the current branch (only if behind)
 
+```bash
+echo "step_pull_start $(date +%s%3N)" >> "$TIMING_TMP"
+```
+
 First fetch and check whether the current branch is behind its remote — skip the pull entirely if there is nothing to integrate:
 
 ```bash
@@ -151,9 +181,17 @@ If rebase produces conflicts after the pull:
 3. After resolution: `git add <resolved-files>` then `git rebase --continue`.
 4. If the rebase is unresolvable, abort with `git rebase --abort` and stop.
 
+```bash
+echo "step_pull_end $(date +%s%3N)" >> "$TIMING_TMP"
+```
+
 ---
 
 ### Step 3 — Stage all changes
+
+```bash
+echo "step_stage_start $(date +%s%3N)" >> "$TIMING_TMP"
+```
 
 ```bash
 git add --all
@@ -167,6 +205,10 @@ git diff --cached --stat
 ```
 
 If the staging area is empty (nothing to commit), stop and tell the user there is nothing to ship.
+
+```bash
+echo "step_stage_end $(date +%s%3N)" >> "$TIMING_TMP"
+```
 
 ---
 
@@ -208,8 +250,12 @@ Skip any stack whose variable is empty (no source files changed there).
 #### 4-B  Run the full test suite
 
 ```bash
-pwsh -NonInteractive -File "$REPO_ROOT/scripts/Start-Tests.ps1" -NoPrompt
+echo "step_tests_start $(date +%s%3N)" >> "$TIMING_TMP"
+TIMING_LOG_PS=$(cygpath -w "$REPO_ROOT/logs/timing.jsonl" 2>/dev/null || echo "$REPO_ROOT/logs/timing.jsonl")
+pwsh -NonInteractive -File "$REPO_ROOT/scripts/Start-Tests.ps1" -NoPrompt -Parallel -SkipE2E -TimingLog "$TIMING_LOG_PS"
 TEST_EXIT=$?
+echo "step_tests_end $(date +%s%3N)" >> "$TIMING_TMP"
+exit $TEST_EXIT
 ```
 
 **If `$TEST_EXIT` is non-zero — STOP.** Do not proceed. Report which suites failed
@@ -244,6 +290,10 @@ MISSING TEST FILES — create these before proceeding:
 ---
 
 #### 4-D  Verify ≥ 80 % coverage for changed source files
+
+```bash
+echo "step_coverage_start $(date +%s%3N)" >> "$TIMING_TMP"
+```
 
 Run targeted coverage checks only for the stacks that have changed source files.
 Do **not** re-run the entire test suite — use focused runs against only the relevant
@@ -371,6 +421,11 @@ If any TS files are below 80 % — **STOP** and require tests before proceeding.
 
 #### 4-E  Clean build gate — lint, type-check, and build warnings
 
+```bash
+echo "step_coverage_end $(date +%s%3N)" >> "$TIMING_TMP"
+echo "step_lint_start $(date +%s%3N)" >> "$TIMING_TMP"
+```
+
 **This sub-step runs for every changed stack, no exceptions.**
 
 The goal is to confirm that the branch introduces **zero new lint errors, zero new type errors outside generated code, and no new build warnings** beyond the pre-existing baseline documented in `CLAUDE.md`.
@@ -464,9 +519,17 @@ If during any of the above checks you observe that a pre-existing issue from the
 
 **All checks passed?** Continue to Step 5.
 
+```bash
+echo "step_lint_end $(date +%s%3N)" >> "$TIMING_TMP"
+```
+
 ---
 
 ### Step 5 — Create the feature branch and commit
+
+```bash
+echo "step_commit_start $(date +%s%3N)" >> "$TIMING_TMP"
+```
 
 ```bash
 git checkout -b $BRANCH
@@ -477,6 +540,7 @@ Verify the commit was created:
 
 ```bash
 git log --oneline -1
+echo "step_commit_end $(date +%s%3N)" >> "$TIMING_TMP"
 ```
 
 ---
@@ -484,22 +548,76 @@ git log --oneline -1
 ### Step 6 — Push the feature branch to origin
 
 ```bash
+echo "step_push_start $(date +%s%3N)" >> "$TIMING_TMP"
 git push -u origin $BRANCH
+echo "step_push_end $(date +%s%3N)" >> "$TIMING_TMP"
 ```
 
 ---
 
 ### Step 7 — Create a PR targeting DEV
 
-Capture both stdout and stderr so we can detect "already exists" gracefully:
+```bash
+echo "step_pr_create_start $(date +%s%3N)" >> "$TIMING_TMP"
+```
+
+Capture both stdout and stderr so we can detect "already exists" gracefully.
+
+**Before creating the PR, extract all capability IDs referenced in the branch commits** and include them in the PR body.
 
 ```bash
-PR_OUTPUT=$(gh pr create \
-  --base dev \
-  --head $BRANCH \
-  --title "$MSG" \
-  --body "$(cat <<'EOF'
-## Summary
+# --- Build capability ID section from branch commits ---
+# Structured CAP-IDs: Refs: XX-CAP-NN
+REFS_CAPS=$(git log "origin/dev..HEAD" --format='%b' 2>/dev/null \
+  | grep -E '^\s*Refs:\s+[A-Za-z]{2,5}-CAP-[0-9]+' \
+  | sed 's/.*Refs:[[:space:]]*//' \
+  | sort -u | tr -d '\r')
+
+# Spec-file refs: Refs: foo.md#...
+REFS_SPECS=$(git log "origin/dev..HEAD" --format='%b' 2>/dev/null \
+  | grep -E '^\s*Refs:\s+[a-z][a-z0-9-]+\.md' \
+  | sed 's/.*Refs:[[:space:]]*//' \
+  | sort -u | tr -d '\r')
+
+# Determine primary action type from commit message prefix
+if echo "$MSG" | grep -qiE '^feat'; then PR_ACTION="Implemented"
+elif echo "$MSG" | grep -qiE '^fix'; then PR_ACTION="Bug Fix"
+elif echo "$MSG" | grep -qiE '^test'; then PR_ACTION="Tested"
+elif echo "$MSG" | grep -qiE '^refactor'; then PR_ACTION="Refactored"
+elif echo "$MSG" | grep -qiE '^chore'; then PR_ACTION="Maintenance"
+elif echo "$MSG" | grep -qiE '^docs'; then PR_ACTION="Documented"
+else PR_ACTION="Updated"
+fi
+
+CAPS_TABLE=""
+if [ -n "$REFS_CAPS" ]; then
+  while IFS= read -r cap_id; do
+    cap_id=$(echo "$cap_id" | tr -d ' \r\n')
+    [ -z "$cap_id" ] && continue
+    # Look up description in feature specs, strip markdown formatting
+    desc=$(grep -rh "\[$cap_id\]" "$REPO_ROOT/docs/features/" 2>/dev/null \
+      | grep -v '^\s*-\s*\[\s*\]\|Refs:' \
+      | sed "s/.*\[$cap_id\][[:space:]]*//" \
+      | sed 's/^\*\*\[P[0-9]\]\*\*[[:space:]]*//' \
+      | sed 's/\*\*//g;s/|.*//' \
+      | head -1 | tr -d '\r' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+    [ -z "$desc" ] && desc="—"
+    desc=$(echo "$desc" | cut -c1-120)
+    CAPS_TABLE="${CAPS_TABLE}
+| \`${cap_id}\` | ${desc} | ${PR_ACTION} |"
+  done <<< "$REFS_CAPS"
+fi
+if [ -n "$REFS_SPECS" ]; then
+  while IFS= read -r spec_ref; do
+    spec_ref=$(echo "$spec_ref" | tr -d ' \r\n')
+    [ -z "$spec_ref" ] && continue
+    CAPS_TABLE="${CAPS_TABLE}
+| — | See \`docs/features/${spec_ref}\` | ${PR_ACTION} |"
+  done <<< "$REFS_SPECS"
+fi
+
+if [ -n "$CAPS_TABLE" ]; then
+  PR_BODY="## Summary
 Automated feature branch PR targeting DEV.
 
 ## Changes
@@ -507,8 +625,29 @@ See commit diff for details.
 
 ## Test plan
 - [ ] Smoke-tested locally before shipping
-EOF
-)" 2>&1)
+
+## Capabilities
+
+| ID | Description | Action |
+|----|-------------|--------|${CAPS_TABLE}"
+else
+  PR_BODY="## Summary
+Automated feature branch PR targeting DEV.
+
+## Changes
+See commit diff for details.
+
+## Test plan
+- [ ] Smoke-tested locally before shipping"
+fi
+```
+
+```bash
+PR_OUTPUT=$(gh pr create \
+  --base dev \
+  --head $BRANCH \
+  --title "$MSG" \
+  --body "$PR_BODY" 2>&1)
 PR_EXIT=$?
 
 if [ $PR_EXIT -eq 0 ]; then
@@ -528,6 +667,10 @@ fi
 
 `$PR_URL` is now set either way. Display it to the user and continue.
 
+```bash
+echo "step_pr_create_end $(date +%s%3N)" >> "$TIMING_TMP"
+```
+
 ---
 
 ### Step 8 — Merge the PR (squash merge)
@@ -540,6 +683,10 @@ after merging. Two things can block that checkout:
    the commit, those uncommitted changes cause `error: Your local changes would be
    overwritten by checkout`. The PR merges on GitHub but the local switch fails,
    leaving the working tree on the feature branch with a dirty state.
+
+```bash
+echo "step_merge_start $(date +%s%3N)" >> "$TIMING_TMP"
+```
 
 Always run this command from `$REPO_ROOT` and **always stash the working tree first**:
 
@@ -575,11 +722,16 @@ Wait for the merge to complete — confirm with:
 ```bash
 gh pr view $BRANCH --json state --jq '.state'
 # Expected: "MERGED"
+echo "step_merge_end $(date +%s%3N)" >> "$TIMING_TMP"
 ```
 
 ---
 
 ### Steps 9 & 10 — Cleanup and sync DEV
+
+```bash
+echo "step_cleanup_start $(date +%s%3N)" >> "$TIMING_TMP"
+```
 
 All cleanup runs from `$REPO_ROOT`. `gh pr merge --squash` may have already switched
 the local working tree to `dev` and deleted the local feature branch; both operations
@@ -625,6 +777,68 @@ git log --oneline -5
 if [ "$STASH_NEEDED" = "true" ]; then
   git stash pop
 fi
+echo "step_cleanup_end $(date +%s%3N)" >> "$TIMING_TMP"
+```
+
+**Timing report** — parse the temp file, print a summary, and append a JSONL entry to the repo log:
+
+```bash
+TIMING_LOG="$(git rev-parse --show-toplevel)/logs/timing.jsonl"
+mkdir -p "$(dirname "$TIMING_LOG")"
+python - "$BRANCH" "$TIMING_LOG" "$TIMING_TMP" <<'PYEOF'
+import sys, json, os
+from datetime import datetime, timezone
+
+branch = sys.argv[1]
+log_path = sys.argv[2]
+tmp_path = sys.argv[3]
+
+# Parse temp file: lines like "step_detect_start 1711619400123"
+data = {}
+with open(tmp_path) as f:
+    for line in f:
+        line = line.strip()
+        if not line: continue
+        parts = line.split()
+        if len(parts) == 2:
+            data[parts[0]] = int(parts[1])
+
+def dur(name):
+    s = data.get(f'step_{name}_start', 0)
+    e = data.get(f'step_{name}_end', 0)
+    return max(0, e - s) if s and e else 0
+
+steps_order = ['detect','pull','stage','tests','coverage','lint','commit','push','pr_create','merge','cleanup']
+steps = {s: dur(s) for s in steps_order}
+
+workflow_start = data.get('workflow_start', 0)
+workflow_end   = data.get('step_cleanup_end', 0)
+total_ms = max(0, workflow_end - workflow_start) if workflow_start and workflow_end else 0
+
+print("")
+print("============================================")
+print("  ship-to-dev Timing")
+print("============================================")
+for s, ms in steps.items():
+    if ms > 0:
+        print(f"  {s:<18}  {ms/1000:>6.1f}s")
+    else:
+        print(f"  {s:<18}     ---")
+print(f"  {'':18}  {total_ms/1000:>6.1f}s  TOTAL")
+print("============================================")
+
+entry = {
+    'ts': datetime.now(timezone.utc).isoformat(),
+    'source': 'ship-to-dev',
+    'branch': branch,
+    'total_ms': total_ms,
+    'steps': steps
+}
+os.makedirs(os.path.dirname(log_path), exist_ok=True)
+with open(log_path, 'a') as f:
+    f.write(json.dumps(entry) + '\n')
+print(f"  [TIMING] Entry appended to {log_path}")
+PYEOF
 ```
 
 ---
@@ -636,7 +850,7 @@ fi
 1.      Ask for $BRANCH and $MSG (skip if already committed on feature branch)
 2.      Fetch + pull only if behind             git fetch origin && [check BEHIND count] && git stash / pull / pop
 3.      Stage all changes                        git add --all
-4.      Test, coverage + clean-build gate         pwsh Start-Tests.ps1 -NoPrompt; verify test files exist; check ≥80% coverage (4-D); ruff/mypy/eslint/tsc/build warnings (4-E) — all must pass
+4.      Test, coverage + clean-build gate         pwsh Start-Tests.ps1 -NoPrompt -Parallel -SkipE2E; verify test files exist; check ≥80% coverage (4-D); ruff/mypy/eslint/tsc/build warnings (4-E) — all must pass
 5.      Create feature branch + commit           git checkout -b $BRANCH && git commit
 6.      Push                                     git push -u origin $BRANCH
 7.      Open PR into DEV                         gh pr create --base dev
@@ -659,9 +873,13 @@ fi
 | Feature branch already exists | Use **AskUserQuestion**: options "Reuse existing branch" / "Choose a different name" — if "different name", loop back to Step 1 |
 | Tests fail at Step 4 | Fix the failing tests/code before continuing — do not skip or bypass the gate |
 | Missing test file at Step 4 | Create the missing test file covering the changed source file, re-run the gate |
-| Coverage below 80% at Step 4 | Add tests for uncovered lines, re-run `pwsh Start-Tests.ps1 -NoPrompt`, re-check coverage |
+| Coverage below 80% at Step 4 | Add tests for uncovered lines, re-run `pwsh Start-Tests.ps1 -NoPrompt -Parallel -SkipE2E`, re-check coverage |
 | `fatal: 'dev' is already used by worktree` | `cd $REPO_ROOT` before running `gh pr merge` — never merge from inside a secondary worktree |
 | `cannot delete branch '…' used by worktree` | Step 8 now removes the worktree automatically before `gh pr merge --delete-branch`. If the error still occurs, run manually: `git worktree prune && rm -rf $WORKTREE_PATH && git branch -d $BRANCH` |
 | `local changes would be overwritten by checkout` | Stash before `gh pr merge` (Step 8 now does this automatically); the PR may have already merged on GitHub even if the command errored — check with `gh pr view` before retrying |
 | PR already merged (second `gh pr merge` attempt) | Verify with `gh pr view $BRANCH --json state --jq '.state'`; if `"MERGED"`, skip to cleanup |
 | `gh pr create` exits 1: "already exists" | Step 7 detects this automatically, extracts the existing PR URL, and continues to Step 8 — no manual intervention needed |
+
+## Diagram
+
+[View diagram](diagram.html)

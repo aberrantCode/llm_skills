@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Team Coordination — Multi-Person Projects</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --font-body: 'Plus Jakarta Sans', system-ui, sans-serif;
+    --font-mono: 'DM Mono', 'SF Mono', Consolas, monospace;
+    --bg: #f6f5ff; --surface: #ffffff; --surface2: #eeedf8; --surface-elevated: #fafaff;
+    --border: rgba(60,40,200,0.07); --border-bright: rgba(60,40,200,0.15);
+    --text: #14102a; --text-dim: #6b648a;
+    --indigo: #3730a3; --indigo-dim: rgba(55,48,163,0.08);
+    --purple: #7e22ce; --purple-dim: rgba(126,34,206,0.08);
+    --teal: #0f766e; --teal-dim: rgba(15,118,110,0.08);
+    --green: #15803d; --green-dim: rgba(21,128,61,0.08);
+    --amber: #92400e; --amber-dim: rgba(146,64,14,0.08);
+    --rose: #9f1239; --rose-dim: rgba(159,18,57,0.08);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #08061a; --surface: #0e0b28; --surface2: #131030; --surface-elevated: #18153a;
+      --border: rgba(160,140,255,0.07); --border-bright: rgba(160,140,255,0.15);
+      --text: #e8e4ff; --text-dim: #8a82b0;
+      --indigo: #a5b4fc; --indigo-dim: rgba(165,180,252,0.1);
+      --purple: #d8b4fe; --purple-dim: rgba(216,180,254,0.1);
+      --teal: #5eead4; --teal-dim: rgba(94,234,212,0.1);
+      --green: #86efac; --green-dim: rgba(134,239,172,0.1);
+      --amber: #fcd34d; --amber-dim: rgba(252,211,77,0.1);
+      --rose: #fda4af; --rose-dim: rgba(253,164,175,0.1);
+    }
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    background:var(--bg);
+    background-image:
+      radial-gradient(ellipse at 75% 0%, var(--indigo-dim) 0%, transparent 55%),
+      radial-gradient(ellipse at 20% 90%, var(--purple-dim) 0%, transparent 50%);
+    color:var(--text); font-family:var(--font-body); padding:48px 40px; min-height:100vh;
+  }
+  @keyframes fadeUp { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+  .section,.flow-arrow { animation:fadeUp 0.35s ease-out both; animation-delay:calc(var(--i,0)*0.06s); }
+  @media (prefers-reduced-motion:reduce) { *,*::before,*::after { animation-duration:0.01ms!important; animation-delay:0ms!important; } }
+
+  h1 { font-size:36px; font-weight:700; letter-spacing:-1px; margin-bottom:4px; }
+  .subtitle { font-family:var(--font-mono); font-size:11px; color:var(--text-dim); margin-bottom:44px; }
+  .section-label { font-family:var(--font-mono); font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:2px; margin-bottom:14px; display:flex; align-items:center; gap:8px; }
+  .dot { width:7px; height:7px; border-radius:50%; display:inline-block; }
+
+  .diagram { display:grid; grid-template-columns:1fr; gap:20px; max-width:1100px; margin:0 auto; }
+  .section { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:20px 24px; }
+  .section--hero { background:var(--surface-elevated); border-color:var(--border-bright); box-shadow:0 4px 24px rgba(0,0,0,0.08); padding:28px 32px; }
+  .section--recessed { background:var(--surface2); }
+
+  .section--indigo .section-label{color:var(--indigo)} .section--indigo .dot{background:var(--indigo)} .section--indigo{border-color:var(--indigo-dim)}
+  .section--purple .section-label{color:var(--purple)} .section--purple .dot{background:var(--purple)} .section--purple{border-color:var(--purple-dim)}
+  .section--teal .section-label{color:var(--teal)} .section--teal .dot{background:var(--teal)} .section--teal{border-color:var(--teal-dim)}
+  .section--green .section-label{color:var(--green)} .section--green .dot{background:var(--green)} .section--green{border-color:var(--green-dim)}
+  .section--amber .section-label{color:var(--amber)} .section--amber .dot{background:var(--amber)} .section--amber{border-color:var(--amber-dim)}
+  .section--rose .section-label{color:var(--rose)} .section--rose .dot{background:var(--rose)} .section--rose{border-color:var(--rose-dim)}
+
+  .two-col { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  .three-col { display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; }
+
+  .ve-card { background:var(--surface2); border:1px solid var(--border); border-radius:8px; padding:12px 14px; }
+  .ve-card .title { font-weight:600; font-size:12px; margin-bottom:5px; }
+  .ve-card .desc { font-size:11px; color:var(--text-dim); line-height:1.55; }
+  .ve-card--indigo { border-left:3px solid var(--indigo); }
+  .ve-card--purple { border-left:3px solid var(--purple); }
+  .ve-card--teal   { border-left:3px solid var(--teal); }
+  .ve-card--green  { border-left:3px solid var(--green); }
+  .ve-card--amber  { border-left:3px solid var(--amber); }
+  .ve-card--rose   { border-left:3px solid var(--rose); }
+
+  .flow-arrow { display:flex; justify-content:center; align-items:center; gap:8px; color:var(--text-dim); font-family:var(--font-mono); font-size:11px; padding:2px 0; }
+  .flow-arrow svg { width:18px; height:18px; fill:none; stroke:var(--border-bright); stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
+  .callout { background:var(--surface2); border:1px solid var(--border); border-left:3px solid var(--indigo); border-radius:0 8px 8px 0; padding:12px 16px; font-size:12px; line-height:1.6; color:var(--text-dim); }
+  .callout strong { color:var(--text); }
+
+  /* Workflow checklist */
+  .workflow-steps { list-style:none; font-size:12px; line-height:1; }
+  .ws-item { display:flex; align-items:flex-start; gap:10px; padding:8px 0; border-bottom:1px solid var(--border); }
+  .ws-item:last-child { border-bottom:none; }
+  .ws-num { font-family:var(--font-mono); font-size:10px; font-weight:700; color:var(--indigo); background:var(--indigo-dim); border:1px solid var(--indigo); padding:2px 7px; border-radius:4px; white-space:nowrap; flex-shrink:0; }
+  .ws-text { font-size:12px; color:var(--text-dim); line-height:1.4; padding-top:2px; }
+  .ws-text strong { color:var(--text); }
+  .ws-text code { font-family:var(--font-mono); font-size:10px; background:var(--indigo-dim); color:var(--indigo); padding:1px 5px; border-radius:3px; }
+
+  /* Status badge */
+  .status-grid { display:flex; flex-wrap:wrap; gap:8px; margin-top:8px; }
+  .status-badge { display:flex; align-items:center; gap:6px; background:var(--surface2); border:1px solid var(--border); border-radius:6px; padding:5px 10px; font-size:11px; }
+  .status-dot { width:8px; height:8px; border-radius:50%; }
+
+  /* Conflict prevention */
+  .conflict-row { display:flex; align-items:center; gap:10px; padding:8px 0; border-bottom:1px solid var(--border); font-size:12px; }
+  .conflict-row:last-child { border-bottom:none; }
+  .conflict-label { font-family:var(--font-mono); font-size:10px; background:var(--amber-dim); color:var(--amber); border:1px solid var(--amber); padding:2px 8px; border-radius:4px; flex-shrink:0; }
+  .conflict-text { color:var(--text-dim); }
+
+  /* File structure */
+  .file-tree { font-family:var(--font-mono); font-size:11px; line-height:1.9; }
+  .ft-dir { color:var(--indigo); font-weight:600; }
+  .ft-shared { color:var(--purple); }
+  .ft-personal { color:var(--teal); }
+  .ft-comment { color:var(--text-dim); font-size:10px; }
+
+  @media (max-width:860px) { body{padding:24px 16px;} .two-col,.three-col{grid-template-columns:1fr;} }
+</style>
+</head>
+<body>
+
+<h1>Team Coordination</h1>
+<p class="subtitle">multi-person projects · shared state · todo claiming · conflict prevention · handoffs</p>
+
+<div class="diagram">
+
+  <!-- Philosophy -->
+  <div class="section section--indigo section--hero" style="--i:0">
+    <div class="section-label"><span class="dot"></span> Core Philosophy</div>
+    <div class="callout">
+      <strong>Multiple devs, multiple Claude sessions, one codebase.</strong>
+      Coordination &gt; Speed. Communication &gt; Assumptions.
+      Before you start: check who's working on what.
+      Before you claim: make sure nobody else has it.
+      Before you decide: check if it's already decided.
+      Before you push: pull and sync state.
+    </div>
+  </div>
+
+  <div class="flow-arrow" style="--i:1">
+    <svg viewBox="0 0 20 20"><path d="M10 4 L10 16 M6 12 L10 16 L14 12"/></svg>
+    managed via
+  </div>
+
+  <!-- Team State Structure + Status Icons -->
+  <div class="two-col" style="--i:2">
+    <div class="section section--purple">
+      <div class="section-label"><span class="dot"></span> Team State File Structure</div>
+      <div class="file-tree">
+        <div class="ft-dir">_project_specs/</div>
+        <div style="padding-left:16px">
+          <div class="ft-dir">├── team/</div>
+          <div style="padding-left:16px">
+            <div><span class="ft-shared">├── state.md</span> <span class="ft-comment">← who's doing what</span></div>
+            <div><span class="ft-shared">├── contributors.md</span> <span class="ft-comment">← team + ownership</span></div>
+            <div class="ft-dir">└── handoffs/</div>
+            <div style="padding-left:16px"><span class="ft-comment">└── [feature]-handoff.md</span></div>
+          </div>
+          <div style="margin-top:6px" class="ft-dir">├── session/</div>
+          <div style="padding-left:16px">
+            <div><span class="ft-personal">├── current-state.md</span> <span class="ft-comment">← YOUR session</span></div>
+            <div><span class="ft-shared">├── decisions.md</span> <span class="ft-comment">← SHARED</span></div>
+            <div><span class="ft-shared">└── code-landmarks.md</span> <span class="ft-comment">← SHARED</span></div>
+          </div>
+          <div style="margin-top:6px" class="ft-dir">└── todos/</div>
+          <div style="padding-left:16px">
+            <div><span class="ft-shared">├── active.md</span> <span class="ft-comment">← SHARED + claims</span></div>
+            <div><span class="ft-shared">├── backlog.md</span> <span class="ft-comment">← SHARED</span></div>
+            <div><span class="ft-shared">└── completed.md</span> <span class="ft-comment">← SHARED</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section section--teal">
+      <div class="section-label"><span class="dot"></span> Contributor Status Icons</div>
+      <div class="status-grid">
+        <div class="status-badge"><div class="status-dot" style="background:#22c55e"></div> 🟢 Active — Currently working</div>
+        <div class="status-badge"><div class="status-dot" style="background:#eab308"></div> 🟡 Paused — Stepped away, will return</div>
+        <div class="status-badge"><div class="status-dot" style="background:#ef4444"></div> 🔴 Blocked — Needs help / waiting</div>
+        <div class="status-badge"><div class="status-dot" style="background:#94a3b8"></div> ⚪ Offline — Not working today</div>
+      </div>
+      <div style="margin-top:14px">
+        <div class="ve-card ve-card--teal">
+          <div class="title">Claim Format</div>
+          <div class="desc"><code style="font-family:var(--font-mono);font-size:10px">**Claimed:** @handle (YYYY-MM-DD HH:MM TZ)</code><br><br>Add to todo in active.md + update state.md + commit + push.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Start/End Session Checklists -->
+  <div class="two-col" style="--i:3">
+    <div class="section section--green">
+      <div class="section-label"><span class="dot"></span> Start Session Checklist</div>
+      <div class="workflow-steps">
+        <div class="ws-item"><span class="ws-num">1</span><div class="ws-text"><code>git pull origin main</code></div></div>
+        <div class="ws-item"><span class="ws-num">2</span><div class="ws-text">Read <strong>team/state.md</strong> — who's active, what's claimed</div></div>
+        <div class="ws-item"><span class="ws-num">3</span><div class="ws-text">Check claimed todos — <strong>don't take what's claimed</strong></div></div>
+        <div class="ws-item"><span class="ws-num">4</span><div class="ws-text">Claim your todo in <strong>active.md</strong></div></div>
+        <div class="ws-item"><span class="ws-num">5</span><div class="ws-text">Update <strong>state.md</strong> with your session info</div></div>
+        <div class="ws-item"><span class="ws-num">6</span><div class="ws-text"><strong>Push state changes</strong> before starting work</div></div>
+        <div class="ws-item"><span class="ws-num">7</span><div class="ws-text">Start working 🚀</div></div>
+      </div>
+    </div>
+    <div class="section section--rose">
+      <div class="section-label"><span class="dot"></span> End Session Checklist</div>
+      <div class="workflow-steps">
+        <div class="ws-item"><span class="ws-num" style="color:var(--rose);background:var(--rose-dim);border-color:var(--rose)">1</span><div class="ws-text"><strong>Commit your work</strong> (even if WIP)</div></div>
+        <div class="ws-item"><span class="ws-num" style="color:var(--rose);background:var(--rose-dim);border-color:var(--rose)">2</span><div class="ws-text">Update <strong>current-state.md</strong></div></div>
+        <div class="ws-item"><span class="ws-num" style="color:var(--rose);background:var(--rose-dim);border-color:var(--rose)">3</span><div class="ws-text">Update <strong>team state.md</strong> → Paused or Done</div></div>
+        <div class="ws-item"><span class="ws-num" style="color:var(--rose);background:var(--rose-dim);border-color:var(--rose)">4</span><div class="ws-text">If passing to someone: <strong>create handoff note</strong></div></div>
+        <div class="ws-item"><span class="ws-num" style="color:var(--rose);background:var(--rose-dim);border-color:var(--rose)">5</span><div class="ws-text">Unclaim todo if abandoning it</div></div>
+        <div class="ws-item"><span class="ws-num" style="color:var(--rose);background:var(--rose-dim);border-color:var(--rose)">6</span><div class="ws-text"><strong>Push everything</strong> 📤</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Conflict Prevention + Handoff -->
+  <div class="two-col" style="--i:4">
+    <div class="section section--amber">
+      <div class="section-label"><span class="dot"></span> Conflict Prevention</div>
+      <div class="conflict-row"><span class="conflict-label">File check</span><span class="conflict-text">Before modifying a file, check state.md for who's touching what — coordinate if conflicting</span></div>
+      <div class="conflict-row"><span class="conflict-label">Pre-push</span><span class="conflict-text"><code style="font-family:var(--font-mono);font-size:10px">git pull origin main</code> — resolve conflicts before pushing</span></div>
+      <div class="conflict-row"><span class="conflict-label">PR tagging</span><span class="conflict-text">Always tag area owners in PRs — authentication owner, payments owner, etc.</span></div>
+      <div class="conflict-row"><span class="conflict-label">Decisions</span><span class="conflict-text">Pull latest decisions.md before deciding. If similar decision exists, follow it — consistency &gt; preference</span></div>
+    </div>
+    <div class="section section--indigo">
+      <div class="section-label"><span class="dot"></span> Handoff Note Contents</div>
+      <div class="three-col" style="gap:8px">
+        <div class="ve-card ve-card--indigo">
+          <div class="title">Status</div>
+          <div class="desc">% complete · What's done · What's left · ETA</div>
+        </div>
+        <div class="ve-card ve-card--purple">
+          <div class="title">Key Decisions</div>
+          <div class="desc">Decisions made · References to decisions.md</div>
+        </div>
+        <div class="ve-card ve-card--amber">
+          <div class="title">Watch Out For</div>
+          <div class="desc">Edge cases · Fragile areas · Gotchas · Files to start with</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Single to Multi-person conversion -->
+  <div class="section section--recessed" style="--i:5">
+    <div class="section-label"><span class="dot"></span> Single → Multi-Person Conversion</div>
+    <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center;">
+      <div style="font-family:var(--font-mono);font-size:11px;background:var(--indigo-dim);color:var(--indigo);border:1px solid var(--indigo);padding:5px 12px;border-radius:6px;">1. Run /check-contributors</div>
+      <div style="color:var(--text-dim)">→</div>
+      <div style="font-family:var(--font-mono);font-size:11px;background:var(--purple-dim);color:var(--purple);border:1px solid var(--purple);padding:5px 12px;border-radius:6px;">2. Create _project_specs/team/</div>
+      <div style="color:var(--text-dim)">→</div>
+      <div style="font-family:var(--font-mono);font-size:11px;background:var(--teal-dim);color:var(--teal);border:1px solid var(--teal);padding:5px 12px;border-radius:6px;">3. Init state.md + contributors.md</div>
+      <div style="color:var(--text-dim)">→</div>
+      <div style="font-family:var(--font-mono);font-size:11px;background:var(--green-dim);color:var(--green);border:1px solid var(--green);padding:5px 12px;border-radius:6px;">4. Add claim annotations to todos</div>
+      <div style="color:var(--text-dim)">→</div>
+      <div style="font-family:var(--font-mono);font-size:11px;background:var(--amber-dim);color:var(--amber);border:1px solid var(--amber);padding:5px 12px;border-radius:6px;">5. Update CLAUDE.md</div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

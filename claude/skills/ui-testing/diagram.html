@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>UI Testing Skill — Visual Verification</title>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0e1117;
+      --surface: #161c26;
+      --surface-2: #1c2433;
+      --border: rgba(255,255,255,0.06);
+      --border-bright: rgba(255,255,255,0.12);
+      --text: #e8edf5;
+      --text-dim: #7a8899;
+      --pass: #2da44e;
+      --pass-dim: rgba(45,164,78,0.12);
+      --fail: #da3633;
+      --fail-dim: rgba(218,54,51,0.12);
+      --warn: #d4a72c;
+      --warn-dim: rgba(212,167,44,0.12);
+      --info: #388bfd;
+      --info-dim: rgba(56,139,253,0.12);
+      --font-body: 'Space Grotesk', system-ui, sans-serif;
+      --font-mono: 'Space Mono', 'Courier New', monospace;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--font-body);
+      background: var(--bg);
+      background-image:
+        radial-gradient(at 0% 0%, var(--pass-dim) 0%, transparent 45%),
+        radial-gradient(at 100% 100%, var(--fail-dim) 0%, transparent 45%);
+      color: var(--text);
+      padding: 40px 24px 80px;
+    }
+
+    header {
+      max-width: 900px;
+      margin: 0 auto 44px;
+    }
+
+    .skill-mono {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--pass);
+      letter-spacing: 0.12em;
+      margin-bottom: 14px;
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      font-weight: 700;
+      letter-spacing: -0.04em;
+      line-height: 1.1;
+      margin-bottom: 12px;
+    }
+
+    .tagline {
+      font-size: 0.92rem;
+      color: var(--text-dim);
+      max-width: 500px;
+      line-height: 1.6;
+    }
+
+    main {
+      max-width: 900px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    /* Checklist section */
+    .checklist-section {
+      background: var(--surface);
+      border: 1px solid var(--border-bright);
+      border-radius: 12px;
+      padding: 22px 24px;
+      animation: fadeUp 0.35s ease both;
+    }
+
+    .section-title {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      margin-bottom: 16px;
+    }
+
+    .section-title.pass-c { color: var(--pass); }
+    .section-title.fail-c { color: var(--fail); }
+    .section-title.warn-c { color: var(--warn); }
+    .section-title.info-c { color: var(--info); }
+
+    .check-groups {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 12px;
+    }
+
+    .check-group h4 {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 0.10em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin-bottom: 8px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .check-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .check-list li {
+      font-size: 0.78rem;
+      padding: 5px 10px 5px 26px;
+      border-radius: 5px;
+      position: relative;
+      background: var(--surface-2);
+      color: var(--text-dim);
+      min-width: 0;
+      overflow-wrap: break-word;
+    }
+
+    .check-list li::before {
+      position: absolute;
+      left: 8px;
+      font-family: var(--font-mono);
+      font-size: 10px;
+    }
+
+    .check-list.pass li::before { content: '✓'; color: var(--pass); }
+    .check-list.fail li::before { content: '✗'; color: var(--fail); }
+    .check-list.todo li::before { content: '□'; color: var(--warn); }
+
+    /* Contrast table */
+    .contrast-section {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      animation: fadeUp 0.35s 0.10s ease both;
+    }
+
+    .ve-card {
+      background: var(--surface);
+      border: 1px solid var(--border-bright);
+      border-radius: 12px;
+      padding: 18px 20px;
+      min-width: 0;
+    }
+
+    .contrast-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 6px 10px;
+      border-radius: 6px;
+      margin-bottom: 4px;
+      gap: 8px;
+      min-width: 0;
+    }
+
+    .contrast-row:last-child { margin-bottom: 0; }
+
+    .contrast-row .label {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      min-width: 0;
+      overflow-wrap: break-word;
+    }
+
+    .contrast-row .ratio {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .contrast-row.ok   { background: var(--pass-dim); }
+    .contrast-row.ok .label   { color: var(--pass); }
+    .contrast-row.ok .ratio   { color: var(--pass); }
+
+    .contrast-row.bad  { background: var(--fail-dim); }
+    .contrast-row.bad .label  { color: var(--fail); }
+    .contrast-row.bad .ratio  { color: var(--fail); }
+
+    /* Common fixes */
+    .fixes-section {
+      background: var(--surface);
+      border: 1px solid var(--border-bright);
+      border-radius: 12px;
+      padding: 22px 24px;
+      animation: fadeUp 0.35s 0.20s ease both;
+    }
+
+    .fix-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 10px;
+    }
+
+    .fix-card {
+      border-radius: 8px;
+      padding: 12px 14px;
+      min-width: 0;
+    }
+
+    .fix-card.problem { background: var(--fail-dim); border: 1px solid rgba(218,54,51,0.2); }
+    .fix-card.solution { background: var(--pass-dim); border: 1px solid rgba(45,164,78,0.2); }
+
+    .fix-card .fix-label {
+      font-family: var(--font-mono);
+      font-size: 9px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+
+    .fix-card.problem .fix-label { color: var(--fail); }
+    .fix-card.solution .fix-label { color: var(--pass); }
+
+    .fix-card h4 {
+      font-size: 0.82rem;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .fix-card p {
+      font-family: var(--font-mono);
+      font-size: 0.69rem;
+      color: var(--text-dim);
+      line-height: 1.5;
+      min-width: 0;
+      overflow-wrap: break-word;
+    }
+
+    /* Automation section */
+    .auto-section {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      animation: fadeUp 0.35s 0.30s ease both;
+    }
+
+    .auto-card {
+      background: var(--surface);
+      border: 1px solid var(--border-bright);
+      border-radius: 12px;
+      padding: 18px 20px;
+      min-width: 0;
+    }
+
+    .auto-card h3 {
+      font-size: 0.9rem;
+      font-weight: 600;
+      margin-bottom: 10px;
+      color: var(--info);
+    }
+
+    .auto-card p {
+      font-size: 0.78rem;
+      color: var(--text-dim);
+      line-height: 1.5;
+      min-width: 0;
+      overflow-wrap: break-word;
+    }
+
+    .code-snippet {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      background: var(--surface-2);
+      border-radius: 6px;
+      padding: 10px 12px;
+      margin-top: 8px;
+      color: var(--text-dim);
+      white-space: pre-wrap;
+      overflow-wrap: break-word;
+    }
+
+    @media (max-width: 640px) {
+      .contrast-section { grid-template-columns: 1fr; }
+      .auto-section { grid-template-columns: 1fr; }
+      h1 { font-size: 1.9rem; }
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(14px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @media (prefers-reduced-motion: reduce) { * { animation: none !important; } }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="skill-mono">// ui-testing skill</div>
+  <h1>UI Verification</h1>
+  <p class="tagline">Catch invisible buttons, broken layouts, and contrast failures. Run these checks after creating any new UI components.</p>
+</header>
+
+<main>
+
+  <!-- Pre-flight checklist -->
+  <div class="checklist-section">
+    <div class="section-title pass-c">Pre-Flight Checklist — Before Shipping Any UI</div>
+    <div class="check-groups">
+      <div class="check-group">
+        <h4>Visibility</h4>
+        <ul class="check-list todo">
+          <li>All buttons have visible bg OR border</li>
+          <li>No text same color as background</li>
+          <li>All text meets 4.5:1 contrast</li>
+          <li>Ghost buttons have visible borders</li>
+        </ul>
+      </div>
+      <div class="check-group">
+        <h4>Touch / Click Targets</h4>
+        <ul class="check-list todo">
+          <li>All buttons minimum 44px height</li>
+          <li>Icon buttons 44x44px minimum</li>
+          <li>Adequate spacing between clickables</li>
+        </ul>
+      </div>
+      <div class="check-group">
+        <h4>States</h4>
+        <ul class="check-list todo">
+          <li>Hover states visible (web)</li>
+          <li>Pressed states visible (mobile)</li>
+          <li>Focus rings on keyboard nav</li>
+          <li>Disabled: opacity 0.5</li>
+          <li>Loading states show indicators</li>
+        </ul>
+      </div>
+      <div class="check-group">
+        <h4>Dark Mode + Responsive</h4>
+        <ul class="check-list todo">
+          <li>Text readable on dark backgrounds</li>
+          <li>Borders visible in dark mode</li>
+          <li>No gray-400 on dark backgrounds</li>
+          <li>No horizontal scroll at 320px</li>
+          <li>Readable at all breakpoints</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Contrast quick reference -->
+  <div class="contrast-section">
+    <div class="ve-card">
+      <div class="section-title pass-c" style="margin-bottom:12px">Light Mode — on White</div>
+      <div class="contrast-row ok"><span class="label">text-gray-900 (#111827)</span><span class="ratio">16:1 PASS</span></div>
+      <div class="contrast-row ok"><span class="label">text-gray-800 (#1F2937)</span><span class="ratio">12:1 PASS</span></div>
+      <div class="contrast-row ok"><span class="label">text-gray-700 (#374151)</span><span class="ratio">9:1 PASS</span></div>
+      <div class="contrast-row ok"><span class="label">text-gray-600 (#4B5563)</span><span class="ratio">6:1 PASS</span></div>
+      <div class="contrast-row bad"><span class="label">text-gray-500 (#6B7280)</span><span class="ratio">4.6:1 BARE</span></div>
+      <div class="contrast-row bad"><span class="label">text-gray-400 (#9CA3AF)</span><span class="ratio">2.6:1 FAIL</span></div>
+    </div>
+
+    <div class="ve-card">
+      <div class="section-title warn-c" style="margin-bottom:12px">Dark Mode — on gray-900</div>
+      <div class="contrast-row ok"><span class="label">text-white (#FFFFFF)</span><span class="ratio">16:1 PASS</span></div>
+      <div class="contrast-row ok"><span class="label">text-gray-100 (#F3F4F6)</span><span class="ratio">13:1 PASS</span></div>
+      <div class="contrast-row ok"><span class="label">text-gray-200 (#E5E7EB)</span><span class="ratio">11:1 PASS</span></div>
+      <div class="contrast-row ok"><span class="label">text-gray-300 (#D1D5DB)</span><span class="ratio">8:1 PASS</span></div>
+      <div class="contrast-row bad"><span class="label">text-gray-400 (#9CA3AF)</span><span class="ratio">5:1 BARE</span></div>
+      <div class="contrast-row bad"><span class="label">text-gray-500 (#6B7280)</span><span class="ratio">3:1 FAIL</span></div>
+    </div>
+  </div>
+
+  <!-- Common Fixes -->
+  <div class="fixes-section">
+    <div class="section-title info-c">Common Fixes</div>
+    <div class="fix-grid">
+      <div class="fix-card problem">
+        <div class="fix-label">Problem</div>
+        <h4>Invisible Button</h4>
+        <p>&lt;button className="text-gray-500"&gt;Click&lt;/button&gt;</p>
+      </div>
+      <div class="fix-card solution">
+        <div class="fix-label">Fix</div>
+        <h4>Add Background or Border</h4>
+        <p>className="bg-gray-100 text-gray-900 px-4 py-3 rounded-lg"</p>
+      </div>
+      <div class="fix-card problem">
+        <div class="fix-label">Problem</div>
+        <h4>Low Contrast Text</h4>
+        <p>&lt;p className="text-gray-400"&gt;Secondary text&lt;/p&gt;</p>
+      </div>
+      <div class="fix-card solution">
+        <div class="fix-label">Fix</div>
+        <h4>Darken the Text</h4>
+        <p>&lt;p className="text-gray-600"&gt;Secondary text&lt;/p&gt;</p>
+      </div>
+      <div class="fix-card problem">
+        <div class="fix-label">Problem</div>
+        <h4>Missing Focus Ring</h4>
+        <p>className="outline-none" (no ring)</p>
+      </div>
+      <div class="fix-card solution">
+        <div class="fix-label">Fix</div>
+        <h4>Add Visible Focus Ring</h4>
+        <p>outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2</p>
+      </div>
+      <div class="fix-card problem">
+        <div class="fix-label">Problem</div>
+        <h4>Small Touch Target</h4>
+        <p>className="p-1 text-sm" — less than 44px</p>
+      </div>
+      <div class="fix-card solution">
+        <div class="fix-label">Fix</div>
+        <h4>Minimum 44px</h4>
+        <p>className="w-11 h-11 flex items-center justify-center"</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Automation -->
+  <div class="auto-section">
+    <div class="auto-card">
+      <h3>ESLint jsx-a11y</h3>
+      <p>Automated accessibility linting via eslint-plugin-jsx-a11y. Catches missing ARIA roles, labels, and structural issues at write time.</p>
+      <div class="code-snippet">npm install -D eslint-plugin-jsx-a11y
+
+// .eslintrc
+{
+  "extends": [
+    "plugin:jsx-a11y/recommended"
+  ]
+}</div>
+    </div>
+
+    <div class="auto-card">
+      <h3>Playwright + axe-core</h3>
+      <p>Full accessibility audit via @axe-core/playwright. Runs against live rendered pages in CI. Catches contrast, landmark, and ARIA violations.</p>
+      <div class="code-snippet">import AxeBuilder from '@axe-core/playwright';
+
+test('no a11y violations', async ({ page }) => {
+  await page.goto('/');
+  const results = await new AxeBuilder({ page })
+    .analyze();
+  expect(results.violations).toEqual([]);
+});</div>
+    </div>
+  </div>
+
+</main>
+
+</body>
+</html>

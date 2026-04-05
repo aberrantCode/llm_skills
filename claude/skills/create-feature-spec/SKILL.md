@@ -1,8 +1,8 @@
-  ---
-  name: create-feature-spec
-  description: Create a comprehensive feature specification from a single sentence description
-  trigger: /create-feature-spec
-  ---
+---
+name: create-feature-spec
+description: Create a comprehensive feature specification from a single sentence description
+trigger: /create-feature-spec
+---
 
 You are tasked with creating a comprehensive feature specification document using the template at
   `@docs/templates/FEATURE_SPECIFICATION.md`.
@@ -78,3 +78,7 @@ You are tasked with creating a comprehensive feature specification document usin
   4. Technical preferences or constraints
 
   Then proceed to create the specification iteratively.
+
+## Diagram
+
+[View diagram](diagram.html)

@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Web Content (SEO + GEO) — Skill Diagram</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --font-body: 'Plus Jakarta Sans', system-ui, sans-serif;
+    --font-mono: 'Space Mono', 'SF Mono', Consolas, monospace;
+
+    --bg: #faf5ff;
+    --surface: #ffffff;
+    --surface2: #f3eeff;
+    --surface-elevated: #fdfaff;
+    --border: rgba(120, 40, 200, 0.1);
+    --border-bright: rgba(120, 40, 200, 0.22);
+    --text: #1a0f2e;
+    --text-dim: #7060a0;
+
+    --violet: #7c3aed;
+    --violet-dim: rgba(124, 58, 237, 0.08);
+    --purple: #9f1ef0;
+    --purple-dim: rgba(159, 30, 240, 0.08);
+    --pink: #c026d3;
+    --pink-dim: rgba(192, 38, 211, 0.08);
+    --blue: #2563eb;
+    --blue-dim: rgba(37, 99, 235, 0.08);
+    --teal: #0d9488;
+    --teal-dim: rgba(13, 148, 136, 0.08);
+    --amber: #d97706;
+    --amber-dim: rgba(217, 119, 6, 0.08);
+    --green: #059669;
+    --green-dim: rgba(5, 150, 105, 0.08);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0d0918;
+      --surface: #160f28;
+      --surface2: #1f1638;
+      --surface-elevated: #261c45;
+      --border: rgba(167, 139, 250, 0.1);
+      --border-bright: rgba(167, 139, 250, 0.22);
+      --text: #ede9fe;
+      --text-dim: #9f89e0;
+      --violet: #a78bfa;
+      --violet-dim: rgba(167, 139, 250, 0.12);
+      --purple: #c084fc;
+      --purple-dim: rgba(192, 132, 252, 0.12);
+      --pink: #f0abfc;
+      --pink-dim: rgba(240, 171, 252, 0.12);
+      --blue: #60a5fa;
+      --blue-dim: rgba(96, 165, 250, 0.12);
+      --teal: #2dd4bf;
+      --teal-dim: rgba(45, 212, 191, 0.12);
+      --amber: #fbbf24;
+      --amber-dim: rgba(251, 191, 36, 0.12);
+      --green: #34d399;
+      --green-dim: rgba(52, 211, 153, 0.12);
+    }
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    background-image:
+      radial-gradient(ellipse at 70% 0%, var(--violet-dim) 0%, transparent 55%),
+      radial-gradient(ellipse at 20% 100%, var(--pink-dim) 0%, transparent 45%);
+    color: var(--text);
+    font-family: var(--font-body);
+    padding: 44px 40px;
+    min-height: 100vh;
+  }
+
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+  .animate { animation: fadeUp 0.45s ease-out both; animation-delay: calc(var(--i, 0) * 0.07s); }
+  @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: 0.01ms !important; animation-delay: 0ms !important; } }
+
+  .header { max-width: 1100px; margin: 0 auto 40px; display: flex; align-items: flex-start; gap: 18px; }
+  .icon-box { width: 54px; height: 54px; background: linear-gradient(135deg, var(--violet) 0%, var(--pink) 100%); border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 26px; flex-shrink: 0; box-shadow: 0 4px 16px var(--violet-dim); }
+  h1 { font-size: 36px; font-weight: 800; letter-spacing: -0.5px; line-height: 1.1; margin-bottom: 6px; }
+  .subtitle { color: var(--text-dim); font-size: 13px; font-family: var(--font-mono); }
+
+  .diagram { display: grid; grid-template-columns: 1fr; gap: 20px; max-width: 1100px; margin: 0 auto; }
+
+  .section { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 22px 26px; }
+  .section--hero { background: var(--surface-elevated); border-color: var(--border-bright); box-shadow: 0 4px 20px var(--violet-dim); padding: 28px 32px; }
+  .section--recessed { background: var(--surface2); box-shadow: inset 0 1px 4px rgba(0,0,0,0.04); }
+
+  .section-label { font-family: var(--font-mono); font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.6px; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
+
+  .section--violet { border-left: 3px solid var(--violet); } .section--violet .section-label { color: var(--violet); } .section--violet .dot { background: var(--violet); }
+  .section--purple { border-left: 3px solid var(--purple); } .section--purple .section-label { color: var(--purple); } .section--purple .dot { background: var(--purple); }
+  .section--pink   { border-left: 3px solid var(--pink); }   .section--pink   .section-label { color: var(--pink); }   .section--pink   .dot { background: var(--pink); }
+  .section--blue   { border-left: 3px solid var(--blue); }   .section--blue   .section-label { color: var(--blue); }   .section--blue   .dot { background: var(--blue); }
+  .section--teal   { border-left: 3px solid var(--teal); }   .section--teal   .section-label { color: var(--teal); }   .section--teal   .dot { background: var(--teal); }
+  .section--amber  { border-left: 3px solid var(--amber); }  .section--amber  .section-label { color: var(--amber); }  .section--amber  .dot { background: var(--amber); }
+  .section--green  { border-left: 3px solid var(--green); }  .section--green  .section-label { color: var(--green); }  .section--green  .dot { background: var(--green); }
+
+  /* SEO vs GEO comparison */
+  .vs-grid { display: grid; grid-template-columns: 1fr auto 1fr; gap: 16px; align-items: start; }
+  .vs-divider { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 0 8px; }
+  .vs-label { font-weight: 800; font-size: 12px; font-family: var(--font-mono); color: var(--text-dim); background: var(--surface2); border: 1px solid var(--border-bright); border-radius: 20px; padding: 5px 10px; }
+
+  .col-card { background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; padding: 16px 18px; }
+  .col-card .col-title { font-weight: 700; font-size: 14px; margin-bottom: 10px; }
+  .col-card ul { list-style: none; font-size: 12px; line-height: 1.85; color: var(--text-dim); }
+  .col-card ul li { padding-left: 14px; position: relative; }
+  .col-card ul li::before { content: '·'; position: absolute; left: 0; color: var(--violet); font-weight: 700; }
+
+  /* Page type grid */
+  .page-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  .page-card { background: var(--surface2); border: 1px solid var(--border); border-radius: 9px; padding: 14px; }
+  .page-card .pg-name { font-weight: 700; font-size: 12.5px; margin-bottom: 4px; }
+  .page-card .pg-schema { font-family: var(--font-mono); font-size: 10px; color: var(--text-dim); margin-bottom: 6px; }
+  .page-card .pg-key { font-size: 11px; color: var(--text-dim); line-height: 1.5; }
+  .page-card--violet { border-top: 3px solid var(--violet); }
+  .page-card--purple { border-top: 3px solid var(--purple); }
+  .page-card--pink   { border-top: 3px solid var(--pink); }
+  .page-card--blue   { border-top: 3px solid var(--blue); }
+  .page-card--teal   { border-top: 3px solid var(--teal); }
+  .page-card--amber  { border-top: 3px solid var(--amber); }
+
+  /* AI formats */
+  .format-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+  .fmt-card { background: var(--surface2); border: 1px solid var(--border); border-radius: 9px; padding: 13px 14px; text-align: center; }
+  .fmt-card .fmt-icon { font-size: 22px; margin-bottom: 7px; }
+  .fmt-card .fmt-name { font-weight: 700; font-size: 12px; margin-bottom: 3px; }
+  .fmt-card .fmt-desc { font-size: 10.5px; color: var(--text-dim); line-height: 1.5; }
+  .fmt-card--violet { border-top: 3px solid var(--violet); }
+  .fmt-card--purple { border-top: 3px solid var(--purple); }
+  .fmt-card--pink   { border-top: 3px solid var(--pink); }
+  .fmt-card--blue   { border-top: 3px solid var(--blue); }
+
+  /* Schema table */
+  .schema-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  .schema-table th { font-family: var(--font-mono); font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: var(--text-dim); padding: 8px 12px; text-align: left; border-bottom: 1px solid var(--border-bright); }
+  .schema-table td { padding: 8px 12px; border-bottom: 1px solid var(--border); color: var(--text-dim); vertical-align: top; }
+  .schema-table td:first-child { font-weight: 600; color: var(--text); }
+  .schema-table tr:last-child td { border-bottom: none; }
+
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .inner-card { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 13px 16px; margin-bottom: 10px; }
+  .inner-card:last-child { margin-bottom: 0; }
+  .inner-card .ic-title { font-weight: 700; font-size: 12.5px; margin-bottom: 5px; }
+  .inner-card .ic-desc { color: var(--text-dim); font-size: 11.5px; line-height: 1.55; }
+  .inner-card code { font-family: var(--font-mono); font-size: 10.5px; background: var(--violet-dim); color: var(--violet); padding: 1px 5px; border-radius: 3px; }
+
+  .node-list { list-style: none; font-size: 12px; line-height: 1.9; }
+  .node-list li { padding-left: 16px; position: relative; color: var(--text-dim); }
+  .node-list li::before { content: '›'; color: var(--violet); font-weight: 700; position: absolute; left: 0; }
+  .node-list code { font-family: var(--font-mono); font-size: 10.5px; background: var(--violet-dim); color: var(--violet); padding: 1px 5px; border-radius: 3px; }
+  .node-list strong { color: var(--text); }
+
+  .flow-arrow { display: flex; justify-content: center; align-items: center; gap: 8px; color: var(--text-dim); font-family: var(--font-mono); font-size: 11px; padding: 2px 0; }
+  .flow-arrow svg { width: 18px; height: 18px; fill: none; stroke: var(--border-bright); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+  .callout { background: var(--surface2); border: 1px solid var(--border); border-left: 3px solid var(--violet); border-radius: 0 9px 9px 0; padding: 13px 18px; font-size: 12.5px; line-height: 1.65; color: var(--text-dim); }
+  .callout strong { color: var(--text); }
+  .callout code { font-family: var(--font-mono); font-size: 11px; background: var(--violet-dim); color: var(--violet); padding: 1px 5px; border-radius: 3px; }
+
+  @media (max-width: 768px) {
+    body { padding: 20px; }
+    .vs-grid { grid-template-columns: 1fr; }
+    .vs-divider { display: none; }
+    .page-grid, .format-grid { grid-template-columns: 1fr 1fr; }
+    .two-col { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header animate" style="--i:0">
+  <div class="icon-box">✍️</div>
+  <div>
+    <h1>Web Content (SEO + GEO)</h1>
+    <p class="subtitle">web-content skill &mdash; schema, ChatGPT/Perplexity optimization, E-E-A-T, AI discovery</p>
+  </div>
+</div>
+
+<div class="diagram">
+
+  <!-- Philosophy + SEO vs GEO -->
+  <div class="section section--hero animate" style="--i:1">
+    <div class="section-label"><span class="dot" style="background:var(--text-dim)"></span> SEO gets clicks. GEO gets citations.</div>
+    <div class="vs-grid">
+      <div class="col-card">
+        <div class="col-title" style="color:var(--blue)">Traditional SEO</div>
+        <ul>
+          <li>Rank on search results pages</li>
+          <li>Optimize for Google rankings</li>
+          <li>Goal: click-through rate</li>
+          <li>Focus: keywords</li>
+          <li>Signals: backlinks for authority</li>
+        </ul>
+      </div>
+      <div class="vs-divider">
+        <div class="vs-label">+</div>
+        <div style="width:1px; height:60px; background:var(--border-bright); margin:8px 0"></div>
+        <div style="font-size:11px; color:var(--text-dim); font-family:var(--font-mono); text-align:center">both<br>required</div>
+      </div>
+      <div class="col-card">
+        <div class="col-title" style="color:var(--violet)">Generative Engine Optimization (GEO)</div>
+        <ul>
+          <li>Be cited in AI-generated answers</li>
+          <li>Optimize for ChatGPT, Claude, Perplexity, Gemini</li>
+          <li>Goal: share of AI answer</li>
+          <li>Focus: entities + facts</li>
+          <li>Signals: citations for consensus</li>
+        </ul>
+      </div>
+    </div>
+    <div style="margin-top:14px; font-size:12px; color:var(--text-dim)">AI traffic grew <strong style="color:var(--violet)">1,200%</strong> between Jul 2024–Feb 2025. Google search share dropped below 90% for first time. Optimize for both.</div>
+  </div>
+
+  <!-- AI-Optimized Content Formats -->
+  <div class="section section--violet animate" style="--i:2">
+    <div class="section-label"><span class="dot"></span> Content Formats AI Loves</div>
+    <div class="format-grid">
+      <div class="fmt-card fmt-card--violet">
+        <div class="fmt-icon">📋</div>
+        <div class="fmt-name">TL;DR Boxes</div>
+        <div class="fmt-desc">At top of articles. AI extracts for summaries. 3–5 bullet key points.</div>
+      </div>
+      <div class="fmt-card fmt-card--purple">
+        <div class="fmt-icon">📖</div>
+        <div class="fmt-name">Definition Blocks</div>
+        <div class="fmt-desc">"What is X?" H2 heading. One-sentence def + characteristics list.</div>
+      </div>
+      <div class="fmt-card fmt-card--pink">
+        <div class="fmt-icon">📊</div>
+        <div class="fmt-name">Comparison Tables</div>
+        <div class="fmt-desc">Feature vs. competitor. Structured comparisons get extracted by AI.</div>
+      </div>
+      <div class="fmt-card fmt-card--blue">
+        <div class="fmt-icon">📈</div>
+        <div class="fmt-name">Stat Boxes + Steps</div>
+        <div class="fmt-desc">Original statistics with sources. Step-by-step guides with HowTo schema.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="flow-arrow animate" style="--i:3">
+    <svg viewBox="0 0 20 20"><path d="M10 4 L10 16 M6 12 L10 16 L14 12"/></svg>
+    page templates
+  </div>
+
+  <!-- Page Types -->
+  <div class="section section--purple animate" style="--i:4">
+    <div class="section-label"><span class="dot"></span> Page Templates</div>
+    <div class="page-grid">
+      <div class="page-card page-card--violet">
+        <div class="pg-name">Homepage</div>
+        <div class="pg-schema">Organization + WebSite + FAQ</div>
+        <div class="pg-key">Value prop → Problem → Solution → Social proof → How it works → FAQ → CTA</div>
+      </div>
+      <div class="page-card page-card--purple">
+        <div class="pg-name">Product / Service</div>
+        <div class="pg-schema">Product + Review + FAQ + Breadcrumb</div>
+        <div class="pg-key">TL;DR box → Problem/Solution → Features grid → Comparison table → FAQ</div>
+      </div>
+      <div class="page-card page-card--pink">
+        <div class="pg-name">Blog Post / Article</div>
+        <div class="pg-schema">Article + Author + FAQ</div>
+        <div class="pg-key">TL;DR → Direct answer first 100 words → H2/H3 body → Expert quotes → Summary</div>
+      </div>
+      <div class="page-card page-card--blue">
+        <div class="pg-name">FAQ Page</div>
+        <div class="pg-schema">FAQPage + Question/Answer</div>
+        <div class="pg-key">Group by category. Direct answer in first sentence. Critical for GEO discovery.</div>
+      </div>
+      <div class="page-card page-card--teal">
+        <div class="pg-name">Landing Page</div>
+        <div class="pg-schema">No schema required</div>
+        <div class="pg-key">Single focus. No nav. Headline → Problem → Solution → Proof → FAQ/Guarantee → CTA</div>
+      </div>
+      <div class="page-card page-card--amber">
+        <div class="pg-name">How-To Guide</div>
+        <div class="pg-schema">HowTo schema</div>
+        <div class="pg-key">Numbered steps with action verbs. Example per step. HowToStep schema. Result at end.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Schema Markup -->
+  <div class="section section--teal animate" style="--i:5">
+    <div class="section-label"><span class="dot"></span> Schema Markup by Page Type</div>
+    <table class="schema-table">
+      <thead><tr><th>Schema Type</th><th>Page</th><th>Key Fields</th></tr></thead>
+      <tbody>
+        <tr><td>Organization</td><td>Homepage (site-wide)</td><td>name, url, logo, foundingDate, sameAs (social links), contactPoint</td></tr>
+        <tr><td>Article</td><td>Blog posts, guides</td><td>headline, author (Person), publisher, datePublished, dateModified, image</td></tr>
+        <tr><td>FAQPage</td><td>FAQ sections / pages</td><td>mainEntity: array of Question + acceptedAnswer objects</td></tr>
+        <tr><td>Product</td><td>Product pages</td><td>name, description, brand, offers (price, currency, availability), aggregateRating</td></tr>
+        <tr><td>HowTo</td><td>Step-by-step guides</td><td>name, description, step: array of HowToStep (name + text)</td></tr>
+        <tr><td>BreadcrumbList</td><td>All pages</td><td>itemListElement: position, name, item URL</td></tr>
+      </tbody>
+    </table>
+    <div style="margin-top:12px; font-size:11.5px; color:var(--text-dim)">
+      Validate at <a href="https://validator.schema.org/" style="color:var(--teal)">validator.schema.org</a> or Google's Rich Results Test. Use JSON-LD in <code style="font-family:var(--font-mono);font-size:10.5px;background:var(--teal-dim);color:var(--teal);padding:1px 5px;border-radius:3px">&lt;head&gt;</code> — not inline microdata.
+    </div>
+  </div>
+
+  <!-- E-E-A-T + Platform Optimization -->
+  <div class="two-col animate" style="--i:6">
+    <div class="section section--amber">
+      <div class="section-label"><span class="dot"></span> E-E-A-T for AI Discovery</div>
+      <ul class="node-list">
+        <li><strong>Experience</strong> — first-person case studies, original screenshots, "we tested X and found Y"</li>
+        <li><strong>Expertise</strong> — author bios with credentials, industry-specific terminology, technical depth</li>
+        <li><strong>Authoritativeness</strong> — backlinks from trusted sources, industry publication mentions</li>
+        <li><strong>Trustworthiness</strong> — contact info visible, about page, HTTPS, accurate dates</li>
+        <li><strong>Freshness</strong> — visible publish + last-updated dates. AI prefers recent content.</li>
+      </ul>
+    </div>
+    <div class="section section--green">
+      <div class="section-label"><span class="dot"></span> Platform-Specific Signals</div>
+      <div class="inner-card">
+        <div class="ic-title">ChatGPT</div>
+        <div class="ic-desc">TL;DR sections, named authors with credentials, original research, multi-intent content (covers related questions).</div>
+      </div>
+      <div class="inner-card">
+        <div class="ic-title">Perplexity</div>
+        <div class="ic-desc">Original statistics with sources, comparison tables, clean URL slugs, YouTube videos (shown in results).</div>
+      </div>
+      <div class="inner-card" style="margin-bottom:0">
+        <div class="ic-title">Claude &amp; Gemini</div>
+        <div class="ic-desc">Logical structure, balanced perspectives, rich schema markup, detailed image alt-text, multimedia with transcripts.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Callout -->
+  <div class="section section--recessed animate" style="--i:7">
+    <div class="callout">
+      <strong>Anti-patterns to avoid:</strong> No dates on content &mdash; anonymous content (no author = no E-E-A-T) &mdash; walls of text (use headers, bullets, boxes) &mdash; generic content without original insights &mdash; missing schema &mdash; no FAQ section &mdash; poor URL structure (<code>/p=12345</code> not <code>/topic-name</code>) &mdash; outdated info (review quarterly minimum).
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

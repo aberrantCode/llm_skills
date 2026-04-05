@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>React Web Skill — Architecture & Workflow</title>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --font-body: 'IBM Plex Sans', system-ui, sans-serif;
+      --font-serif: 'Instrument Serif', Georgia, serif;
+      --font-mono: 'JetBrains Mono', 'SF Mono', Consolas, monospace;
+
+      --bg: #faf8f5;
+      --surface: #ffffff;
+      --surface-tinted: #f5f0e8;
+      --border: rgba(0,0,0,0.08);
+      --border-mid: rgba(0,0,0,0.14);
+      --text: #1c1a16;
+      --text-dim: #6b6355;
+
+      --tfd: #b45309;
+      --tfd-dim: rgba(180,83,9,0.1);
+      --structure: #0e7490;
+      --structure-dim: rgba(14,116,144,0.1);
+      --state: #047857;
+      --state-dim: rgba(4,120,87,0.1);
+      --perf: #7c3aed;
+      --perf-dim: rgba(124,58,237,0.08);
+      --anti: #be123c;
+      --anti-dim: rgba(190,18,60,0.08);
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #14120e;
+        --surface: #1e1b15;
+        --surface-tinted: #231f17;
+        --border: rgba(255,255,255,0.07);
+        --border-mid: rgba(255,255,255,0.13);
+        --text: #ede8de;
+        --text-dim: #9a9080;
+        --tfd: #f59e0b;
+        --tfd-dim: rgba(245,158,11,0.12);
+        --structure: #22d3ee;
+        --structure-dim: rgba(34,211,238,0.1);
+        --state: #34d399;
+        --state-dim: rgba(52,211,153,0.1);
+        --perf: #a78bfa;
+        --perf-dim: rgba(167,139,250,0.1);
+        --anti: #fb7185;
+        --anti-dim: rgba(251,113,133,0.1);
+      }
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--font-body);
+      background-color: var(--bg);
+      background-image:
+        radial-gradient(ellipse at 60% 0%, var(--tfd-dim) 0%, transparent 55%),
+        radial-gradient(circle, var(--border) 1px, transparent 1px);
+      background-size: auto, 28px 28px;
+      color: var(--text);
+      min-height: 100vh;
+      padding: 48px 24px 80px;
+    }
+
+    .page-wrap { max-width: 960px; margin: 0 auto; }
+
+    /* ── Hero ── */
+    .hero {
+      margin-bottom: 56px;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: end;
+      gap: 24px;
+      border-bottom: 1px solid var(--border-mid);
+      padding-bottom: 32px;
+    }
+    .hero-eyebrow {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--tfd);
+      margin-bottom: 12px;
+    }
+    .hero h1 {
+      font-family: var(--font-serif);
+      font-size: clamp(2rem, 5vw, 3.2rem);
+      font-weight: 400;
+      line-height: 1.15;
+      color: var(--text);
+    }
+    .hero h1 em { font-style: italic; color: var(--tfd); }
+    .hero-desc {
+      font-size: 15px;
+      color: var(--text-dim);
+      line-height: 1.65;
+      margin-top: 14px;
+      max-width: 56ch;
+    }
+    .hero-badge {
+      background: var(--tfd-dim);
+      border: 1px solid var(--tfd);
+      border-radius: 6px;
+      padding: 10px 16px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--tfd);
+      white-space: nowrap;
+      align-self: start;
+    }
+
+    /* ── Section label ── */
+    .section-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin-bottom: 16px;
+    }
+    .section-label::before {
+      content: '';
+      display: inline-block;
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: currentColor;
+      flex-shrink: 0;
+    }
+    .section-label.tfd { color: var(--tfd); }
+    .section-label.structure { color: var(--structure); }
+    .section-label.state { color: var(--state); }
+    .section-label.perf { color: var(--perf); }
+    .section-label.anti { color: var(--anti); }
+
+    /* ── Cards ── */
+    .ve-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 20px 24px;
+    }
+    .ve-card--hero {
+      background: var(--surface-tinted);
+      border-color: var(--border-mid);
+      padding: 28px 32px;
+    }
+    .ve-card--accent {
+      border-left: 3px solid var(--tfd);
+      padding-left: 20px;
+    }
+
+    /* ── TFD Workflow ── */
+    .tfd-section { margin-bottom: 52px; }
+    .tfd-title {
+      font-family: var(--font-serif);
+      font-size: 1.5rem;
+      font-weight: 400;
+      margin-bottom: 24px;
+    }
+    .tfd-flow {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 0;
+      position: relative;
+    }
+    .tfd-step {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      position: relative;
+    }
+    .tfd-step:not(:last-child)::after {
+      content: '';
+      position: absolute;
+      top: 20px;
+      right: -1px;
+      width: 50%;
+      height: 2px;
+      background: linear-gradient(to right, var(--tfd), transparent);
+    }
+    .tfd-step:not(:first-child)::before {
+      content: '';
+      position: absolute;
+      top: 20px;
+      left: -1px;
+      width: 50%;
+      height: 2px;
+      background: linear-gradient(to right, transparent, var(--tfd));
+    }
+    .tfd-num {
+      width: 40px; height: 40px;
+      border-radius: 50%;
+      background: var(--tfd-dim);
+      border: 2px solid var(--tfd);
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--font-mono);
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--tfd);
+      margin-bottom: 10px;
+      position: relative;
+      z-index: 1;
+    }
+    .tfd-step-label {
+      font-family: var(--font-mono);
+      font-size: 9px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      line-height: 1.4;
+    }
+    .tfd-step-sub {
+      font-size: 11px;
+      color: var(--tfd);
+      font-style: italic;
+      margin-top: 4px;
+    }
+
+    .tfd-states {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 1px;
+      background: var(--border-mid);
+      border: 1px solid var(--border-mid);
+      border-radius: 8px;
+      overflow: hidden;
+      margin-top: 20px;
+    }
+    .tfd-state {
+      background: var(--surface);
+      padding: 14px 16px;
+      font-family: var(--font-mono);
+      font-size: 12px;
+    }
+    .tfd-state strong {
+      display: block;
+      font-size: 14px;
+      margin-bottom: 4px;
+    }
+    .tfd-state.red strong { color: var(--anti); }
+    .tfd-state.green strong { color: var(--state); }
+    .tfd-state.refactor strong { color: var(--structure); }
+
+    /* ── Structure ── */
+    .structure-section { margin-bottom: 52px; }
+    .file-tree {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    .file-tree-header {
+      background: var(--surface-tinted);
+      border-bottom: 1px solid var(--border);
+      padding: 10px 16px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--text-dim);
+      letter-spacing: 0.05em;
+    }
+    .file-tree-body { padding: 16px; }
+    .tree-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 3px 0;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      line-height: 1.5;
+    }
+    .tree-indent { color: var(--border-mid); flex-shrink: 0; width: 16px; text-align: center; }
+    .tree-dir { color: var(--structure); font-weight: 500; }
+    .tree-file { color: var(--text-dim); }
+    .tree-note {
+      color: var(--text-dim);
+      font-size: 10px;
+      margin-left: auto;
+      opacity: 0.7;
+    }
+
+    /* ── Component patterns ── */
+    .patterns-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+    .pattern-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .pattern-header {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface-tinted);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.06em;
+    }
+    .pattern-header.tfd-h { color: var(--tfd); }
+    .pattern-header.structure-h { color: var(--structure); }
+    .pattern-header.state-h { color: var(--state); }
+    .pattern-body { padding: 14px 16px; font-size: 13px; line-height: 1.6; color: var(--text-dim); }
+    .pattern-body ul { padding-left: 0; list-style: none; }
+    .pattern-body li { padding: 2px 0; }
+    .pattern-body li::before { content: '→ '; color: var(--structure); font-family: var(--font-mono); }
+
+    /* ── State management ── */
+    .state-ladder {
+      display: flex;
+      flex-direction: column;
+      gap: 1px;
+      background: var(--border-mid);
+      border: 1px solid var(--border-mid);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    .state-tier {
+      background: var(--surface);
+      padding: 14px 20px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .state-tier-num {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      color: var(--text-dim);
+      width: 28px;
+      text-align: right;
+      flex-shrink: 0;
+    }
+    .state-tier-name {
+      font-weight: 600;
+      font-size: 14px;
+      min-width: 120px;
+    }
+    .state-tier-name.t1 { color: var(--state); }
+    .state-tier-name.t2 { color: var(--structure); }
+    .state-tier-name.t3 { color: var(--tfd); }
+    .state-tier-tool {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--text-dim);
+      background: var(--surface-tinted);
+      border: 1px solid var(--border);
+      padding: 2px 8px;
+      border-radius: 4px;
+    }
+    .state-tier-desc { font-size: 13px; color: var(--text-dim); margin-left: auto; }
+
+    /* ── Anti-patterns ── */
+    .anti-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+    .anti-item {
+      background: var(--anti-dim);
+      border: 1px solid rgba(190,18,60,0.2);
+      border-radius: 8px;
+      padding: 12px 14px;
+    }
+    .anti-label {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--anti);
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .anti-label::before { content: '✕'; font-size: 13px; }
+    .anti-fix { font-size: 12px; color: var(--text-dim); line-height: 1.4; }
+    .anti-fix strong { color: var(--state); }
+
+    /* ── Sections ── */
+    .main-section { margin-bottom: 52px; }
+    .section-title {
+      font-family: var(--font-serif);
+      font-size: 1.4rem;
+      font-weight: 400;
+      margin-bottom: 20px;
+    }
+
+    /* ── Animations ── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .hero, .tfd-section, .structure-section, .main-section {
+      animation: fadeUp 0.5s ease both;
+    }
+    .hero { animation-delay: 0s; }
+    .tfd-section { animation-delay: 0.08s; }
+    .structure-section { animation-delay: 0.16s; }
+    .main-section:nth-of-type(1) { animation-delay: 0.24s; }
+    .main-section:nth-of-type(2) { animation-delay: 0.32s; }
+    .main-section:nth-of-type(3) { animation-delay: 0.40s; }
+
+    @media (prefers-reduced-motion: reduce) {
+      * { animation: none !important; transition: none !important; }
+    }
+
+    @media (max-width: 640px) {
+      .tfd-flow { grid-template-columns: 1fr 1fr; gap: 16px; }
+      .tfd-step::after, .tfd-step::before { display: none; }
+      .patterns-grid, .anti-grid { grid-template-columns: 1fr; }
+      .tfd-states { grid-template-columns: 1fr; }
+      .hero { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+<div class="page-wrap">
+
+  <!-- Hero -->
+  <div class="hero">
+    <div>
+      <div class="hero-eyebrow">LLM Skill · react-web</div>
+      <h1>React <em>Web</em><br>Development</h1>
+      <p class="hero-desc">Hooks, React Query, Zustand, and test-first component development for production React web applications. Load with base.md + typescript.md.</p>
+    </div>
+    <div class="hero-badge">Hooks · React Query<br>Zustand · Vite/Next</div>
+  </div>
+
+  <!-- TFD -->
+  <div class="tfd-section">
+    <div class="section-label tfd">Test-First Development</div>
+    <h2 class="section-title">The Mandatory Workflow</h2>
+
+    <div class="ve-card ve-card--hero" style="margin-bottom:24px;">
+      <div class="tfd-flow">
+        <div class="tfd-step">
+          <div class="tfd-num">1</div>
+          <div class="tfd-step-label">Write<br>Test File</div>
+          <div class="tfd-step-sub">Define behavior</div>
+        </div>
+        <div class="tfd-step">
+          <div class="tfd-num">2</div>
+          <div class="tfd-step-label">Run Tests<br>(Fail)</div>
+          <div class="tfd-step-sub">Validates tests</div>
+        </div>
+        <div class="tfd-step">
+          <div class="tfd-num">3</div>
+          <div class="tfd-step-label">Write Min.<br>Code</div>
+          <div class="tfd-step-sub">Just enough</div>
+        </div>
+        <div class="tfd-step">
+          <div class="tfd-num">4</div>
+          <div class="tfd-step-label">Run Tests<br>(Pass)</div>
+          <div class="tfd-step-sub">Validates impl</div>
+        </div>
+        <div class="tfd-step">
+          <div class="tfd-num">5</div>
+          <div class="tfd-step-label">Refactor<br>If Needed</div>
+          <div class="tfd-step-sub">Tests guard</div>
+        </div>
+      </div>
+
+      <div class="tfd-states">
+        <div class="tfd-state red">
+          <strong>RED</strong>
+          Write .test.tsx first<br>Tests fail (expected)
+        </div>
+        <div class="tfd-state green">
+          <strong>GREEN</strong>
+          Create .tsx component<br>Tests pass
+        </div>
+        <div class="tfd-state refactor">
+          <strong>IMPROVE</strong>
+          Refactor cleanly<br>Add .module.css
+        </div>
+      </div>
+    </div>
+
+    <div class="ve-card ve-card--accent" style="background:var(--anti-dim); border-left-color:var(--anti);">
+      <div style="font-family:var(--font-mono);font-size:12px;color:var(--anti);font-weight:600;margin-bottom:8px;">VIOLATION — Never do this</div>
+      <div style="font-size:13px;color:var(--text-dim);line-height:1.6;">
+        Creating <code style="font-family:var(--font-mono);color:var(--anti);">Button.tsx</code> before <code style="font-family:var(--font-mono);color:var(--anti);">Button.test.tsx</code> exists.
+        Tests written after implementation rarely cover edge cases or accessibility. Claude MUST refuse and create the test file first.
+      </div>
+    </div>
+  </div>
+
+  <!-- Project Structure -->
+  <div class="structure-section">
+    <div class="section-label structure">Project Structure</div>
+    <h2 class="section-title">File Organization</h2>
+
+    <div class="file-tree">
+      <div class="file-tree-header">project/ — recommended layout</div>
+      <div class="file-tree-body">
+        <div class="tree-row"><span class="tree-dir">src/</span></div>
+        <div class="tree-row"><span class="tree-indent">├</span><span class="tree-dir">core/</span><span class="tree-note">Pure business logic (no React)</span></div>
+        <div class="tree-row"><span class="tree-indent">├</span><span class="tree-dir">components/</span><span class="tree-note">Reusable UI</span></div>
+        <div class="tree-row"><span class="tree-indent">│</span><span class="tree-indent">└</span><span class="tree-dir">Button/</span></div>
+        <div class="tree-row"><span class="tree-indent">│</span><span class="tree-indent">·</span><span class="tree-indent">├</span><span class="tree-file">Button.test.tsx</span><span class="tree-note" style="color:var(--tfd)">← written first</span></div>
+        <div class="tree-row"><span class="tree-indent">│</span><span class="tree-indent">·</span><span class="tree-indent">├</span><span class="tree-file">Button.tsx</span></div>
+        <div class="tree-row"><span class="tree-indent">│</span><span class="tree-indent">·</span><span class="tree-indent">└</span><span class="tree-file">Button.module.css</span></div>
+        <div class="tree-row"><span class="tree-indent">├</span><span class="tree-dir">pages/</span><span class="tree-note">Route-level components</span></div>
+        <div class="tree-row"><span class="tree-indent">│</span><span class="tree-indent">└</span><span class="tree-dir">Home/</span></div>
+        <div class="tree-row"><span class="tree-indent">│</span><span class="tree-indent">·</span><span class="tree-indent">├</span><span class="tree-file">HomePage.tsx</span><span class="tree-note">Pure presentation</span></div>
+        <div class="tree-row"><span class="tree-indent">│</span><span class="tree-indent">·</span><span class="tree-indent">└</span><span class="tree-file">useHome.ts</span><span class="tree-note">All logic here</span></div>
+        <div class="tree-row"><span class="tree-indent">├</span><span class="tree-dir">hooks/</span><span class="tree-note">Shared custom hooks</span></div>
+        <div class="tree-row"><span class="tree-indent">├</span><span class="tree-dir">store/</span><span class="tree-note">Zustand global state</span></div>
+        <div class="tree-row"><span class="tree-indent">└</span><span class="tree-dir">api/</span><span class="tree-note">React Query + API client</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Component Patterns + State -->
+  <div class="main-section">
+    <div class="section-label structure">Component Patterns</div>
+    <h2 class="section-title">How Components Are Built</h2>
+
+    <div class="patterns-grid">
+      <div class="pattern-card">
+        <div class="pattern-header structure-h">Functional Components Only</div>
+        <div class="pattern-body">
+          <ul>
+            <li>Always define explicit Props interface</li>
+            <li>No class components</li>
+            <li>Return type: JSX.Element</li>
+            <li>Default props in destructuring</li>
+          </ul>
+        </div>
+      </div>
+      <div class="pattern-card">
+        <div class="pattern-header tfd-h">Extract Logic to Hooks</div>
+        <div class="pattern-body">
+          <ul>
+            <li>useXxx.ts holds all logic</li>
+            <li>Page components are pure presentation</li>
+            <li>Hooks are independently testable</li>
+            <li>renderHook() for hook tests</li>
+          </ul>
+        </div>
+      </div>
+      <div class="pattern-card">
+        <div class="pattern-header state-h">CSS Modules (Preferred)</div>
+        <div class="pattern-body">
+          <ul>
+            <li>Button.module.css per component</li>
+            <li>Tailwind as alternative</li>
+            <li>Never inline style objects</li>
+            <li>Extract repeated combos</li>
+          </ul>
+        </div>
+      </div>
+      <div class="pattern-card">
+        <div class="pattern-header structure-h">Forms: React Hook Form + Zod</div>
+        <div class="pattern-body">
+          <ul>
+            <li>zodResolver for validation</li>
+            <li>Type-safe schema inference</li>
+            <li>Error messages per field</li>
+            <li>No uncontrolled surprises</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- State Management -->
+  <div class="main-section">
+    <div class="section-label state">State Management</div>
+    <h2 class="section-title">The Escalation Ladder</h2>
+
+    <div class="state-ladder">
+      <div class="state-tier">
+        <span class="state-tier-num">01</span>
+        <span class="state-tier-name t1">Local State</span>
+        <span class="state-tier-tool">useState</span>
+        <span class="state-tier-desc">Start here — always</span>
+      </div>
+      <div class="state-tier">
+        <span class="state-tier-num">02</span>
+        <span class="state-tier-name t2">Server State</span>
+        <span class="state-tier-tool">React Query</span>
+        <span class="state-tier-desc">Fetching, caching, invalidation</span>
+      </div>
+      <div class="state-tier">
+        <span class="state-tier-num">03</span>
+        <span class="state-tier-name t3">Global UI State</span>
+        <span class="state-tier-tool">Zustand</span>
+        <span class="state-tier-desc">Only when prop drilling &gt; 2 levels</span>
+      </div>
+    </div>
+
+    <div style="margin-top:16px; display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+      <div class="ve-card" style="border-left:3px solid var(--structure);">
+        <div style="font-family:var(--font-mono);font-size:11px;color:var(--structure);margin-bottom:8px;">React Query — Server State</div>
+        <div style="font-size:13px;color:var(--text-dim);line-height:1.6;">
+          queryKey for cache identity · staleTime to avoid over-fetching · invalidateQueries on mutation success · Never fetch in useEffect
+        </div>
+      </div>
+      <div class="ve-card" style="border-left:3px solid var(--state);">
+        <div style="font-family:var(--font-mono);font-size:11px;color:var(--state);margin-bottom:8px;">Zustand — Global UI State</div>
+        <div style="font-size:13px;color:var(--text-dim);line-height:1.6;">
+          Immutable updates via set() · setUser, toggleTheme actions · No reducers · Persist middleware for localStorage
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Anti-Patterns -->
+  <div class="main-section">
+    <div class="section-label anti">Anti-Patterns</div>
+    <h2 class="section-title">What to Avoid</h2>
+
+    <div class="anti-grid">
+      <div class="anti-item">
+        <div class="anti-label">Inline functions in JSX</div>
+        <div class="anti-fix">Use <strong>useCallback</strong> for handlers</div>
+      </div>
+      <div class="anti-item">
+        <div class="anti-label">Logic in render</div>
+        <div class="anti-fix">Extract to <strong>custom hooks</strong></div>
+      </div>
+      <div class="anti-item">
+        <div class="anti-label">Prop drilling &gt; 2 levels</div>
+        <div class="anti-fix">Use <strong>context or Zustand</strong></div>
+      </div>
+      <div class="anti-item">
+        <div class="anti-label">useEffect for derived state</div>
+        <div class="anti-fix">Use <strong>useMemo</strong> instead</div>
+      </div>
+      <div class="anti-item">
+        <div class="anti-label">Fetching in useEffect</div>
+        <div class="anti-fix">Use <strong>React Query</strong></div>
+      </div>
+      <div class="anti-item">
+        <div class="anti-label">Index as list key</div>
+        <div class="anti-fix">Use <strong>stable IDs</strong></div>
+      </div>
+      <div class="anti-item">
+        <div class="anti-label">Direct state mutation</div>
+        <div class="anti-fix">Always use <strong>setter functions</strong></div>
+      </div>
+      <div class="anti-item">
+        <div class="anti-label">Business logic in UI</div>
+        <div class="anti-fix">Keep <strong>core/</strong> React-free</div>
+      </div>
+      <div class="anti-item">
+        <div class="anti-label">Large components &gt;100 lines</div>
+        <div class="anti-fix">Split into <strong>smaller pieces</strong></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

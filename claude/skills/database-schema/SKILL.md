@@ -374,3 +374,7 @@ When schema changes are needed:
 - [ ] Using generated types (not raw strings)
 - [ ] Type check passes (catches column errors)
 - [ ] Tests use correct schema
+
+## Diagram
+
+[View diagram](diagram.html)

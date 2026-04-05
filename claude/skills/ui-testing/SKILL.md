@@ -180,3 +180,7 @@ Add comprehensive visual testing (Playwright screenshots, Storybook) when:
 - Design system enforcement needed
 
 For solo projects or MVPs, the checklist above is sufficient.
+
+## Diagram
+
+[View diagram](diagram.html)

@@ -631,3 +631,7 @@ className="rounded-sm rounded-lg rounded-2xl" // System: sm, lg, xl, 2xl
 □ Micro-interactions on hover/focus
 □ Dark mode support
 ```
+
+## Diagram
+
+[View diagram](diagram.html)
