@@ -8,7 +8,7 @@ Consolidated archive of custom agents, commands, and skills for Claude Code, Ope
 llm_skills/
 ├── claude/
 │   ├── agents/     # 15 sub-agents invoked via the Task tool
-│   ├── commands/   # 26 slash commands
+│   ├── commands/   # 25 slash commands
 │   └── skills/     # 89 domain-specific knowledge modules
 ├── codex/
 │   └── skills/     # 65 domain-specific knowledge modules
@@ -86,7 +86,7 @@ Slash commands available globally in Claude Code. Most delegate to a specialized
 | [`/generate-web-diagram`](claude/commands/generate-web-diagram.md) | Generate a beautiful standalone HTML diagram and open it in the browser |
 | [`/plan-review`](claude/commands/plan-review.md) | Visual HTML plan review — current codebase vs. proposed plan with risk assessment |
 | [`/project-recap`](claude/commands/project-recap.md) | Visual HTML project recap — architecture snapshot, decision log, and cognitive debt hotspots |
-| [`/sync-skills`](claude/commands/sync-skills.md) | Scan the Claude profile and all `C:\development` projects for new/changed skills, copy them into the archive, update this README, and print a change summary |
+| [`/skills-manager`](claude/commands/skills-manager.md) | Full lifecycle management of LLM skills — find, sync, install, update, and import; all interactions via AskUserQuestion — ships with `/find-skills`, `/sync-skill`, `/install-skill`, `/update-skill`, `/import-skill` |
 
 ---
 
@@ -179,7 +179,7 @@ Domain-specific knowledge modules loaded into AI context. Claude skills live in 
 | [`add-remote-installer`](claude/skills/add-remote-installer/) | Tooling & DevOps | Add a remote install script (install.ps1) and self-update capability to a PowerShell repository — detects GitHub remote, locates primary app script, applies remote-installer skill | ✓ | | |
 | [`publish-github`](claude/skills/publish-github/) | Tooling & DevOps | End-to-end workflow for publishing a local project as a new GitHub repository — gitleaks secrets-detection hook, .gitignore/.gitattributes, main/dev branch setup, and branch protection rules | ✓ | | |
 | [`remote-installer`](claude/skills/remote-installer/) | Tooling & DevOps | Domain expertise for implementing a remote PowerShell install script and self-update check — auto-elevation, GitHub Releases API version resolution, safe download ordering, .env backup/merge | ✓ | | |
-| [`sync-skills`](claude/skills/sync-skills/) | Tooling & DevOps | Domain expertise for maintaining the LLM Skills Archive — source discovery, conflict resolution, README classification, and archive invariants | ✓ | | |
+| [`skills-manager`](claude/skills/skills-manager/) | Tooling & DevOps | Full lifecycle management of LLM skills — find, sync, install, update, and import with complete bundles (sub-skills + companion commands); all interactions via AskUserQuestion — ships with `/find-skills`, `/sync-skill`, `/install-skill`, `/update-skill`, `/import-skill` | ✓ | | |
 | [`vercel-deploy-claimable`](claude/skills/vercel-deploy-claimable/) | Tooling & DevOps | Deploy applications to Vercel — preview URLs and claimable deployment links, no authentication required | ✓ | | |
 | [`youtube-prd-forensics`](claude/skills/youtube-prd-forensics/) | Research & OSINT | Create or update a detailed PRD from a YouTube demo video using evidence-first analysis — timestamps, keyframes, transcript, and embedded screenshots | ✓ | ✓ | |
 | [`worldview-layer-scaffold`](claude/skills/worldview-layer-scaffold/) | Research & OSINT | Scaffold a new real-time data layer for the WorldView GEOINT dashboard — DATA LAYERS panel row, health/freshness tracking, CesiumJS rendering | ✓ | | |
@@ -193,7 +193,7 @@ Domain-specific knowledge modules loaded into AI context. Claude skills live in 
 | Type | Count |
 |------|-------|
 | Agents | 15 |
-| Commands | 26 |
+| Commands | 25 |
 | Skills (Claude) | 89 |
 | Skills (Codex) | 65 |
 | Skills (Gemini) | 0 |
