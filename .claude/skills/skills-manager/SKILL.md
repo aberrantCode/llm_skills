@@ -67,7 +67,10 @@ Discover skills across the workstation that are new or changed relative to the a
 
 1. Determine scan scope:
    - If `path` argument given: scan only that directory
-   - Otherwise: scan all canonical source locations (see Source Discovery table below)
+   - If no argument: use `AskUserQuestion` to confirm before scanning:
+     - Question: "Scan all source locations for new or changed skills?"
+     - Options: "Yes, scan everything" | "Cancel"
+     - Proceed only on confirm
 
 2. For each discovered `SKILL.md`:
    - Read frontmatter — if `installed-from: llm_skills` is present, **skip** (installed copy)
@@ -76,7 +79,7 @@ Discover skills across the workstation that are new or changed relative to the a
 
 3. For each New or Changed skill: also search the same project's `.claude/commands/` for companion commands using the detection heuristic.
 
-4. Output a structured report (no `AskUserQuestion` needed — this is read-only):
+4. Output a structured report:
    ```
    ┌─ Skills Manager: Find Report ──────────────────┐
    │ New (N):     skill-a, skill-b                  │
@@ -108,11 +111,11 @@ Archive a specific skill (or all discovered skills) including its full bundle.
 
 ### Without a skill name
 
-Use `AskUserQuestion`:
-- Question: "No skill name provided. What would you like to do?"
-- Options: "Sync all discovered skills" | "Exit without syncing"
-
-If "Sync all": run /find-skills first, then process each New and Changed skill in turn.
+1. Run the /find-skills scan internally (no user prompt for the scan itself) to enumerate scope
+2. Use `AskUserQuestion` to confirm:
+   - Question: "Sync all N new/changed skills? (list skill names)"
+   - Options: "Yes, sync all" | "Cancel"
+3. Proceed only on confirm; process each New and Changed skill in turn
 
 ### README Update Rules (sync)
 - New skill: extract `description` from frontmatter, classify subsection (see heuristics), insert alphabetically within subsection, mark `✓` in correct toolset column, increment counts
@@ -123,35 +126,42 @@ If "Sync all": run /find-skills first, then process each New and Changed skill i
 
 ---
 
-## Operation: /install-skill \<name\> [target-dir]
+## Operation: /install-skill [name] [target-dir]
 
 Deploy a skill bundle from the archive into a project.
 
 ### Steps
 
-1. Locate the bundle: `claude/skills/<name>/` in the archive; error with `AskUserQuestion` if not found:
+1. **Determine scope:**
+   - If `name` given: install that skill only
+   - If no `name`: enumerate all skills in `claude/skills/` that have not already been installed in `target-dir`; use `AskUserQuestion` to confirm:
+     - Question: "Install all N available skills into `<target>`? This will write N files."
+     - Options: "Yes, install all" | "Cancel"
+     - Proceed only on confirm
+
+2. For a named skill: locate `claude/skills/<name>/` in the archive; if not found use `AskUserQuestion`:
    - Question: "Skill `<name>` not found in archive. Check the name and try again."
    - Options: "OK" | "List available skills"
 
-2. If `target-dir` not provided, use `AskUserQuestion`:
-   - Question: "Where should `<name>` be installed?"
+3. If `target-dir` not provided, use `AskUserQuestion`:
+   - Question: "Where should the skill(s) be installed?"
    - Options: "Current project directory" | "Other path (specify below)"
 
-3. Inventory what will be installed:
+4. Inventory what will be installed per skill:
    - `SKILL.md` (1 file)
    - Sub-skills from `sub-skills/` (N files)
    - Commands from `commands/` (N files)
 
-4. Use `AskUserQuestion` to confirm:
+5. If `name` was given, use `AskUserQuestion` to confirm:
    - Question: "Install `<name>` into `<target>`? This will write N files."
    - Options: "Yes, install" | "Cancel"
 
-5. On confirm:
+6. On confirm:
    - Write `<target>/.claude/skills/<name>/SKILL.md`; inject `installed-from: llm_skills` into frontmatter (add after existing fields)
    - Write each sub-skill to `<target>/.claude/skills/<sub>/SKILL.md` with same marker
    - Write each command to `<target>/.claude/commands/<cmd>.md` (no marker — commands are not skills)
 
-6. Report all files written
+7. Report all files written
 
 ---
 
@@ -169,12 +179,13 @@ Update installed skills in the current project when the archive has newer versio
    - If identical: skip (no update needed)
    - If archive is newer: record as outdated
 
-4. For each outdated skill, use `AskUserQuestion`:
-   - Question: "Skill `<name>` is outdated. Update to the archive version?"
-   - Options: "Yes, update" | "Skip this skill"
+4. **Confirm scope** with `AskUserQuestion` before touching anything:
+   - If updating all: "Update all N outdated skills? (list skill names)"
+   - If updating one by name: "Update `<name>` to the archive version?"
+   - Options: "Yes, update" | "Cancel"
 
-5. On "Yes, update":
-   - Overwrite `SKILL.md`, preserving the `installed-from: llm_skills` marker in frontmatter
+5. On confirm:
+   - Overwrite each `SKILL.md`, preserving the `installed-from: llm_skills` marker in frontmatter
    - Also check `commands/` in the archive bundle — write any new or changed commands to `<project>/.claude/commands/`
    - Also check `sub-skills/` — update any installed sub-skills that are outdated
 
@@ -182,14 +193,21 @@ Update installed skills in the current project when the archive has newer versio
 
 ---
 
-## Operation: /import-skill \<name\>
+## Operation: /import-skill [name]
 
 Import project-level changes to a skill back into the archive and the global user profile.
 
 ### Steps
 
-1. Locate `<name>/SKILL.md` in the current project's `.claude/skills/`
-2. Check frontmatter: if `installed-from: llm_skills` is present, use `AskUserQuestion` to reject:
+1. **Determine scope:**
+   - If `name` given: import that skill only
+   - If no `name`: scan current project's `.claude/skills/` for all skills that do NOT have `installed-from: llm_skills` and differ from the archive; use `AskUserQuestion` to confirm:
+     - Question: "Import all N project-developed skills to archive and user profile? (list names)"
+     - Options: "Yes, import all" | "Cancel"
+     - Proceed only on confirm
+
+2. Locate `<name>/SKILL.md` in the current project's `.claude/skills/`
+3. Check frontmatter: if `installed-from: llm_skills` is present, use `AskUserQuestion` to reject:
    - Question: "`<name>` was installed from the archive — it is not a project-developed skill. Import would just overwrite the archive with its own content. Proceed anyway?"
    - Options: "Cancel" | "Yes, force import"
    - Default is Cancel; only proceed if user explicitly chooses force
