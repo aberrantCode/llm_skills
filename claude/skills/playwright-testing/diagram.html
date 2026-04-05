@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Playwright Testing Skill — Diagram</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=Inconsolata:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --font-body: 'Sora', system-ui, sans-serif;
+    --font-mono: 'Inconsolata', 'SF Mono', monospace;
+    --bg: #0f0f1a;
+    --surface: #16162a;
+    --surface2: #1e1e35;
+    --border: rgba(255,255,255,0.07);
+    --border-bright: rgba(255,255,255,0.15);
+    --text: #e0e0f0;
+    --text-dim: #8888aa;
+    --purple: #a78bfa;
+    --purple-dim: rgba(167,139,250,0.1);
+    --teal: #2dd4bf;
+    --teal-dim: rgba(45,212,191,0.1);
+    --pink: #f472b6;
+    --pink-dim: rgba(244,114,182,0.1);
+    --sky: #38bdf8;
+    --sky-dim: rgba(56,189,248,0.1);
+    --lime: #a3e635;
+    --lime-dim: rgba(163,230,53,0.1);
+    --orange: #fb923c;
+    --orange-dim: rgba(251,146,60,0.1);
+  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  body {
+    font-family: var(--font-body);
+    background: var(--bg);
+    background-image:
+      radial-gradient(ellipse at 50% 0%, rgba(167,139,250,0.12) 0%, transparent 55%),
+      radial-gradient(ellipse at 85% 80%, rgba(45,212,191,0.08) 0%, transparent 50%);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 44px 24px 80px;
+  }
+  .page { max-width: 1080px; margin: 0 auto; }
+
+  .hero { text-align: center; margin-bottom: 52px; animation: fadeUp 0.5s ease both; }
+  .hero-badge {
+    display: inline-block; font-family: var(--font-mono); font-size: 12px;
+    color: var(--purple); background: var(--purple-dim);
+    border: 1px solid rgba(167,139,250,0.25); border-radius: 8px;
+    padding: 5px 16px; margin-bottom: 18px; letter-spacing: 0.06em;
+  }
+  .hero h1 {
+    font-size: clamp(28px, 5vw, 48px); font-weight: 800;
+    letter-spacing: -0.03em; line-height: 1.1; margin-bottom: 14px;
+    background: linear-gradient(135deg, var(--text) 0%, var(--purple) 50%, var(--teal) 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  }
+  .hero p { font-size: 16px; color: var(--text-dim); max-width: 560px; margin: 0 auto; line-height: 1.65; }
+  .browser-pills { display: flex; justify-content: center; gap: 8px; margin-top: 14px; flex-wrap: wrap; }
+  .browser-pill {
+    font-family: var(--font-mono); font-size: 11px; padding: 4px 12px;
+    border-radius: 20px; border: 1px solid;
+    font-weight: 500;
+  }
+
+  .section-label {
+    font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.12em;
+    text-transform: uppercase; color: var(--text-dim); margin: 46px 0 14px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+  /* PROJECT STRUCTURE */
+  .struct-tree {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 12px; padding: 22px; font-family: var(--font-mono);
+    font-size: 12px; line-height: 1.9; color: var(--text-dim);
+    animation: fadeUp 0.4s ease both;
+  }
+  .tree-dir { color: var(--purple); font-weight: 600; }
+  .tree-file { color: var(--text); }
+  .tree-comment { color: var(--text-dim); font-size: 11px; }
+  .tree-indent { margin-left: 20px; }
+
+  /* LOCATOR STRATEGY */
+  .locator-list { display: flex; flex-direction: column; gap: 8px; }
+  .locator-row {
+    display: grid; grid-template-columns: 60px 1fr 1fr;
+    align-items: center; gap: 12px;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 12px 16px;
+    animation: fadeUp 0.5s ease both;
+  }
+  .loc-grade {
+    font-size: 22px; text-align: center;
+    font-weight: 700;
+  }
+  .loc-name { font-size: 13px; font-weight: 600; }
+  .loc-example { font-family: var(--font-mono); font-size: 11px; color: var(--teal); }
+
+  /* PAGE OBJECT MODEL */
+  .pom-diagram {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 14px; padding: 24px;
+    animation: fadeUp 0.5s ease 0.1s both;
+  }
+  .pom-row { display: grid; grid-template-columns: 1fr auto 1fr; gap: 16px; align-items: center; margin-bottom: 14px; }
+  .pom-box {
+    border-radius: 10px; padding: 14px 16px; border: 1px solid;
+    font-size: 13px;
+  }
+  .pom-box.test { background: var(--purple-dim); border-color: rgba(167,139,250,0.3); }
+  .pom-box.page { background: var(--teal-dim); border-color: rgba(45,212,191,0.3); }
+  .pom-box.base { background: var(--sky-dim); border-color: rgba(56,189,248,0.3); }
+  .pom-title { font-weight: 700; font-size: 14px; margin-bottom: 6px; }
+  .pom-items { font-size: 11px; color: var(--text-dim); line-height: 1.7; font-family: var(--font-mono); }
+  .pom-arrow { color: var(--text-dim); font-size: 20px; text-align: center; }
+
+  /* ASSERTIONS */
+  .assert-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
+  .assert-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 12px; padding: 16px;
+    animation: fadeUp 0.5s ease both;
+  }
+  .assert-type { font-size: 12px; font-weight: 700; margin-bottom: 8px; display: flex; gap: 6px; align-items: center; }
+  .assert-examples { font-family: var(--font-mono); font-size: 11px; color: var(--text-dim); line-height: 1.8; }
+  .assert-examples span { color: var(--teal); }
+
+  /* DEAD LINK DETECTION */
+  .dead-link-box {
+    background: var(--surface);
+    border: 2px solid rgba(244,114,182,0.3);
+    border-radius: 14px; padding: 24px;
+    animation: fadeUp 0.5s ease 0.2s both;
+  }
+  .dlb-header { font-size: 16px; font-weight: 700; color: var(--pink); margin-bottom: 10px; display: flex; gap: 8px; align-items: center; }
+  .dlb-required { font-family: var(--font-mono); font-size: 10px; background: var(--pink-dim); color: var(--pink); border: 1px solid rgba(244,114,182,0.3); border-radius: 4px; padding: 2px 8px; }
+  .dlb-steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-top: 14px; }
+  .dlb-step { font-size: 12px; color: var(--text-dim); display: flex; gap: 8px; }
+  .dlb-num { color: var(--pink); font-weight: 700; font-family: var(--font-mono); flex-shrink: 0; }
+
+  /* ANTI-PATTERNS */
+  .anti-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; }
+  .anti-item {
+    background: var(--surface); border: 1px solid rgba(251,146,60,0.2);
+    border-radius: 10px; padding: 13px; font-size: 12px;
+    display: flex; gap: 8px; line-height: 1.4;
+  }
+  .anti-icon { flex-shrink: 0; }
+
+  /* CI BLOCK */
+  .ci-block {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 12px; padding: 22px;
+    animation: fadeUp 0.4s ease 0.1s both;
+  }
+  .ci-steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; }
+  .ci-step { font-size: 12px; display: flex; gap: 8px; color: var(--text-dim); line-height: 1.4; }
+  .ci-step::before { content: '▸'; color: var(--lime); flex-shrink: 0; }
+
+  footer { text-align: center; margin-top: 60px; font-size: 12px; color: var(--text-dim); font-family: var(--font-mono); }
+  @keyframes fadeUp { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)} }
+  @media (prefers-reduced-motion: reduce) { *{animation:none!important;transition:none!important} }
+  @media (max-width:640px) { .pom-row{grid-template-columns:1fr} .pom-arrow{display:none} }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="hero">
+    <div class="hero-badge">playwright-testing skill</div>
+    <h1>Playwright E2E Testing</h1>
+    <p>End-to-end testing with Page Object Model, cross-browser coverage, and dead link detection. Every project requires E2E tests before deployment.</p>
+    <div class="browser-pills">
+      <span class="browser-pill" style="color:var(--sky);border-color:rgba(56,189,248,0.3)">Chrome</span>
+      <span class="browser-pill" style="color:var(--orange);border-color:rgba(251,146,60,0.3)">Firefox</span>
+      <span class="browser-pill" style="color:var(--text-dim);border-color:var(--border)">Safari/WebKit</span>
+      <span class="browser-pill" style="color:var(--purple);border-color:rgba(167,139,250,0.3)">Mobile Chrome</span>
+      <span class="browser-pill" style="color:var(--pink);border-color:rgba(244,114,182,0.3)">Mobile Safari</span>
+    </div>
+  </div>
+
+  <!-- PROJECT STRUCTURE -->
+  <div class="section-label">01 — Project Structure</div>
+  <div class="struct-tree">
+    <div><span class="tree-dir">e2e/</span></div>
+    <div class="tree-indent"><span class="tree-dir">fixtures/</span></div>
+    <div class="tree-indent tree-indent"><span class="tree-file">auth.fixture.ts</span> <span class="tree-comment">// Auth state management</span></div>
+    <div class="tree-indent tree-indent"><span class="tree-file">test.fixture.ts</span> <span class="tree-comment">// Extended test with fixtures</span></div>
+    <div class="tree-indent"><span class="tree-dir">pages/</span></div>
+    <div class="tree-indent tree-indent"><span class="tree-file">base.page.ts</span> <span class="tree-comment">// Base page with common elements</span></div>
+    <div class="tree-indent tree-indent"><span class="tree-file">login.page.ts</span> <span class="tree-comment">// Login page object</span></div>
+    <div class="tree-indent tree-indent"><span class="tree-file">dashboard.page.ts</span> <span class="tree-comment">// Dashboard page object</span></div>
+    <div class="tree-indent"><span class="tree-dir">tests/</span></div>
+    <div class="tree-indent tree-indent"><span class="tree-file">auth.spec.ts</span> <span class="tree-comment">// Authentication tests</span></div>
+    <div class="tree-indent tree-indent"><span class="tree-file">checkout.spec.ts</span> <span class="tree-comment">// Checkout flow tests</span></div>
+    <div class="tree-indent tree-indent"><span class="tree-file">links.spec.ts</span> <span class="tree-comment">// ← REQUIRED: Dead link detection</span></div>
+    <div class="tree-indent"><span class="tree-file">auth.setup.ts</span> <span class="tree-comment">// Global auth setup (runs once)</span></div>
+    <div><span class="tree-file">playwright.config.ts</span> <span class="tree-comment">// Multi-browser, retries, reporters</span></div>
+    <div><span class="tree-dir">.auth/</span> <span class="tree-comment">// Stored auth state (gitignored)</span></div>
+  </div>
+
+  <!-- LOCATOR STRATEGY -->
+  <div class="section-label">02 — Locator Strategy (Priority Order)</div>
+  <div class="locator-list">
+    <div class="locator-row" style="border-color:rgba(163,230,53,0.3)">
+      <div class="loc-grade" style="color:var(--lime)">✅✅</div>
+      <div>
+        <div class="loc-name" style="color:var(--lime)">Role-based (BEST)</div>
+        <div style="font-size:11px;color:var(--text-dim)">Mirrors user interaction. Accessible &amp; resilient to DOM changes.</div>
+      </div>
+      <div class="loc-example">getByRole('button', &#123; name: 'Submit' &#125;)<br>getByRole('textbox', &#123; name: 'Email' &#125;)</div>
+    </div>
+    <div class="locator-row" style="border-color:rgba(45,212,191,0.3)">
+      <div class="loc-grade" style="color:var(--teal)">✅</div>
+      <div>
+        <div class="loc-name" style="color:var(--teal)">Label / Text / TestID</div>
+        <div style="font-size:11px;color:var(--text-dim)">User-facing identifiers. Stable against visual redesigns.</div>
+      </div>
+      <div class="loc-example">getByLabel('Email')<br>getByTestId('submit-btn')</div>
+    </div>
+    <div class="locator-row" style="border-color:rgba(251,191,36,0.3)">
+      <div class="loc-grade" style="color:var(--orange)">⚠️</div>
+      <div>
+        <div class="loc-name" style="color:var(--orange)">CSS selectors (AVOID)</div>
+        <div style="font-size:11px;color:var(--text-dim)">Brittle — breaks when styles or classes change.</div>
+      </div>
+      <div class="loc-example">locator('.btn-primary')</div>
+    </div>
+    <div class="locator-row" style="border-color:rgba(244,114,182,0.3)">
+      <div class="loc-grade" style="color:var(--pink)">❌</div>
+      <div>
+        <div class="loc-name" style="color:var(--pink)">XPath (NEVER)</div>
+        <div style="font-size:11px;color:var(--text-dim)">Extremely brittle. Breaks on any structural DOM change.</div>
+      </div>
+      <div class="loc-example">locator('//div[@class]/button[1]')</div>
+    </div>
+  </div>
+
+  <!-- PAGE OBJECT MODEL -->
+  <div class="section-label">03 — Page Object Model Architecture</div>
+  <div class="pom-diagram">
+    <div class="pom-row">
+      <div class="pom-box test">
+        <div class="pom-title" style="color:var(--purple)">Test File</div>
+        <div class="pom-items">auth.spec.ts<br>checkout.spec.ts<br>dashboard.spec.ts</div>
+        <div style="margin-top:8px;font-size:11px;color:var(--text-dim)">Imports page objects,<br>calls high-level methods</div>
+      </div>
+      <div class="pom-arrow">→</div>
+      <div class="pom-box page">
+        <div class="pom-title" style="color:var(--teal)">Page Objects</div>
+        <div class="pom-items">login.page.ts<br>dashboard.page.ts<br>checkout.page.ts</div>
+        <div style="margin-top:8px;font-size:11px;color:var(--text-dim)">Locators as properties,<br>actions as methods</div>
+      </div>
+    </div>
+    <div style="text-align:center;margin:4px 0;font-size:12px;color:var(--text-dim)">All page objects extend BasePage</div>
+    <div class="pom-box base" style="max-width:400px;margin:0 auto">
+      <div class="pom-title" style="color:var(--sky)">BasePage</div>
+      <div class="pom-items">navigate(path) · waitForPageLoad()<br>header · footer · clickNavLink(name)</div>
+    </div>
+  </div>
+
+  <!-- ASSERTIONS -->
+  <div class="section-label">04 — Web-First Assertions (Auto-Wait)</div>
+  <div class="assert-grid">
+    <div class="assert-card">
+      <div class="assert-type" style="color:var(--lime)">👁 Visibility</div>
+      <div class="assert-examples">
+        <span>toBeVisible()</span><br>toBeHidden()<br>toBeAttached()
+      </div>
+    </div>
+    <div class="assert-card">
+      <div class="assert-type" style="color:var(--teal)">📝 Text Content</div>
+      <div class="assert-examples">
+        <span>toHaveText('exact')</span><br>toContainText('part')<br>toHaveValue('input')
+      </div>
+    </div>
+    <div class="assert-card">
+      <div class="assert-type" style="color:var(--purple)">🎛 State</div>
+      <div class="assert-examples">
+        <span>toBeEnabled()</span><br>toBeDisabled()<br>toBeChecked()<br>toBeFocused()
+      </div>
+    </div>
+    <div class="assert-card">
+      <div class="assert-type" style="color:var(--sky)">🌐 Page</div>
+      <div class="assert-examples">
+        <span>toHaveURL('/dash')</span><br>toHaveTitle(/title/)<br>toHaveScreenshot('pg.png')
+      </div>
+    </div>
+    <div class="assert-card" style="border-color:rgba(251,146,60,0.3)">
+      <div class="assert-type" style="color:var(--orange)">❌ Never Use</div>
+      <div class="assert-examples" style="color:var(--orange)">
+        waitForTimeout(3000)<br>
+        <span style="color:var(--text-dim);font-size:10px">Manual waits cause flaky tests</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- DEAD LINK DETECTION -->
+  <div class="section-label">05 — Dead Link Detection (REQUIRED)</div>
+  <div class="dead-link-box">
+    <div class="dlb-header">🔗 Dead Link Detection <span class="dlb-required">REQUIRED on every project</span></div>
+    <p style="font-size:13px;color:var(--text-dim);margin-bottom:14px">Every project MUST include dead link detection tests. Run these on every deployment. A broken link = broken user experience.</p>
+    <div class="dlb-steps">
+      <div class="dlb-step"><div class="dlb-num">1.</div><div>Navigate to each page in <span style="font-family:var(--font-mono);font-size:11px">PAGES_TO_CHECK</span> array</div></div>
+      <div class="dlb-step"><div class="dlb-num">2.</div><div>Collect all <span style="font-family:var(--font-mono);font-size:11px">a[href]</span> elements from the page</div></div>
+      <div class="dlb-step"><div class="dlb-num">3.</div><div>Skip <span style="font-family:var(--font-mono);font-size:11px">mailto:</span>, <span style="font-family:var(--font-mono);font-size:11px">tel:</span>, and anchor links</div></div>
+      <div class="dlb-step"><div class="dlb-num">4.</div><div>HTTP HEAD each URL, verify <span style="font-family:var(--font-mono);font-size:11px">response.ok()</span></div></div>
+      <div class="dlb-step"><div class="dlb-num">5.</div><div>Fail test with specific dead link URL + found-on page</div></div>
+      <div class="dlb-step"><div class="dlb-num">6.</div><div>Also check broken images with <span style="font-family:var(--font-mono);font-size:11px">img[src]</span> validation</div></div>
+    </div>
+  </div>
+
+  <!-- ANTI-PATTERNS -->
+  <div class="section-label">06 — Anti-Patterns to Avoid</div>
+  <div class="anti-grid">
+    <div class="anti-item"><div class="anti-icon">🚫</div><div><strong>Hardcoded waits</strong> — waitForTimeout() makes tests flaky. Use auto-waiting assertions.</div></div>
+    <div class="anti-item"><div class="anti-icon">🚫</div><div><strong>CSS/XPath selectors</strong> — brittle. Use role/text/testid.</div></div>
+    <div class="anti-item"><div class="anti-icon">🚫</div><div><strong>Shared state between tests</strong> — each test must be fully isolated.</div></div>
+    <div class="anti-item"><div class="anti-icon">🚫</div><div><strong>Missing awaits</strong> — use ESLint rule no-floating-promises.</div></div>
+    <div class="anti-item"><div class="anti-icon">🚫</div><div><strong>Testing third-party sites</strong> — mock external dependencies.</div></div>
+    <div class="anti-item"><div class="anti-icon">🚫</div><div><strong>Huge test files</strong> — split by feature or page.</div></div>
+  </div>
+
+  <footer>playwright-testing skill · /e2e · Page Object Model · Cross-browser · Dead Link Detection</footer>
+</div>
+</body>
+</html>

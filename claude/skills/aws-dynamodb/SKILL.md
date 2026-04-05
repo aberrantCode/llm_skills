@@ -664,3 +664,7 @@ aws dynamodb scan --table-name MyTable --limit 10
 - **No condition expressions** - Always validate with ConditionExpression
 - **Fetching all attributes** - Use ProjectionExpression to limit data
 - **Multi-table design without reason** - Single-table is preferred unless access patterns don't overlap
+
+## Diagram
+
+[View diagram](diagram.html)

@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chrome Extension Builder — WXT + MV3 Architecture</title>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --font-body: 'IBM Plex Sans', system-ui, sans-serif;
+      --font-mono: 'IBM Plex Mono', 'SF Mono', Consolas, monospace;
+
+      /* Warm amber + slate — reliable technical feel */
+      --bg: #fefaf3;
+      --surface: #ffffff;
+      --surface-2: #fdf6e8;
+      --surface-3: #faf0d8;
+      --border: rgba(180,120,0,0.1);
+      --border-bright: rgba(180,120,0,0.2);
+      --text: #1c1407;
+      --text-dim: #7a6040;
+
+      --amber: #b45309;
+      --amber-dim: rgba(180,83,9,0.1);
+      --slate: #1e3a5f;
+      --slate-dim: rgba(30,58,95,0.1);
+      --green: #15803d;
+      --green-dim: rgba(21,128,61,0.1);
+      --red: #b91c1c;
+      --red-dim: rgba(185,28,28,0.08);
+      --chrome-yellow: #fbbc04;
+      --chrome-blue: #4285f4;
+      --chrome-red: #ea4335;
+      --chrome-green: #34a853;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #130f08;
+        --surface: #1e1810;
+        --surface-2: #261f12;
+        --surface-3: #2d2516;
+        --border: rgba(251,188,4,0.1);
+        --border-bright: rgba(251,188,4,0.2);
+        --text: #f5edd8;
+        --text-dim: #9a8060;
+        --amber: #fbbf24;
+        --amber-dim: rgba(251,191,36,0.1);
+        --slate: #60a5fa;
+        --slate-dim: rgba(96,165,250,0.1);
+        --green: #4ade80;
+        --green-dim: rgba(74,222,128,0.1);
+      }
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--font-body);
+      background: var(--bg);
+      background-image: radial-gradient(ellipse at 50% 0%, var(--amber-dim) 0%, transparent 55%);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 48px 24px 80px;
+    }
+
+    .page-wrap { max-width: 960px; margin: 0 auto; }
+
+    /* Hero */
+    .hero {
+      margin-bottom: 56px;
+      padding-bottom: 36px;
+      border-bottom: 2px solid var(--border-bright);
+    }
+    .hero-top {
+      display: flex;
+      align-items: flex-start;
+      gap: 20px;
+      margin-bottom: 16px;
+    }
+    .chrome-icon {
+      display: flex;
+      gap: 3px;
+      flex-shrink: 0;
+      padding-top: 4px;
+    }
+    .chrome-dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+    }
+    .hero-eyebrow {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--amber);
+      margin-bottom: 8px;
+    }
+    .hero h1 {
+      font-size: clamp(2rem, 5vw, 3rem);
+      font-weight: 600;
+      line-height: 1.15;
+      letter-spacing: -0.02em;
+    }
+    .mv3 {
+      font-family: var(--font-mono);
+      font-size: 0.7em;
+      background: var(--amber-dim);
+      border: 1px solid var(--amber);
+      color: var(--amber);
+      padding: 2px 8px;
+      border-radius: 4px;
+      vertical-align: middle;
+      margin-left: 8px;
+    }
+    .hero-desc {
+      font-size: 15px;
+      color: var(--text-dim);
+      line-height: 1.7;
+      max-width: 62ch;
+      margin-top: 10px;
+    }
+    .tech-stack {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 16px;
+    }
+    .tech-pill {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      padding: 4px 12px;
+      border-radius: 4px;
+      border: 1px solid var(--border-bright);
+      background: var(--surface-2);
+      color: var(--text-dim);
+    }
+
+    /* Labels */
+    .section-label {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .section-label::before {
+      content: '';
+      display: inline-block;
+      width: 20px; height: 2px;
+      background: currentColor;
+      flex-shrink: 0;
+    }
+    .section-label.amber { color: var(--amber); }
+    .section-label.slate { color: var(--slate); }
+    .section-label.green { color: var(--green); }
+
+    .section { margin-bottom: 52px; }
+    .section-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      margin-bottom: 20px;
+    }
+
+    /* Workflow steps */
+    .workflow {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+    .workflow-step {
+      display: grid;
+      grid-template-columns: 48px 1fr;
+      gap: 0;
+      position: relative;
+    }
+    .workflow-step:not(:last-child) .step-num::after {
+      content: '';
+      position: absolute;
+      top: 48px;
+      left: 23px;
+      width: 2px;
+      height: calc(100% - 24px);
+      background: var(--border-bright);
+    }
+    .step-num-wrap {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding-top: 2px;
+    }
+    .step-num {
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      background: var(--surface-2);
+      border: 2px solid var(--amber);
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--font-mono);
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--amber);
+      flex-shrink: 0;
+      z-index: 1;
+    }
+    .step-content {
+      padding: 0 0 28px 16px;
+    }
+    .step-title {
+      font-weight: 600;
+      font-size: 14px;
+      margin-bottom: 8px;
+    }
+    .step-body { font-size: 13px; color: var(--text-dim); line-height: 1.6; }
+
+    /* Component types */
+    .component-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1px;
+      background: var(--border-bright);
+      border: 1px solid var(--border-bright);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    .comp-item {
+      background: var(--surface);
+      padding: 16px 18px;
+    }
+    .comp-name {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--amber);
+      margin-bottom: 4px;
+    }
+    .comp-purpose {
+      font-size: 12px;
+      color: var(--text-dim);
+      line-height: 1.4;
+      margin-bottom: 6px;
+    }
+    .comp-when {
+      font-size: 11px;
+      color: var(--green);
+      font-family: var(--font-mono);
+    }
+
+    /* Architecture diagram */
+    .arch-diagram {
+      background: var(--surface);
+      border: 1px solid var(--border-bright);
+      border-radius: 10px;
+      padding: 24px;
+    }
+    .arch-center {
+      background: var(--amber-dim);
+      border: 2px solid var(--amber);
+      border-radius: 8px;
+      padding: 12px 16px;
+      text-align: center;
+      font-family: var(--font-mono);
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--amber);
+      margin: 16px auto;
+      max-width: 220px;
+    }
+    .arch-spokes {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 12px;
+      margin-top: 12px;
+    }
+    .arch-spoke {
+      background: var(--surface-2);
+      border: 1px solid var(--border-bright);
+      border-radius: 8px;
+      padding: 12px 14px;
+    }
+    .arch-spoke-name {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--slate);
+      margin-bottom: 4px;
+    }
+    .arch-spoke-desc { font-size: 11px; color: var(--text-dim); line-height: 1.4; }
+
+    /* File tree */
+    .file-tree {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    .file-tree-header {
+      background: var(--surface-2);
+      border-bottom: 1px solid var(--border);
+      padding: 10px 16px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--text-dim);
+    }
+    .file-tree-body { padding: 14px 16px; }
+    .tr {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 0;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      line-height: 1.5;
+    }
+    .tr-ind { color: var(--border-bright); width: 12px; text-align: center; flex-shrink: 0; }
+    .tr-dir { color: var(--amber); }
+    .tr-file { color: var(--text-dim); }
+    .tr-note { font-size: 10px; color: var(--text-dim); opacity: 0.6; margin-left: auto; white-space: nowrap; }
+    .tr-note.highlight { color: var(--green); opacity: 1; }
+
+    /* Patterns */
+    .patterns-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .pattern-row {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 14px 18px;
+      display: grid;
+      grid-template-columns: 160px 1fr;
+      gap: 16px;
+      align-items: start;
+    }
+    .pattern-name {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--amber);
+    }
+    .pattern-desc { font-size: 13px; color: var(--text-dim); line-height: 1.5; }
+
+    /* Animations */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .hero { animation: fadeUp 0.4s ease both; }
+    .section:nth-of-type(1) { animation: fadeUp 0.4s 0.06s ease both; }
+    .section:nth-of-type(2) { animation: fadeUp 0.4s 0.12s ease both; }
+    .section:nth-of-type(3) { animation: fadeUp 0.4s 0.18s ease both; }
+    .section:nth-of-type(4) { animation: fadeUp 0.4s 0.24s ease both; }
+
+    @media (prefers-reduced-motion: reduce) { * { animation: none !important; } }
+    @media (max-width: 640px) {
+      .component-grid, .arch-spokes { grid-template-columns: 1fr; }
+      .pattern-row { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+<div class="page-wrap">
+
+  <!-- Hero -->
+  <div class="hero">
+    <div class="hero-top">
+      <div class="chrome-icon">
+        <div class="chrome-dot" style="background:var(--chrome-red)"></div>
+        <div class="chrome-dot" style="background:var(--chrome-yellow)"></div>
+        <div class="chrome-dot" style="background:var(--chrome-green)"></div>
+      </div>
+      <div>
+        <div class="hero-eyebrow">LLM Skill · chrome-extension-builder</div>
+        <h1>Chrome Extension Builder<span class="mv3">MV3</span></h1>
+      </div>
+    </div>
+    <p class="hero-desc">Scaffold production-ready Chrome Manifest V3 extensions using WXT framework with React, TypeScript, and shadcn-UI. Covers service workers, content scripts, side panels, and cross-context messaging.</p>
+    <div class="tech-stack">
+      <span class="tech-pill">WXT Framework</span>
+      <span class="tech-pill">React + TypeScript</span>
+      <span class="tech-pill">shadcn-UI + Tailwind</span>
+      <span class="tech-pill">Vitest + Playwright</span>
+    </div>
+  </div>
+
+  <!-- Workflow -->
+  <div class="section">
+    <div class="section-label amber">Build Workflow</div>
+    <h2 class="section-title">Four Steps to Production</h2>
+    <div class="workflow">
+      <div class="workflow-step">
+        <div class="step-num-wrap"><div class="step-num">1</div></div>
+        <div class="step-content">
+          <div class="step-title">Gather Requirements</div>
+          <div class="step-body">Determine which components are needed: background service worker (always), content script, side panel, popup, options page. Identify target sites and required permissions.</div>
+        </div>
+      </div>
+      <div class="workflow-step">
+        <div class="step-num-wrap"><div class="step-num">2</div></div>
+        <div class="step-content">
+          <div class="step-title">Create Project Structure</div>
+          <div class="step-body">Run <code style="font-family:var(--font-mono);color:var(--amber);">pnpm dlx wxt@latest init &lt;name&gt; --template react</code>. Organize entrypoints/, content/, lib/, and components/.</div>
+        </div>
+      </div>
+      <div class="workflow-step">
+        <div class="step-num-wrap"><div class="step-num">3</div></div>
+        <div class="step-content">
+          <div class="step-title">Configure WXT + Manifest</div>
+          <div class="step-body">Set permissions, host_permissions, and optional_permissions in wxt.config.ts. Add React module. Configure manifest fields.</div>
+        </div>
+      </div>
+      <div class="workflow-step">
+        <div class="step-num-wrap"><div class="step-num">4</div></div>
+        <div class="step-content">
+          <div class="step-title">Implement Components</div>
+          <div class="step-body">Background handler, content scripts with defineContentScript(), React UIs in entrypoints/. Use Shadow DOM for content script UI isolation.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Component Types -->
+  <div class="section">
+    <div class="section-label slate">Extension Components</div>
+    <h2 class="section-title">When to Include Each</h2>
+    <div class="component-grid">
+      <div class="comp-item">
+        <div class="comp-name">Background SW</div>
+        <div class="comp-purpose">Message hub, native messaging, state management</div>
+        <div class="comp-when">Always include</div>
+      </div>
+      <div class="comp-item">
+        <div class="comp-name">Content Script</div>
+        <div class="comp-purpose">DOM manipulation, page extraction, text insertion</div>
+        <div class="comp-when">Interacting with pages</div>
+      </div>
+      <div class="comp-item">
+        <div class="comp-name">Side Panel</div>
+        <div class="comp-purpose">Persistent UI alongside pages, complex interactions</div>
+        <div class="comp-when">Complex UIs</div>
+      </div>
+      <div class="comp-item">
+        <div class="comp-name">Popup</div>
+        <div class="comp-purpose">Quick actions, settings access, toolbar button</div>
+        <div class="comp-when">Simple interactions</div>
+      </div>
+      <div class="comp-item">
+        <div class="comp-name">Options Page</div>
+        <div class="comp-purpose">Extension configuration, user preferences</div>
+        <div class="comp-when">User settings needed</div>
+      </div>
+      <div class="comp-item">
+        <div class="comp-name">DevTools Panel</div>
+        <div class="comp-purpose">Developer debugging tools, performance inspection</div>
+        <div class="comp-when">Dev tooling</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Communication Architecture -->
+  <div class="section">
+    <div class="section-label amber">Architecture</div>
+    <h2 class="section-title">Cross-Context Communication</h2>
+    <div class="arch-diagram">
+      <div style="font-family:var(--font-mono);font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-dim);margin-bottom:12px;text-align:center;">Message Flow</div>
+      <div class="arch-center">Background Service Worker<br><span style="font-size:10px;opacity:0.7;">Message Hub</span></div>
+      <div class="arch-spokes">
+        <div class="arch-spoke">
+          <div class="arch-spoke-name">Content Script</div>
+          <div class="arch-spoke-desc">browser.runtime.sendMessage()<br>→ background<br>Listens: onMessage</div>
+        </div>
+        <div class="arch-spoke">
+          <div class="arch-spoke-name">Side Panel / Popup</div>
+          <div class="arch-spoke-desc">browser.runtime.sendMessage()<br>React UI with hooks<br>Listens: onMessage</div>
+        </div>
+        <div class="arch-spoke">
+          <div class="arch-spoke-name">Native App (optional)</div>
+          <div class="arch-spoke-desc">connectNative(appName)<br>Port-based messaging<br>Mock in development</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- File Structure -->
+  <div class="section">
+    <div class="section-label green">File Structure</div>
+    <h2 class="section-title">Project Layout</h2>
+    <div class="file-tree">
+      <div class="file-tree-header">extension/ — wxt project</div>
+      <div class="file-tree-body">
+        <div class="tr"><span class="tr-dir">entrypoints/</span></div>
+        <div class="tr"><span class="tr-ind">├</span><span class="tr-file">background.ts</span><span class="tr-note highlight">Service worker + message hub</span></div>
+        <div class="tr"><span class="tr-ind">├</span><span class="tr-dir">sidepanel/</span><span class="tr-note">React side panel UI</span></div>
+        <div class="tr"><span class="tr-ind">├</span><span class="tr-dir">popup/</span><span class="tr-note">Toolbar popup (optional)</span></div>
+        <div class="tr"><span class="tr-ind">└</span><span class="tr-dir">options/</span><span class="tr-note">Settings page (optional)</span></div>
+        <div class="tr" style="margin-top:4px;"><span class="tr-dir">content/</span></div>
+        <div class="tr"><span class="tr-ind">├</span><span class="tr-file">main.ts</span><span class="tr-note">Primary content script</span></div>
+        <div class="tr"><span class="tr-ind">├</span><span class="tr-file">gdocs.ts</span><span class="tr-note">Google Docs integration</span></div>
+        <div class="tr"><span class="tr-ind">└</span><span class="tr-file">overleaf.ts</span><span class="tr-note">Overleaf integration</span></div>
+        <div class="tr" style="margin-top:4px;"><span class="tr-dir">lib/</span></div>
+        <div class="tr"><span class="tr-ind">├</span><span class="tr-file">storage.ts</span><span class="tr-note">WXT storage wrapper</span></div>
+        <div class="tr"><span class="tr-ind">├</span><span class="tr-file">messaging.ts</span><span class="tr-note">Typed message protocol</span></div>
+        <div class="tr"><span class="tr-ind">└</span><span class="tr-file">types.ts</span><span class="tr-note">Shared types</span></div>
+        <div class="tr" style="margin-top:4px;"><span class="tr-file">wxt.config.ts</span><span class="tr-note">Manifest + permissions</span></div>
+        <div class="tr"><span class="tr-file">tailwind.config.js</span><span class="tr-note">Tailwind CSS</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Common Patterns -->
+  <div class="section">
+    <div class="section-label amber">Common Patterns</div>
+    <h2 class="section-title">Key Implementation Patterns</h2>
+    <div class="patterns-list">
+      <div class="pattern-row">
+        <span class="pattern-name">Storage Wrapper</span>
+        <span class="pattern-desc">Typed WXT storage with per-doc keys: <code style="font-family:var(--font-mono);font-size:12px;">local:doc:{id}</code>. Get, set, and watch methods. Isolates storage key management from business logic.</span>
+      </div>
+      <div class="pattern-row">
+        <span class="pattern-name">Message Protocol</span>
+        <span class="pattern-desc">Union type MessageType for all cross-context messages. PROTOCOL_VERSION for compatibility. sendMessage() with generic return type for type-safe responses.</span>
+      </div>
+      <div class="pattern-row">
+        <span class="pattern-name">Shadow DOM UI</span>
+        <span class="pattern-desc">createShadowRootUi() isolates CSS from host page. React root mounted inside shadow. Prevents style leakage into host page.</span>
+      </div>
+      <div class="pattern-row">
+        <span class="pattern-name">Native Messaging</span>
+        <span class="pattern-desc">NativeAdapter interface with connect/send/onMessage/disconnect. Mock adapter for development (USE_MOCK_NATIVE=true). Swap adapters via environment variable.</span>
+      </div>
+      <div class="pattern-row">
+        <span class="pattern-name">Text Insertion</span>
+        <span class="pattern-desc">insertText() via Selection API for standard editors. insertViaClipboard() for Google Docs workaround (execCommand paste). Returns boolean for success/failure.</span>
+      </div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

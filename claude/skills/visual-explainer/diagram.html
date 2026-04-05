@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>visual-explainer — HTML Diagram Generator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,600;1,400;1,600&family=Noto+Sans+Mono:wght@400;500&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ============ THEME — Paper / Ink (light-first) ============ */
+:root {
+  --font-body: 'Plus Jakarta Sans', system-ui, sans-serif;
+  --font-display: 'Crimson Pro', Georgia, serif;
+  --font-mono: 'Noto Sans Mono', 'SF Mono', Consolas, monospace;
+
+  --bg:        #faf7f5;
+  --surface:   #ffffff;
+  --surface2:  #f4f0eb;
+  --surface3:  #ede7df;
+  --border:    rgba(80,50,30,0.09);
+  --border-bright: rgba(80,50,30,0.18);
+  --text:      #2c1f14;
+  --text-dim:  #7c6554;
+
+  /* Terracotta + sage palette */
+  --terra:     #c2410c;
+  --terra-dim: rgba(194,65,12,0.09);
+  --sage:      #4d7c0f;
+  --sage-dim:  rgba(77,124,15,0.09);
+  --amber:     #b45309;
+  --amber-dim: rgba(180,83,9,0.09);
+  --slate:     #374151;
+  --slate-dim: rgba(55,65,81,0.09);
+  --plum:      #9f1239;
+  --plum-dim:  rgba(159,18,57,0.09);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg:        #1c1512;
+    --surface:   #261e18;
+    --surface2:  #312620;
+    --surface3:  #3e3028;
+    --border:    rgba(250,220,190,0.08);
+    --border-bright: rgba(250,220,190,0.16);
+    --text:      #f0e6da;
+    --text-dim:  #a8917c;
+
+    --terra:     #fb923c;
+    --terra-dim: rgba(251,146,60,0.12);
+    --sage:      #a3e635;
+    --sage-dim:  rgba(163,230,53,0.10);
+    --amber:     #fbbf24;
+    --amber-dim: rgba(251,191,36,0.10);
+    --slate:     #94a3b8;
+    --slate-dim: rgba(148,163,184,0.10);
+    --plum:      #fda4af;
+    --plum-dim:  rgba(253,164,175,0.10);
+  }
+}
+
+/* ============ RESET ============ */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  background-color: var(--bg);
+  /* Subtle diagonal texture — paper feel */
+  background-image: repeating-linear-gradient(
+    -45deg,
+    transparent,
+    transparent 48px,
+    var(--border) 48px,
+    var(--border) 49px
+  );
+  color: var(--text);
+  font-family: var(--font-body);
+  padding: 52px 44px;
+  min-height: 100vh;
+  overflow-wrap: break-word;
+}
+
+/* ============ ANIMATIONS ============ */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.anim {
+  animation: fadeUp 0.5s ease-out both;
+  animation-delay: calc(var(--i, 0) * 0.065s);
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; animation-delay: 0ms !important; }
+}
+
+/* ============ LAYOUT ============ */
+.container { max-width: 1040px; margin: 0 auto; }
+
+/* ============ HEADER ============ */
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--terra);
+  margin-bottom: 10px;
+}
+
+h1 {
+  font-family: var(--font-display);
+  font-size: 52px;
+  font-weight: 600;
+  line-height: 1.0;
+  letter-spacing: -0.5px;
+  margin-bottom: 6px;
+}
+
+h1 em { font-style: italic; color: var(--terra); }
+
+.tagline {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-dim);
+  margin-bottom: 10px;
+}
+
+.hero-rule {
+  border: none;
+  border-top: 2px solid var(--terra);
+  width: 60px;
+  margin: 16px 0 28px;
+}
+
+/* ============ PURPOSE BAND ============ */
+.purpose-band {
+  background: var(--surface);
+  border: 1px solid var(--border-bright);
+  border-left: 4px solid var(--terra);
+  border-radius: 0 8px 8px 0;
+  padding: 16px 22px;
+  font-size: 15px;
+  line-height: 1.75;
+  color: var(--text-dim);
+  max-width: 820px;
+  margin-bottom: 36px;
+}
+.purpose-band strong { color: var(--text); }
+.purpose-band code {
+  font-family: var(--font-mono); font-size: 12px;
+  background: var(--terra-dim); color: var(--terra); padding: 1px 6px; border-radius: 3px;
+}
+
+/* ============ SECTION DIVIDER ============ */
+.sec-head {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.sec-head::after { content: ''; flex: 1; height: 1px; background: var(--border-bright); }
+
+/* ============ WORKFLOW PHASES ============ */
+.phases {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 28px;
+}
+@media (max-width: 800px) { .phases { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 480px) { .phases { grid-template-columns: 1fr; } }
+
+.phase-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-top: 3px solid var(--terra);
+  border-radius: 0 0 8px 8px;
+  padding: 16px 16px;
+  min-width: 0;
+}
+.phase-card:nth-child(2) { border-top-color: var(--amber); }
+.phase-card:nth-child(3) { border-top-color: var(--sage); }
+.phase-card:nth-child(4) { border-top-color: var(--slate); }
+
+.phase-num {
+  font-family: var(--font-display);
+  font-size: 32px;
+  font-weight: 600;
+  line-height: 1;
+  margin-bottom: 6px;
+}
+.phase-card:nth-child(1) .phase-num { color: var(--terra); }
+.phase-card:nth-child(2) .phase-num { color: var(--amber); }
+.phase-card:nth-child(3) .phase-num { color: var(--sage); }
+.phase-card:nth-child(4) .phase-num { color: var(--slate); }
+
+.phase-name {
+  font-weight: 600;
+  font-size: 14px;
+  margin-bottom: 8px;
+}
+
+.phase-body {
+  font-size: 12px;
+  line-height: 1.65;
+  color: var(--text-dim);
+}
+.phase-body code {
+  font-family: var(--font-mono); font-size: 11px;
+  background: var(--surface2); color: var(--text); padding: 1px 5px; border-radius: 3px;
+}
+
+/* ============ TRIGGER TABLE ============ */
+.trigger-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 28px;
+}
+@media (max-width: 640px) { .trigger-grid { grid-template-columns: 1fr; } }
+
+.trigger-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 14px 16px;
+  min-width: 0;
+}
+.trigger-label {
+  font-family: var(--font-mono); font-size: 10px;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  margin-bottom: 9px;
+  display: flex; align-items: center; gap: 6px;
+}
+.trigger-label .pip { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+.trigger-list { display: flex; flex-direction: column; gap: 5px; }
+.trigger-item {
+  font-size: 12px; color: var(--text-dim);
+  padding-left: 14px; position: relative; line-height: 1.5;
+}
+.trigger-item::before { content: '→'; position: absolute; left: 0; font-family: var(--font-mono); color: var(--terra); font-size: 11px; }
+
+/* ============ RENDERING DECISION TABLE ============ */
+.render-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  margin-bottom: 28px;
+  background: var(--surface);
+  border: 1px solid var(--border-bright);
+  border-radius: 8px;
+  overflow: hidden;
+}
+.render-table th {
+  font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase;
+  background: var(--surface2); color: var(--text-dim);
+  padding: 10px 14px; text-align: left;
+  border-bottom: 1px solid var(--border-bright);
+}
+.render-table td {
+  padding: 10px 14px; color: var(--text-dim); border-bottom: 1px solid var(--border);
+  vertical-align: top; line-height: 1.5;
+}
+.render-table tr:last-child td { border-bottom: none; }
+.render-table tr:nth-child(even) td { background: var(--surface2); }
+.render-table td:first-child { color: var(--text); font-weight: 500; }
+.render-table td code {
+  font-family: var(--font-mono); font-size: 11px;
+  background: var(--terra-dim); color: var(--terra); padding: 1px 5px; border-radius: 3px;
+}
+.render-table td.use-mermaid { color: var(--sage); font-family: var(--font-mono); font-size: 11px; }
+.render-table td.use-css     { color: var(--amber); font-family: var(--font-mono); font-size: 11px; }
+.render-table td.use-table   { color: var(--slate); font-family: var(--font-mono); font-size: 11px; }
+
+/* ============ SLOP SIGNALS ============ */
+.slop-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 8px;
+  margin-bottom: 28px;
+}
+.slop-item {
+  display: flex; align-items: flex-start; gap: 8px;
+  background: var(--plum-dim);
+  border: 1px solid rgba(159,18,57,0.25);
+  border-radius: 7px; padding: 8px 10px;
+  font-size: 12px; color: var(--text-dim); min-width: 0;
+}
+.slop-x { color: var(--plum); font-family: var(--font-mono); font-size: 13px; flex-shrink: 0; }
+.slop-item code { font-family: var(--font-mono); font-size: 11px; background: rgba(0,0,0,0.07); padding: 1px 4px; border-radius: 3px; color: var(--plum); }
+
+@media (prefers-color-scheme: dark) {
+  .slop-item code { background: rgba(255,255,255,0.08); }
+}
+
+/* ============ SUB-SKILLS STRIP ============ */
+.subskills {
+  display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 28px;
+}
+.subskill-pill {
+  background: var(--surface);
+  border: 1px solid var(--border-bright);
+  border-radius: 20px;
+  padding: 6px 14px;
+  font-family: var(--font-mono); font-size: 11px; color: var(--text-dim);
+  display: flex; align-items: center; gap: 6px;
+}
+.subskill-pill .marker {
+  width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0;
+}
+
+/* ============ AESTHETIC GRID ============ */
+.aesthetics-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 16px;
+}
+@media (max-width: 640px) { .aesthetics-grid { grid-template-columns: 1fr 1fr; } }
+
+.aesthetic-card {
+  border: 1px solid var(--border);
+  border-radius: 8px; padding: 12px 14px;
+  min-width: 0;
+}
+.aesthetic-name { font-size: 13px; font-weight: 600; margin-bottom: 4px; }
+.aesthetic-desc { font-size: 11px; color: var(--text-dim); line-height: 1.5; }
+
+@media (max-width: 768px) {
+  body { padding: 24px 16px; }
+  h1 { font-size: 36px; }
+}
+</style>
+</head>
+<body>
+<div class="container">
+
+  <p class="eyebrow anim" style="--i:0">skill · visual-explainer</p>
+  <h1 class="anim" style="--i:1">Visual<br><em>Explainer</em></h1>
+  <p class="tagline anim" style="--i:2">html diagrams · self-contained · always open in browser</p>
+  <hr class="hero-rule anim" style="--i:3">
+
+  <div class="purpose-band anim" style="--i:4">
+    Generate <strong>beautiful, self-contained HTML pages</strong> that visually explain systems, code changes, plans, and data.
+    Triggered explicitly when a user asks for a diagram or overview — and <strong>proactively</strong> when about to render
+    an ASCII table with <code>4+ rows</code> or <code>3+ columns</code>. Never fall back to ASCII art when this skill is loaded.
+  </div>
+
+  <!-- 4-phase workflow -->
+  <div class="sec-head anim" style="--i:5">workflow phases</div>
+  <div class="phases anim" style="--i:6">
+
+    <div class="phase-card">
+      <div class="phase-num">1</div>
+      <div class="phase-name">Think</div>
+      <div class="phase-body">
+        Commit to a direction before writing HTML. Who is looking?
+        What diagram type? Which aesthetic? Pick one and hold it.
+        Constrained aesthetics (Blueprint, Editorial, Paper/ink) prevent generic output.
+        <em>The swap test:</em> if a generic dark theme would be indistinguishable, push further.
+      </div>
+    </div>
+
+    <div class="phase-card">
+      <div class="phase-num">2</div>
+      <div class="phase-name">Structure</div>
+      <div class="phase-body">
+        Read the reference template before generating — every time.
+        Choose rendering approach based on diagram type.
+        <code>Mermaid</code> for graphs, flows, sequences, state machines.
+        <code>CSS Grid</code> for text-heavy architecture cards.
+        <code>&lt;table&gt;</code> for data, comparisons, audits.
+      </div>
+    </div>
+
+    <div class="phase-card">
+      <div class="phase-num">3</div>
+      <div class="phase-name">Style</div>
+      <div class="phase-body">
+        Distinctive font pairing — never Inter or Roboto as body.
+        Forbidden accents: indigo/violet, fuchsia, cyan+magenta+pink.
+        No gradient text on headings. No glowing animated shadows.
+        Vary the palette every generation. Typography is the diagram.
+      </div>
+    </div>
+
+    <div class="phase-card">
+      <div class="phase-num">4</div>
+      <div class="phase-name">Deliver</div>
+      <div class="phase-body">
+        Write to <code>~/.agent/diagrams/</code>.
+        Open in browser immediately.
+        Tell the user the file path.
+        Run the squint test and swap test before shipping.
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Trigger conditions -->
+  <div class="sec-head anim" style="--i:7">trigger conditions</div>
+  <div class="trigger-grid anim" style="--i:8">
+
+    <div class="trigger-card">
+      <div class="trigger-label">
+        <div class="pip" style="background:var(--terra)"></div>
+        <span style="color:var(--terra)">Explicit triggers</span>
+      </div>
+      <div class="trigger-list">
+        <div class="trigger-item">User asks for a diagram or architecture overview</div>
+        <div class="trigger-item">diff review, plan review, project recap</div>
+        <div class="trigger-item">Any visual explanation of technical concepts</div>
+        <div class="trigger-item">Comparison table or feature matrix request</div>
+      </div>
+    </div>
+
+    <div class="trigger-card">
+      <div class="trigger-label">
+        <div class="pip" style="background:var(--sage)"></div>
+        <span style="color:var(--sage)">Proactive triggers</span>
+      </div>
+      <div class="trigger-list">
+        <div class="trigger-item">About to render ASCII table with 4+ rows</div>
+        <div class="trigger-item">About to render table with 3+ columns</div>
+        <div class="trigger-item">Status reports, audits, config matrices</div>
+        <div class="trigger-item">Any structured rows × columns data</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Rendering decision -->
+  <div class="sec-head anim" style="--i:9">rendering decision guide</div>
+  <table class="render-table anim" style="--i:10">
+    <thead>
+      <tr>
+        <th>Diagram type</th>
+        <th>Approach</th>
+        <th>Reason</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Flowchart / pipeline</td>
+        <td class="use-mermaid">Mermaid graph TD/LR</td>
+        <td>Automatic node positioning &amp; edge routing</td>
+      </tr>
+      <tr>
+        <td>Sequence diagram</td>
+        <td class="use-mermaid">Mermaid sequenceDiagram</td>
+        <td>Lifelines, messages, activation boxes need auto layout</td>
+      </tr>
+      <tr>
+        <td>State machine</td>
+        <td class="use-mermaid">Mermaid stateDiagram-v2 or flowchart</td>
+        <td>State transitions with labeled edges; use flowchart if labels have special chars</td>
+      </tr>
+      <tr>
+        <td>ER / schema</td>
+        <td class="use-mermaid">Mermaid erDiagram</td>
+        <td>Relationship lines need auto-routing between many entities</td>
+      </tr>
+      <tr>
+        <td>Architecture (text-heavy)</td>
+        <td class="use-css">CSS Grid cards</td>
+        <td>Rich card content (descriptions, code, lists) needs CSS control</td>
+      </tr>
+      <tr>
+        <td>Architecture (topology)</td>
+        <td class="use-mermaid">Mermaid graph</td>
+        <td>Visible connections between components need edge routing</td>
+      </tr>
+      <tr>
+        <td>Data table / comparison</td>
+        <td class="use-table">&lt;table&gt; element</td>
+        <td>Semantic markup, accessibility, copy-paste behavior — not CSS grid</td>
+      </tr>
+      <tr>
+        <td>Timeline / roadmap</td>
+        <td class="use-css">CSS (central line + cards)</td>
+        <td>Simple linear layout, no edge routing needed</td>
+      </tr>
+      <tr>
+        <td>Dashboard / metrics</td>
+        <td class="use-css">CSS Grid + Chart.js</td>
+        <td>Card grid with embedded charts — Mermaid doesn't do dashboards well</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- Sub-skills -->
+  <div class="sec-head anim" style="--i:11">sub-skills</div>
+  <div class="subskills anim" style="--i:12">
+    <div class="subskill-pill"><div class="marker" style="background:var(--terra)"></div>generate-web-diagram</div>
+    <div class="subskill-pill"><div class="marker" style="background:var(--amber)"></div>diff-review</div>
+    <div class="subskill-pill"><div class="marker" style="background:var(--sage)"></div>fact-check</div>
+    <div class="subskill-pill"><div class="marker" style="background:var(--slate)"></div>generate-slides</div>
+    <div class="subskill-pill"><div class="marker" style="background:var(--plum)"></div>generate-visual-plan</div>
+    <div class="subskill-pill"><div class="marker" style="background:var(--terra)"></div>plan-review</div>
+    <div class="subskill-pill"><div class="marker" style="background:var(--amber)"></div>project-recap</div>
+  </div>
+
+  <!-- Constrained aesthetics -->
+  <div class="sec-head anim" style="--i:13">constrained aesthetics (prefer these)</div>
+  <div class="aesthetics-grid anim" style="--i:14">
+    <div class="aesthetic-card" style="border-top:3px solid var(--slate)">
+      <div class="aesthetic-name" style="color:var(--slate)">Blueprint</div>
+      <div class="aesthetic-desc">Deep slate/blue, grid background, monospace labels, precise borders. Technical drawing feel.</div>
+    </div>
+    <div class="aesthetic-card" style="border-top:3px solid var(--terra)">
+      <div class="aesthetic-name" style="color:var(--terra)">Paper / Ink</div>
+      <div class="aesthetic-desc">Warm cream #faf7f5, terracotta + sage accents, informal and handcrafted feel.</div>
+    </div>
+    <div class="aesthetic-card" style="border-top:3px solid var(--plum)">
+      <div class="aesthetic-name" style="color:var(--plum)">Editorial</div>
+      <div class="aesthetic-desc">Serif headline, generous whitespace, muted earth tones or deep navy + gold.</div>
+    </div>
+    <div class="aesthetic-card" style="border-top:3px solid var(--amber)">
+      <div class="aesthetic-name" style="color:var(--amber)">Terminal Mono</div>
+      <div class="aesthetic-desc">Green/amber on near-black, monospace everything, CRT glow optional.</div>
+    </div>
+    <div class="aesthetic-card" style="border-top:3px solid var(--sage)">
+      <div class="aesthetic-name" style="color:var(--sage)">IDE Theme</div>
+      <div class="aesthetic-desc">Commit to a real named theme: Dracula, Nord, Catppuccin, Gruvbox, Solarized. Not approximations.</div>
+    </div>
+    <div class="aesthetic-card" style="border-top:3px solid var(--text-dim)">
+      <div class="aesthetic-name">Data Dense</div>
+      <div class="aesthetic-desc">Small type, tight spacing, maximum information, muted colors. No decoration.</div>
+    </div>
+  </div>
+
+  <!-- Slop signals -->
+  <div class="sec-head anim" style="--i:15">slop signals — forbidden patterns</div>
+  <div class="slop-grid anim" style="--i:16">
+    <div class="slop-item"><span class="slop-x">✕</span><span>Inter or Roboto as <code>--font-body</code></span></div>
+    <div class="slop-item"><span class="slop-x">✕</span><span>Indigo/violet accents <code>#8b5cf6</code> <code>#7c3aed</code></span></div>
+    <div class="slop-item"><span class="slop-x">✕</span><span>Gradient text on headings (<code>background-clip:text</code>)</span></div>
+    <div class="slop-item"><span class="slop-x">✕</span><span>Glowing animated box-shadows on cards</span></div>
+    <div class="slop-item"><span class="slop-x">✕</span><span>Cyan + magenta + pink neon combination</span></div>
+    <div class="slop-item"><span class="slop-x">✕</span><span>Perfectly uniform cards — no visual hierarchy</span></div>
+    <div class="slop-item"><span class="slop-x">✕</span><span>Three-dot code block chrome (red/yellow/green)</span></div>
+    <div class="slop-item"><span class="slop-x">✕</span><span>Neon Dashboard aesthetic — always generic</span></div>
+  </div>
+
+</div>
+</body>
+</html>

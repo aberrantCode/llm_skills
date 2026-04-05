@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Add Remote Installer — Skill Diagram</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --font-body: 'Space Grotesk', system-ui, sans-serif;
+    --font-mono: 'Space Mono', Consolas, monospace;
+    --bg: #0a0e1a;
+    --surface: #111827;
+    --surface2: #1a2235;
+    --border: rgba(99, 179, 237, 0.12);
+    --border-bright: rgba(99, 179, 237, 0.28);
+    --text: #e2e8f0;
+    --text-dim: #94a3b8;
+    --accent: #63b3ed;
+    --accent-dim: rgba(99, 179, 237, 0.12);
+    --green: #68d391;
+    --green-dim: rgba(104, 211, 145, 0.12);
+    --orange: #f6ad55;
+    --orange-dim: rgba(246, 173, 85, 0.12);
+    --purple: #b794f4;
+    --purple-dim: rgba(183, 148, 244, 0.12);
+    --red: #fc8181;
+    --red-dim: rgba(252, 129, 129, 0.12);
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: var(--font-body);
+    background: var(--bg);
+    background-image:
+      radial-gradient(at 15% 10%, rgba(99,179,237,0.08) 0%, transparent 50%),
+      radial-gradient(at 85% 80%, rgba(183,148,244,0.07) 0%, transparent 50%);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 40px 24px 64px;
+  }
+  .page { max-width: 900px; margin: 0 auto; }
+
+  /* HEADER */
+  .header { text-align: center; margin-bottom: 48px; }
+  .skill-badge {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--accent);
+    border: 1px solid var(--border-bright);
+    border-radius: 4px;
+    padding: 3px 10px;
+    margin-bottom: 14px;
+    letter-spacing: 0.08em;
+  }
+  h1 { font-size: 36px; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 10px; }
+  .subtitle { color: var(--text-dim); font-size: 15px; max-width: 560px; margin: 0 auto; line-height: 1.6; }
+
+  /* STEP FLOW */
+  .flow { display: flex; flex-direction: column; gap: 0; }
+  .step-row { display: flex; align-items: stretch; gap: 0; }
+  .step-connector { display: flex; flex-direction: column; align-items: center; width: 40px; flex-shrink: 0; }
+  .step-dot {
+    width: 32px; height: 32px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-mono); font-size: 12px; font-weight: 700;
+    flex-shrink: 0;
+  }
+  .step-line { width: 2px; flex: 1; min-height: 20px; }
+
+  .step-card {
+    flex: 1;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px 24px;
+    margin: 4px 0 4px 12px;
+    position: relative;
+    animation: fadeUp 0.4s ease both;
+    animation-delay: calc(var(--i, 0) * 0.08s);
+  }
+  .step-card:hover { border-color: var(--border-bright); }
+
+  .step-title { font-size: 15px; font-weight: 600; margin-bottom: 6px; }
+  .step-desc { font-size: 13px; color: var(--text-dim); line-height: 1.6; margin-bottom: 12px; }
+
+  .tag-list { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+  .tag {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 4px;
+    border: 1px solid;
+  }
+
+  /* BRANCH BOX */
+  .branch-box {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-left: 3px solid;
+    border-radius: 8px;
+    padding: 12px 16px;
+    margin-top: 10px;
+    font-size: 12.5px;
+  }
+  .branch-box h4 { font-size: 11px; font-weight: 600; letter-spacing: 0.06em; margin-bottom: 6px; opacity: 0.7; }
+  .branch-item { display: flex; align-items: flex-start; gap: 8px; margin-bottom: 4px; color: var(--text-dim); line-height: 1.5; }
+  .branch-item:last-child { margin-bottom: 0; }
+  .bullet { color: var(--accent); flex-shrink: 0; }
+
+  /* DECISION DIAMOND */
+  .decision-wrap { display: flex; justify-content: center; margin: 12px 0; }
+  .diamond-container { position: relative; }
+  .diamond {
+    width: 130px; height: 50px;
+    background: var(--purple-dim);
+    border: 1px solid var(--purple);
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 600; color: var(--purple);
+    text-align: center;
+    clip-path: polygon(12px 0%, calc(100% - 12px) 0%, 100% 50%, calc(100% - 12px) 100%, 12px 100%, 0% 50%);
+    padding: 0 20px;
+  }
+
+  /* COLOR CODES */
+  .s-blue .step-dot { background: var(--accent-dim); color: var(--accent); border: 1.5px solid var(--accent); }
+  .s-blue .step-line { background: linear-gradient(to bottom, var(--accent), transparent); }
+  .s-blue .step-card { border-left: 3px solid var(--accent); }
+  .s-green .step-dot { background: var(--green-dim); color: var(--green); border: 1.5px solid var(--green); }
+  .s-green .step-line { background: linear-gradient(to bottom, var(--green), transparent); }
+  .s-green .step-card { border-left: 3px solid var(--green); }
+  .s-orange .step-dot { background: var(--orange-dim); color: var(--orange); border: 1.5px solid var(--orange); }
+  .s-orange .step-line { background: linear-gradient(to bottom, var(--orange), transparent); }
+  .s-orange .step-card { border-left: 3px solid var(--orange); }
+  .s-purple .step-dot { background: var(--purple-dim); color: var(--purple); border: 1.5px solid var(--purple); }
+  .s-purple .step-line { background: linear-gradient(to bottom, var(--purple), transparent); }
+  .s-purple .step-card { border-left: 3px solid var(--purple); }
+  .s-red .step-dot { background: var(--red-dim); color: var(--red); border: 1.5px solid var(--red); }
+
+  .tag.blue { color: var(--accent); border-color: var(--accent-dim); background: var(--accent-dim); }
+  .tag.green { color: var(--green); border-color: var(--green-dim); background: var(--green-dim); }
+  .tag.orange { color: var(--orange); border-color: var(--orange-dim); background: var(--orange-dim); }
+  .tag.purple { color: var(--purple); border-color: var(--purple-dim); background: var(--purple-dim); }
+
+  /* OUTPUT SECTION */
+  .output-section {
+    margin-top: 40px;
+    background: var(--surface);
+    border: 1px solid var(--border-bright);
+    border-radius: 14px;
+    padding: 28px 32px;
+  }
+  .output-label {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    color: var(--green);
+    margin-bottom: 8px;
+  }
+  .output-title { font-size: 17px; font-weight: 600; margin-bottom: 14px; }
+  .output-items { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .output-item {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 16px;
+  }
+  .output-item-name { font-family: var(--font-mono); font-size: 12px; color: var(--accent); margin-bottom: 4px; }
+  .output-item-desc { font-size: 12px; color: var(--text-dim); line-height: 1.5; }
+
+  .oneliner {
+    margin-top: 20px;
+    background: #0d1829;
+    border: 1px solid var(--border-bright);
+    border-radius: 8px;
+    padding: 14px 18px;
+    font-family: var(--font-mono);
+    font-size: 12.5px;
+    color: var(--green);
+    word-break: break-all;
+  }
+  .oneliner-label { font-size: 10px; color: var(--text-dim); margin-bottom: 6px; letter-spacing: 0.08em; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @media (prefers-reduced-motion: reduce) { * { animation: none !important; } }
+  @media (max-width: 600px) {
+    h1 { font-size: 26px; }
+    .output-items { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="header">
+    <div class="skill-badge">SKILL / ADD-REMOTE-INSTALLER</div>
+    <h1>Add Remote Installer</h1>
+    <p class="subtitle">Context-gathering orchestrator that detects your GitHub repo, locates the primary app script, collects install parameters, then delegates to the <code style="font-family:var(--font-mono);color:var(--accent)">remote-installer</code> skill to build both artifacts.</p>
+  </div>
+
+  <div class="flow">
+
+    <!-- STEP 1 -->
+    <div class="step-row s-blue" style="--i:0">
+      <div class="step-connector">
+        <div class="step-dot">1</div>
+        <div class="step-line"></div>
+      </div>
+      <div class="step-card">
+        <div class="step-title">Auto-detect Repository Context</div>
+        <div class="step-desc">Silently runs before asking the user anything — parses <strong>OWNER/REPO</strong> from the git remote URL and checks for conventional launcher scripts.</div>
+        <div class="tag-list">
+          <span class="tag blue">git remote get-url origin</span>
+          <span class="tag blue">Test-Path scripts/Start-App.ps1</span>
+          <span class="tag blue">Test-Path .env.example</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 2 -->
+    <div class="step-row s-purple" style="--i:1">
+      <div class="step-connector">
+        <div class="step-dot">2</div>
+        <div class="step-line"></div>
+      </div>
+      <div class="step-card">
+        <div class="step-title">Locate the Primary App Script</div>
+        <div class="step-desc">The script that actually <em>runs</em> the application (not the launcher). Resolved automatically, or asked if ambiguous.</div>
+
+        <div class="branch-box" style="border-left-color: var(--green);">
+          <h4>PATH A — Auto-resolved</h4>
+          <div class="branch-item"><span class="bullet">→</span> Read <code style="font-family:var(--font-mono);font-size:11px">scripts/Start-App.ps1</code>, find the <code style="font-family:var(--font-mono);font-size:11px">& $target</code> line → extract <code style="font-family:var(--font-mono);font-size:11px">$APP_SCRIPT</code></div>
+        </div>
+        <div class="branch-box" style="border-left-color: var(--orange); margin-top: 8px;">
+          <h4>PATH B — AskUserQuestion</h4>
+          <div class="branch-item"><span class="bullet">→</span> Launcher not found or target unparseable → present detected script options to user</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 3 -->
+    <div class="step-row s-orange" style="--i:2">
+      <div class="step-connector">
+        <div class="step-dot">3</div>
+        <div class="step-line"></div>
+      </div>
+      <div class="step-card">
+        <div class="step-title">Ask for Required Context</div>
+        <div class="step-desc">A single <strong>AskUserQuestion</strong> call. Only asks for what could not be auto-detected — OWNER, REPO, and APP_SCRIPT are never re-asked if resolved.</div>
+        <div class="tag-list">
+          <span class="tag orange">Install directory</span>
+          <span class="tag orange">PowerShell module (if Import-Module detected)</span>
+        </div>
+        <div class="branch-box" style="border-left-color: var(--text-dim); margin-top: 10px;">
+          <div class="branch-item"><span class="bullet">·</span> <span>Default install dir: <code style="font-family:var(--font-mono);font-size:11px">C:\osm\&lt;repo-slug&gt;</code></span></div>
+          <div class="branch-item"><span class="bullet">·</span> <span>Module question skipped if no <code style="font-family:var(--font-mono);font-size:11px">Import-Module</code> in app script</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 4 -->
+    <div class="step-row s-purple" style="--i:3">
+      <div class="step-connector">
+        <div class="step-dot">4</div>
+        <div class="step-line"></div>
+      </div>
+      <div class="step-card">
+        <div class="step-title">Invoke the remote-installer Skill</div>
+        <div class="step-desc">Delegates all code generation to the <code style="font-family:var(--font-mono);font-size:12px;color:var(--purple)">remote-installer</code> skill, passing the full resolved context as structured variables.</div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:12px;">
+          <div class="branch-box" style="border-left-color: var(--purple); margin:0;">
+            <h4>VARIABLES PASSED</h4>
+            <div class="branch-item"><span class="bullet">$</span>OWNER/$REPO</div>
+            <div class="branch-item"><span class="bullet">$</span>INSTALL_DIR</div>
+            <div class="branch-item"><span class="bullet">$</span>APP_SCRIPT</div>
+            <div class="branch-item"><span class="bullet">$</span>START_SCRIPT</div>
+            <div class="branch-item"><span class="bullet">$</span>MODULE / $MODULE_VERSION</div>
+            <div class="branch-item"><span class="bullet">$</span>ENV_EXAMPLE ($true/$false)</div>
+          </div>
+          <div class="branch-box" style="border-left-color: var(--accent); margin:0;">
+            <h4>ARTIFACTS PRODUCED</h4>
+            <div class="branch-item"><span class="bullet">→</span><code style="font-family:var(--font-mono);font-size:11px">install.ps1</code> at repo root</div>
+            <div class="branch-item"><span class="bullet">→</span>Update-check block in <code style="font-family:var(--font-mono);font-size:11px">$APP_SCRIPT</code></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 5 -->
+    <div class="step-row s-green" style="--i:4">
+      <div class="step-connector">
+        <div class="step-dot">5</div>
+      </div>
+      <div class="step-card">
+        <div class="step-title">Verify Before Finishing</div>
+        <div class="step-desc">Confirms both artifacts exist and the safeguards checklist passes before reporting success.</div>
+        <div class="tag-list">
+          <span class="tag green">Test-Path install.ps1</span>
+          <span class="tag green">grep "Update check" $APP_SCRIPT</span>
+          <span class="tag green">safeguards checklist</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- OUTPUT -->
+  <div class="output-section">
+    <div class="output-label">FINAL OUTPUT</div>
+    <div class="output-title">Two Artifacts Written to Repo</div>
+    <div class="output-items">
+      <div class="output-item">
+        <div class="output-item-name">install.ps1</div>
+        <div class="output-item-desc">Remote bootstrap at repo root — downloadable as a one-liner. Handles auto-elevation, version check, ZIP download, .env merge, module install.</div>
+      </div>
+      <div class="output-item">
+        <div class="output-item-name">Update-check block</div>
+        <div class="output-item-desc">Inserted into <code style="font-family:var(--font-mono);font-size:11px">$APP_SCRIPT</code> — silently checks GitHub Releases on every launch and self-updates when a newer version exists.</div>
+      </div>
+    </div>
+    <div class="oneliner">
+      <div class="oneliner-label">ONE-LINER TO SHARE</div>
+      irm 'https://raw.githubusercontent.com/$OWNER/$REPO/main/install.ps1' | iex
+    </div>
+  </div>
+</div>
+</body>
+</html>

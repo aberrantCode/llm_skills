@@ -676,3 +676,7 @@ project/
 | FAQ | FAQPage |
 | How-to | HowTo |
 | About | Organization, Person |
+
+## Diagram
+
+[View diagram](diagram.html)

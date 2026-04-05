@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>explain-code — Code Explanation Skill</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,400;1,9..144,600&family=Source+Code+Pro:wght@400;500&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ============ THEME — Warm Sepia / Scholarly ============ */
+:root {
+  --font-display: 'Fraunces', Georgia, serif;
+  --font-body:    'DM Sans', system-ui, sans-serif;
+  --font-mono:    'Source Code Pro', 'SF Mono', Consolas, monospace;
+
+  --bg:        #fdf8f0;
+  --surface:   #ffffff;
+  --surface2:  #f5ede0;
+  --surface3:  #ecddc8;
+  --border:    rgba(100,60,10,0.10);
+  --border-bright: rgba(100,60,10,0.20);
+  --text:      #2d1f0e;
+  --text-dim:  #80604a;
+
+  /* Warm amber-gold palette */
+  --amber:     #b45309;
+  --amber-dim: rgba(180,83,9,0.09);
+  --teal:      #0f766e;
+  --teal-dim:  rgba(15,118,110,0.09);
+  --rust:      #9a3412;
+  --rust-dim:  rgba(154,52,18,0.09);
+  --forest:    #166534;
+  --forest-dim: rgba(22,101,52,0.09);
+  --navy:      #1e3a5f;
+  --navy-dim:  rgba(30,58,95,0.09);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg:        #1a1208;
+    --surface:   #241908;
+    --surface2:  #302010;
+    --surface3:  #3d2a14;
+    --border:    rgba(255,210,150,0.08);
+    --border-bright: rgba(255,210,150,0.18);
+    --text:      #f5e6cc;
+    --text-dim:  #a0845a;
+
+    --amber:     #fbbf24;
+    --amber-dim: rgba(251,191,36,0.12);
+    --teal:      #5eead4;
+    --teal-dim:  rgba(94,234,212,0.10);
+    --rust:      #fb923c;
+    --rust-dim:  rgba(251,146,60,0.12);
+    --forest:    #4ade80;
+    --forest-dim: rgba(74,222,128,0.10);
+    --navy:      #60a5fa;
+    --navy-dim:  rgba(96,165,250,0.10);
+  }
+}
+
+/* ============ RESET ============ */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  background-color: var(--bg);
+  background-image: radial-gradient(ellipse at 60% 0%, var(--amber-dim) 0%, transparent 55%);
+  color: var(--text);
+  font-family: var(--font-body);
+  padding: 52px 44px;
+  min-height: 100vh;
+  overflow-wrap: break-word;
+}
+
+/* ============ ANIMATIONS ============ */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.anim {
+  animation: fadeUp 0.5s ease-out both;
+  animation-delay: calc(var(--i, 0) * 0.07s);
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; animation-delay: 0ms !important; }
+}
+
+/* ============ LAYOUT ============ */
+.container { max-width: 860px; margin: 0 auto; }
+
+/* ============ HEADER ============ */
+.eyebrow {
+  font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.14em;
+  text-transform: uppercase; color: var(--amber);
+  background: var(--amber-dim); border: 1px solid rgba(180,83,9,0.22);
+  display: inline-block; padding: 3px 10px; border-radius: 4px; margin-bottom: 16px;
+}
+
+h1 {
+  font-family: var(--font-display);
+  font-size: 50px; font-weight: 700; letter-spacing: -1px;
+  margin-bottom: 6px; line-height: 1.0;
+}
+h1 em { font-style: italic; color: var(--amber); }
+
+.tagline {
+  font-family: var(--font-mono); font-size: 12px; color: var(--text-dim); margin-bottom: 10px;
+}
+
+.rule {
+  border: none; border-top: 2px solid var(--amber);
+  width: 48px; margin: 18px 0 30px;
+}
+
+/* ============ TRIGGER ============ */
+.trigger-band {
+  background: var(--surface);
+  border: 1px solid var(--border-bright);
+  border-top: 3px solid var(--amber);
+  border-radius: 0 0 8px 8px;
+  padding: 16px 22px;
+  font-size: 14px; line-height: 1.75; color: var(--text-dim);
+  margin-bottom: 36px;
+}
+.trigger-band strong { color: var(--text); }
+.trigger-band code {
+  font-family: var(--font-mono); font-size: 12px;
+  background: var(--amber-dim); color: var(--amber); padding: 1px 6px; border-radius: 3px;
+}
+
+/* ============ FOUR ELEMENTS ============ */
+.sec-head {
+  font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--text-dim); margin-bottom: 14px;
+  display: flex; align-items: center; gap: 10px;
+}
+.sec-head::after { content: ''; flex: 1; height: 1px; background: var(--border-bright); }
+
+.four-elements { display: flex; flex-direction: column; gap: 16px; margin-bottom: 36px; }
+
+.element-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 20px 24px;
+  display: grid;
+  grid-template-columns: 56px 1fr;
+  gap: 18px;
+  align-items: start;
+  min-width: 0;
+}
+
+@media (max-width: 560px) {
+  .element-card { grid-template-columns: 1fr; }
+  .elem-num { text-align: left; }
+}
+
+.elem-num {
+  font-family: var(--font-display);
+  font-size: 44px; font-weight: 700; line-height: 1;
+  color: var(--border-bright);
+  text-align: center;
+  padding-top: 2px;
+  transition: color 0.2s;
+  user-select: none;
+}
+.element-card:nth-child(1) .elem-num { color: var(--amber); opacity: 0.7; }
+.element-card:nth-child(2) .elem-num { color: var(--teal); opacity: 0.7; }
+.element-card:nth-child(3) .elem-num { color: var(--navy); opacity: 0.7; }
+.element-card:nth-child(4) .elem-num { color: var(--rust); opacity: 0.7; }
+
+.element-card:nth-child(1) { border-left: 3px solid var(--amber); }
+.element-card:nth-child(2) { border-left: 3px solid var(--teal); }
+.element-card:nth-child(3) { border-left: 3px solid var(--navy); }
+.element-card:nth-child(4) { border-left: 3px solid var(--rust); }
+
+.elem-body {}
+.elem-title {
+  font-family: var(--font-display);
+  font-size: 20px; font-weight: 600;
+  margin-bottom: 6px; line-height: 1.2;
+}
+.element-card:nth-child(1) .elem-title { color: var(--amber); }
+.element-card:nth-child(2) .elem-title { color: var(--teal); }
+.element-card:nth-child(3) .elem-title { color: var(--navy); }
+.element-card:nth-child(4) .elem-title { color: var(--rust); }
+
+.elem-subtitle {
+  font-family: var(--font-mono); font-size: 11px; color: var(--text-dim);
+  margin-bottom: 10px; letter-spacing: 0.04em;
+}
+
+.elem-desc {
+  font-size: 13px; line-height: 1.75; color: var(--text-dim);
+}
+.elem-desc code {
+  font-family: var(--font-mono); font-size: 11px;
+  background: var(--surface2); color: var(--text); padding: 1px 5px; border-radius: 3px;
+}
+.elem-desc strong { color: var(--text); }
+
+.elem-example {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 10px 14px;
+  margin-top: 10px;
+  font-size: 12px; color: var(--text-dim); line-height: 1.6;
+  font-style: italic;
+}
+.elem-example::before {
+  content: 'e.g. ';
+  font-family: var(--font-mono); font-size: 10px; font-style: normal;
+  color: var(--amber); font-weight: 500; letter-spacing: 0.08em;
+}
+
+/* ============ IO STRIP ============ */
+.io-row {
+  display: grid; grid-template-columns: 1fr auto 1fr;
+  gap: 14px; align-items: center; margin-bottom: 28px;
+}
+@media (max-width: 560px) { .io-row { grid-template-columns: 1fr; } .io-arrow { display: none; } }
+
+.io-box {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 8px; padding: 14px 16px;
+}
+.io-label {
+  font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase;
+  margin-bottom: 8px; display: flex; align-items: center; gap: 6px;
+}
+.io-label .pip { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+.io-list { list-style: none; display: flex; flex-direction: column; gap: 5px; }
+.io-list li { font-size: 13px; color: var(--text-dim); padding-left: 14px; position: relative; line-height: 1.5; }
+.io-list li::before { content: '›'; position: absolute; left: 0; font-family: var(--font-mono); color: var(--amber); }
+.io-arrow { font-family: var(--font-display); font-size: 30px; color: var(--text-dim); text-align: center; font-style: italic; }
+
+/* ============ TIPS STRIP ============ */
+.tips-strip {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+@media (max-width: 560px) { .tips-strip { grid-template-columns: 1fr; } }
+
+.tip {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px; padding: 14px 16px;
+  font-size: 13px; line-height: 1.65; color: var(--text-dim);
+}
+.tip strong { color: var(--text); }
+.tip code {
+  font-family: var(--font-mono); font-size: 11px;
+  background: var(--surface2); color: var(--text); padding: 1px 5px; border-radius: 3px;
+}
+
+@media (max-width: 768px) {
+  body { padding: 24px 16px; }
+  h1 { font-size: 36px; }
+}
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="eyebrow anim" style="--i:0">skill · explain-code</div>
+  <h1 class="anim" style="--i:1">Explain<br><em>Code</em></h1>
+  <p class="tagline anim" style="--i:2">analogy · diagram · walkthrough · gotcha — always all four</p>
+  <hr class="rule anim" style="--i:3">
+
+  <div class="trigger-band anim" style="--i:4">
+    Use when <strong>explaining how code works</strong>, teaching about a codebase, or when a user asks
+    <code>"how does this work?"</code>. Every explanation follows the same four-element structure — always,
+    in order, without skipping. Keep explanations <strong>conversational</strong>.
+    For complex concepts, use <strong>multiple analogies</strong>.
+  </div>
+
+  <!-- IO -->
+  <div class="sec-head anim" style="--i:5">input → output</div>
+  <div class="io-row anim" style="--i:6">
+    <div class="io-box">
+      <div class="io-label"><div class="pip" style="background:var(--navy)"></div><span style="color:var(--navy)">Input</span></div>
+      <ul class="io-list">
+        <li>Any code snippet the user is confused about</li>
+        <li>A function, class, module, or system</li>
+        <li>Question like "how does X work?"</li>
+        <li>Codebase the user is trying to understand</li>
+      </ul>
+    </div>
+    <div class="io-arrow">→</div>
+    <div class="io-box">
+      <div class="io-label"><div class="pip" style="background:var(--forest)"></div><span style="color:var(--forest)">Output</span></div>
+      <ul class="io-list">
+        <li>Everyday-life analogy that makes it click</li>
+        <li>Visual diagram of flow, structure, or relationships</li>
+        <li>Step-by-step code walkthrough</li>
+        <li>One "gotcha" — the most common misconception</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Four elements -->
+  <div class="sec-head anim" style="--i:7">the four elements — always in this order</div>
+  <div class="four-elements anim" style="--i:8">
+
+    <div class="element-card">
+      <div class="elem-num">1</div>
+      <div class="elem-body">
+        <div class="elem-title">Analogy</div>
+        <div class="elem-subtitle">compare to something from everyday life</div>
+        <div class="elem-desc">
+          Pick a concrete, familiar thing that maps onto the code's behaviour.
+          The analogy should explain the <strong>core mechanic</strong>, not just the name.
+          For complex concepts, stack multiple analogies from different angles.
+        </div>
+        <div class="elem-example">
+          A closure is like a backpack — the function carries its own environment with it wherever it goes,
+          even after it's left the room where it was packed.
+        </div>
+      </div>
+    </div>
+
+    <div class="element-card">
+      <div class="elem-num">2</div>
+      <div class="elem-body">
+        <div class="elem-title">Diagram</div>
+        <div class="elem-subtitle">show the flow, structure, or relationships</div>
+        <div class="elem-desc">
+          Draw a visual representation — a flowchart, box diagram, sequence, or ASCII art sketch.
+          Show <strong>how the pieces connect</strong>, not just what they're named.
+          Favour spatial clarity over completeness; a simple diagram that illuminates beats a complete one that overwhelms.
+        </div>
+        <div class="elem-example">
+          An event loop diagram showing the call stack, microtask queue, and macrotask queue as three lanes,
+          with arrows showing which drains first.
+        </div>
+      </div>
+    </div>
+
+    <div class="element-card">
+      <div class="elem-num">3</div>
+      <div class="elem-body">
+        <div class="elem-title">Walkthrough</div>
+        <div class="elem-subtitle">step-by-step through what happens</div>
+        <div class="elem-desc">
+          Trace the code execution in order, explaining each step in plain language.
+          Reference the actual code — use <code>line N</code> or <code>function name</code> anchors.
+          Keep it <strong>conversational</strong>: "first this happens, then that, because…"
+        </div>
+        <div class="elem-example">
+          "Line 3: <code>useEffect</code> fires after render. Line 7: we return a cleanup — React calls this
+          before the next effect runs or the component unmounts."
+        </div>
+      </div>
+    </div>
+
+    <div class="element-card">
+      <div class="elem-num">4</div>
+      <div class="elem-body">
+        <div class="elem-title">Gotcha</div>
+        <div class="elem-subtitle">the common mistake or misconception</div>
+        <div class="elem-desc">
+          Surface the one thing most people get wrong about this code.
+          Frame it as <strong>"people expect X, but actually Y"</strong>.
+          This is the most memorable part of the explanation — make it specific and precise.
+        </div>
+        <div class="elem-example">
+          "People expect <code>async/await</code> to make code run in parallel — it doesn't.
+          It just pauses <em>this</em> function while other already-running tasks continue.
+          You need <code>Promise.all()</code> for actual concurrency."
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Style tips -->
+  <div class="sec-head anim" style="--i:9">style guidance</div>
+  <div class="tips-strip anim" style="--i:10">
+    <div class="tip">
+      <strong>Conversational tone.</strong> Write as if explaining to a colleague over coffee, not writing documentation.
+      Contractions, parenthetical asides, and "notice that…" are fine.
+    </div>
+    <div class="tip">
+      <strong>Multiple analogies for complexity.</strong> One analogy rarely covers every angle of a complex concept.
+      Offer 2–3 from different perspectives — mechanical, spatial, social — and let the reader pick the one that sticks.
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

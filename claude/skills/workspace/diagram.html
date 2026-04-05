@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Workspace Analysis — Skill Diagram</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700&family=Inconsolata:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --font-body: 'Lexend', system-ui, sans-serif;
+    --font-mono: 'Inconsolata', 'SF Mono', Consolas, monospace;
+
+    --bg: #0d1117;
+    --surface: #161b22;
+    --surface2: #21262d;
+    --surface-elevated: #1c2333;
+    --border: rgba(255, 255, 255, 0.07);
+    --border-bright: rgba(255, 255, 255, 0.15);
+    --text: #e6edf3;
+    --text-dim: #8b949e;
+
+    --green: #3fb950;
+    --green-dim: rgba(63, 185, 80, 0.12);
+    --blue: #58a6ff;
+    --blue-dim: rgba(88, 166, 255, 0.12);
+    --cyan: #39d0dc;
+    --cyan-dim: rgba(57, 208, 220, 0.12);
+    --purple: #bc8cff;
+    --purple-dim: rgba(188, 140, 255, 0.12);
+    --amber: #f0a840;
+    --amber-dim: rgba(240, 168, 64, 0.12);
+    --rose: #ff7b72;
+    --rose-dim: rgba(255, 123, 114, 0.12);
+    --orange: #ffa657;
+    --orange-dim: rgba(255, 166, 87, 0.12);
+  }
+
+  /* This is a forced dark-mode diagram */
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    background-image:
+      radial-gradient(ellipse at 15% 0%, rgba(88, 166, 255, 0.06) 0%, transparent 50%),
+      radial-gradient(ellipse at 85% 100%, rgba(63, 185, 80, 0.06) 0%, transparent 45%);
+    color: var(--text);
+    font-family: var(--font-body);
+    padding: 44px 40px;
+    min-height: 100vh;
+  }
+
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+  .animate { animation: fadeUp 0.45s ease-out both; animation-delay: calc(var(--i, 0) * 0.07s); }
+  @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: 0.01ms !important; animation-delay: 0ms !important; } }
+
+  .header { max-width: 1100px; margin: 0 auto 40px; display: flex; align-items: flex-start; gap: 18px; }
+  .icon-box { width: 54px; height: 54px; background: linear-gradient(135deg, #1f6feb 0%, #388bfd 100%); border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 26px; flex-shrink: 0; box-shadow: 0 4px 16px rgba(56, 139, 253, 0.25); }
+  h1 { font-size: 36px; font-weight: 700; letter-spacing: -0.5px; line-height: 1.1; margin-bottom: 6px; }
+  .subtitle { color: var(--text-dim); font-size: 13px; font-family: var(--font-mono); }
+
+  .diagram { display: grid; grid-template-columns: 1fr; gap: 20px; max-width: 1100px; margin: 0 auto; }
+
+  .section { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 22px 26px; }
+  .section--hero { background: var(--surface-elevated); border-color: var(--border-bright); box-shadow: 0 4px 20px rgba(56, 139, 253, 0.08); padding: 28px 32px; }
+  .section--recessed { background: var(--surface2); }
+
+  .section-label { font-family: var(--font-mono); font-size: 10.5px; font-weight: 500; text-transform: uppercase; letter-spacing: 1.6px; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
+
+  .section--green  { border-left: 3px solid var(--green); }  .section--green  .section-label { color: var(--green); }  .section--green  .dot { background: var(--green); }
+  .section--blue   { border-left: 3px solid var(--blue); }   .section--blue   .section-label { color: var(--blue); }   .section--blue   .dot { background: var(--blue); }
+  .section--cyan   { border-left: 3px solid var(--cyan); }   .section--cyan   .section-label { color: var(--cyan); }   .section--cyan   .dot { background: var(--cyan); }
+  .section--purple { border-left: 3px solid var(--purple); } .section--purple .section-label { color: var(--purple); } .section--purple .dot { background: var(--purple); }
+  .section--amber  { border-left: 3px solid var(--amber); }  .section--amber  .section-label { color: var(--amber); }  .section--amber  .dot { background: var(--amber); }
+  .section--rose   { border-left: 3px solid var(--rose); }   .section--rose   .section-label { color: var(--rose); }   .section--rose   .dot { background: var(--rose); }
+  .section--orange { border-left: 3px solid var(--orange); } .section--orange .section-label { color: var(--orange); } .section--orange .dot { background: var(--orange); }
+
+  /* Workspace type cards */
+  .ws-types { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+  .ws-card { background: var(--surface2); border: 1px solid var(--border); border-radius: 9px; padding: 14px; }
+  .ws-card .wt-name { font-weight: 600; font-size: 13px; margin-bottom: 6px; }
+  .ws-card .wt-indicators { font-family: var(--font-mono); font-size: 10.5px; color: var(--text-dim); line-height: 1.6; margin-bottom: 6px; }
+  .ws-card .wt-access { font-size: 11px; color: var(--text-dim); }
+  .ws-card--monorepo { border-top: 3px solid var(--green); }
+  .ws-card--multi    { border-top: 3px solid var(--blue); }
+  .ws-card--hybrid   { border-top: 3px solid var(--cyan); }
+  .ws-card--single   { border-top: 3px solid var(--text-dim); }
+
+  /* Analysis phases pipeline */
+  .phases { display: flex; flex-direction: column; gap: 10px; }
+  .phase { display: flex; gap: 14px; align-items: flex-start; }
+  .phase-num { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: var(--font-mono); font-size: 12px; font-weight: 700; flex-shrink: 0; margin-top: 2px; }
+  .phase-content { flex: 1; }
+  .phase-title { font-weight: 600; font-size: 13px; margin-bottom: 3px; }
+  .phase-desc { font-size: 12px; color: var(--text-dim); line-height: 1.55; }
+  .phase-time { font-family: var(--font-mono); font-size: 10px; color: var(--text-dim); margin-top: 3px; }
+
+  .phase--1 .phase-num { background: var(--green-dim); color: var(--green); border: 1px solid var(--green); }
+  .phase--2 .phase-num { background: var(--blue-dim); color: var(--blue); border: 1px solid var(--blue); }
+  .phase--3 .phase-num { background: var(--cyan-dim); color: var(--cyan); border: 1px solid var(--cyan); }
+  .phase--4 .phase-num { background: var(--purple-dim); color: var(--purple); border: 1px solid var(--purple); }
+
+  /* Artifacts grid */
+  .artifacts { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  .artifact-card { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 13px 16px; }
+  .artifact-card .af-file { font-family: var(--font-mono); font-size: 11px; color: var(--cyan); margin-bottom: 5px; font-weight: 500; }
+  .artifact-card .af-desc { font-size: 11.5px; color: var(--text-dim); line-height: 1.5; }
+
+  /* Token budget */
+  .token-budget { display: flex; flex-direction: column; gap: 8px; }
+  .budget-row { display: flex; align-items: center; gap: 12px; }
+  .budget-label { font-family: var(--font-mono); font-size: 10.5px; width: 90px; flex-shrink: 0; }
+  .budget-bar-track { flex: 1; height: 10px; background: var(--surface2); border-radius: 5px; overflow: hidden; }
+  .budget-bar { height: 100%; border-radius: 5px; }
+  .budget-tokens { font-family: var(--font-mono); font-size: 10px; color: var(--text-dim); width: 80px; text-align: right; flex-shrink: 0; }
+  .budget-desc { font-size: 11px; color: var(--text-dim); width: 200px; flex-shrink: 0; }
+
+  /* Freshness tiers */
+  .freshness-tiers { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
+  .tier-card { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 12px; text-align: center; }
+  .tier-card .t-num { font-family: var(--font-mono); font-size: 10px; color: var(--text-dim); margin-bottom: 5px; }
+  .tier-card .t-trigger { font-weight: 600; font-size: 11.5px; margin-bottom: 4px; }
+  .tier-card .t-time { font-family: var(--font-mono); font-size: 10px; color: var(--text-dim); }
+  .tier-card .t-blocking { font-size: 10px; margin-top: 4px; }
+  .tier-card--1 { border-top: 2px solid var(--green); }
+  .tier-card--2 { border-top: 2px solid var(--blue); }
+  .tier-card--3 { border-top: 2px solid var(--amber); }
+  .tier-card--4 { border-top: 2px solid var(--rose); }
+  .tier-card--5 { border-top: 2px solid var(--purple); }
+
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+  .node-list { list-style: none; font-size: 12px; line-height: 1.9; }
+  .node-list li { padding-left: 16px; position: relative; color: var(--text-dim); }
+  .node-list li::before { content: '›'; color: var(--blue); font-weight: 700; position: absolute; left: 0; }
+  .node-list code { font-family: var(--font-mono); font-size: 10.5px; background: var(--blue-dim); color: var(--blue); padding: 1px 5px; border-radius: 3px; }
+  .node-list strong { color: var(--text); }
+
+  .flow-arrow { display: flex; justify-content: center; align-items: center; gap: 8px; color: var(--text-dim); font-family: var(--font-mono); font-size: 11px; padding: 2px 0; }
+  .flow-arrow svg { width: 18px; height: 18px; fill: none; stroke: var(--border-bright); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+  .callout { background: var(--surface2); border: 1px solid var(--border); border-left: 3px solid var(--blue); border-radius: 0 9px 9px 0; padding: 13px 18px; font-size: 12.5px; line-height: 1.65; color: var(--text-dim); }
+  .callout strong { color: var(--text); }
+  .callout code { font-family: var(--font-mono); font-size: 11px; background: var(--blue-dim); color: var(--blue); padding: 1px 5px; border-radius: 3px; }
+
+  @media (max-width: 768px) {
+    body { padding: 20px; }
+    .ws-types, .artifacts { grid-template-columns: 1fr 1fr; }
+    .freshness-tiers { grid-template-columns: 1fr 1fr; }
+    .two-col { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header animate" style="--i:0">
+  <div class="icon-box">🗂️</div>
+  <div>
+    <h1>Workspace Analysis</h1>
+    <p class="subtitle">workspace skill &mdash; multi-repo topology, API contracts, cross-repo context</p>
+  </div>
+</div>
+
+<div class="diagram">
+
+  <!-- Problem + Workspace Types -->
+  <div class="section section--hero animate" style="--i:1">
+    <div class="section-label"><span class="dot" style="background:var(--text-dim)"></span> The Problem</div>
+    <div style="font-size:13px; color:var(--text-dim); margin-bottom:18px; line-height:1.7">
+      Claude Code operates in isolation across repos — missing API contracts, shared types, full architecture, and cross-repo dependencies. This causes duplicate type definitions, API mismatches, breaking changes caught only at runtime. Solution: dynamic workspace analysis with auto-refreshed artifacts.
+    </div>
+    <div class="ws-types">
+      <div class="ws-card ws-card--monorepo">
+        <div class="wt-name" style="color:var(--green)">Monorepo</div>
+        <div class="wt-indicators">pnpm-workspace.yaml<br>nx.json / turbo.json<br>lerna.json</div>
+        <div class="wt-access">Direct (same tree)</div>
+      </div>
+      <div class="ws-card ws-card--multi">
+        <div class="wt-name" style="color:var(--blue)">Multi-Repo</div>
+        <div class="wt-indicators">Sibling dirs with<br>separate .git repos</div>
+        <div class="wt-access">Via symlinks or paths</div>
+      </div>
+      <div class="ws-card ws-card--hybrid">
+        <div class="wt-name" style="color:var(--cyan)">Hybrid</div>
+        <div class="wt-indicators">Monorepo + external<br>repo dependencies</div>
+        <div class="wt-access">Mixed access</div>
+      </div>
+      <div class="ws-card ws-card--single">
+        <div class="wt-name" style="color:var(--text-dim)">Single</div>
+        <div class="wt-indicators">One app, no<br>workspace config</div>
+        <div class="wt-access">Use existing-repo.md</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="flow-arrow animate" style="--i:2">
+    <svg viewBox="0 0 20 20"><path d="M10 4 L10 16 M6 12 L10 16 L14 12"/></svg>
+    /analyze-workspace (full ~2 min)
+  </div>
+
+  <!-- Analysis Phases -->
+  <div class="two-col animate" style="--i:3">
+    <div class="section section--green">
+      <div class="section-label"><span class="dot"></span> Analysis Protocol — 4 Phases</div>
+      <div class="phases">
+        <div class="phase phase--1">
+          <div class="phase-num">1</div>
+          <div class="phase-content">
+            <div class="phase-title">Topology Discovery</div>
+            <div class="phase-desc">Identify workspace root, classify type, list all modules/apps/packages, detect tech stack per module, identify entry points.</div>
+            <div class="phase-time">~30 seconds</div>
+          </div>
+        </div>
+        <div class="phase phase--2">
+          <div class="phase-num">2</div>
+          <div class="phase-content">
+            <div class="phase-title">Dependency Graph</div>
+            <div class="phase-desc">Map internal deps (workspace imports), API relationships (fetch/axios calls), database connections (Prisma/Drizzle/SQLAlchemy).</div>
+            <div class="phase-time">~60 seconds</div>
+          </div>
+        </div>
+        <div class="phase phase--3">
+          <div class="phase-num">3</div>
+          <div class="phase-content">
+            <div class="phase-title">Contract Extraction</div>
+            <div class="phase-desc">Parse OpenAPI/GraphQL/tRPC/Protobuf/TypeScript/Pydantic/Zod. Priority: generated specs → schema defs → type exports → inferred.</div>
+            <div class="phase-time">~45 seconds</div>
+          </div>
+        </div>
+        <div class="phase phase--4">
+          <div class="phase-num">4</div>
+          <div class="phase-content">
+            <div class="phase-title">Key File Identification</div>
+            <div class="phase-desc">Routes (HIGH), Types (HIGH), API clients (HIGH), Config (MEDIUM), Entry points (MEDIUM), Tests (LOW/on-demand).</div>
+            <div class="phase-time">~30 seconds</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="section section--cyan">
+      <div class="section-label"><span class="dot"></span> Generated Artifacts — _project_specs/workspace/</div>
+      <div class="artifacts">
+        <div class="artifact-card">
+          <div class="af-file">TOPOLOGY.md</div>
+          <div class="af-desc">Module roles, tech stacks, entry points, token estimates per module.</div>
+        </div>
+        <div class="artifact-card">
+          <div class="af-file">CONTRACTS.md</div>
+          <div class="af-desc">API specs, shared types, endpoint summary, validation status + freshness.</div>
+        </div>
+        <div class="artifact-card">
+          <div class="af-file">DEPENDENCY_GRAPH.md</div>
+          <div class="af-desc">Visual + matrix: who calls whom, import analysis, API call graph.</div>
+        </div>
+        <div class="artifact-card">
+          <div class="af-file">KEY_FILES.md</div>
+          <div class="af-desc">What to load per context (API integration, DB changes, auth, etc.).</div>
+        </div>
+        <div class="artifact-card">
+          <div class="af-file">CROSS_REPO_INDEX.md</div>
+          <div class="af-desc">Capability index by domain (auth, campaigns, analytics). Q&amp;A search guide.</div>
+        </div>
+        <div class="artifact-card">
+          <div class="af-file">.contract-sources</div>
+          <div class="af-desc">Files monitored for changes: openapi.json, *.ts, schemas/*.py, schema/*.ts.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Token Budget -->
+  <div class="section section--purple animate" style="--i:4">
+    <div class="section-label"><span class="dot"></span> Token Budget Allocation (200K context)</div>
+    <div class="token-budget">
+      <div class="budget-row">
+        <div class="budget-label" style="color:var(--rose)">P0 Must-have</div>
+        <div class="budget-bar-track"><div class="budget-bar" style="width:33%;background:var(--rose)"></div></div>
+        <div class="budget-tokens" style="color:var(--rose)">~50K</div>
+        <div class="budget-desc">Current module (full)</div>
+      </div>
+      <div class="budget-row">
+        <div class="budget-label" style="color:var(--amber)">P1 Should</div>
+        <div class="budget-bar-track"><div class="budget-bar" style="width:27%;background:var(--amber)"></div></div>
+        <div class="budget-tokens" style="color:var(--amber)">~40K</div>
+        <div class="budget-desc">Directly related modules (summary)</div>
+      </div>
+      <div class="budget-row">
+        <div class="budget-label" style="color:var(--cyan)">P2 Nice-to</div>
+        <div class="budget-bar-track"><div class="budget-bar" style="width:20%;background:var(--cyan)"></div></div>
+        <div class="budget-tokens" style="color:var(--cyan)">~30K</div>
+        <div class="budget-desc">Contracts + shared types</div>
+      </div>
+      <div class="budget-row">
+        <div class="budget-label" style="color:var(--blue)">P3 If room</div>
+        <div class="budget-bar-track"><div class="budget-bar" style="width:13%;background:var(--blue)"></div></div>
+        <div class="budget-tokens" style="color:var(--blue)">~20K</div>
+        <div class="budget-desc">Decisions, todos, history</div>
+      </div>
+      <div class="budget-row">
+        <div class="budget-label" style="color:var(--green)">Buffer</div>
+        <div class="budget-bar-track"><div class="budget-bar" style="width:7%;background:var(--green)"></div></div>
+        <div class="budget-tokens" style="color:var(--green)">~10K</div>
+        <div class="budget-desc">Dynamic loading during session</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Freshness Tiers -->
+  <div class="section section--amber animate" style="--i:5">
+    <div class="section-label"><span class="dot"></span> Contract Freshness Tiers</div>
+    <div class="freshness-tiers">
+      <div class="tier-card tier-card--1">
+        <div class="t-num">TIER 1</div>
+        <div class="t-trigger">Session Start</div>
+        <div class="t-time">~5s staleness check</div>
+        <div class="t-blocking" style="color:var(--green)">Non-blocking</div>
+      </div>
+      <div class="tier-card tier-card--2">
+        <div class="t-num">TIER 2</div>
+        <div class="t-trigger">Post-Commit</div>
+        <div class="t-time">~15s auto-sync</div>
+        <div class="t-blocking" style="color:var(--green)">Non-blocking</div>
+      </div>
+      <div class="tier-card tier-card--3">
+        <div class="t-num">TIER 3</div>
+        <div class="t-trigger">Pre-Push</div>
+        <div class="t-time">~10s validation gate</div>
+        <div class="t-blocking" style="color:var(--amber)">Blocking (bypassable)</div>
+      </div>
+      <div class="tier-card tier-card--4">
+        <div class="t-num">TIER 4</div>
+        <div class="t-trigger">PR Opened</div>
+        <div class="t-time">~30s CI check</div>
+        <div class="t-blocking" style="color:var(--rose)">Blocking</div>
+      </div>
+      <div class="tier-card tier-card--5">
+        <div class="t-num">TIER 5</div>
+        <div class="t-trigger">Weekly Cron</div>
+        <div class="t-time">~2min full re-analysis</div>
+        <div class="t-blocking" style="color:var(--green)">Non-blocking</div>
+      </div>
+    </div>
+    <div style="margin-top:12px; font-size:11.5px; color:var(--text-dim)">
+      Freshness indicators: 🟢 Fresh (synced &lt;24h, no source changes) · 🟡 Stale (sources changed since sync) · 🔴 Outdated (&gt;7 days) · ⚠️ Drift (validation found inconsistencies).
+    </div>
+  </div>
+
+  <!-- Callout -->
+  <div class="section section--recessed animate" style="--i:6">
+    <div class="callout">
+      <strong>Commands:</strong> <code>/analyze-workspace</code> (full ~2min, first setup) · <code>/sync-contracts</code> (incremental ~15s, run frequently) · <code>/workspace-status</code> (quick check). <strong>Multi-repo access:</strong> use sibling directory convention (<code>../myapp-backend/</code>) or set up workspace symlinks in <code>.workspace/repos/</code>.
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

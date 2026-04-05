@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vercel React Best Practices — 57 Rules Across 8 Categories</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --font-body: 'DM Sans', system-ui, sans-serif;
+      --font-mono: 'Fira Code', 'SF Mono', Consolas, monospace;
+
+      /* Data-dense: Gruvbox Light inspired */
+      --bg: #fbf1c7;
+      --surface: #fffff0;
+      --surface-2: #f2e5bc;
+      --surface-3: #ebdbb2;
+      --border: rgba(60,56,54,0.12);
+      --border-bright: rgba(60,56,54,0.2);
+      --text: #3c3836;
+      --text-dim: #7c6f64;
+
+      --critical: #9d0006;
+      --critical-dim: rgba(157,0,6,0.1);
+      --high: #af3a03;
+      --high-dim: rgba(175,58,3,0.1);
+      --medium-high: #b57614;
+      --medium-high-dim: rgba(181,118,20,0.1);
+      --medium: #427b58;
+      --medium-dim: rgba(66,123,88,0.1);
+      --low-medium: #076678;
+      --low-medium-dim: rgba(7,102,120,0.1);
+      --low: #8f3f71;
+      --low-dim: rgba(143,63,113,0.1);
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #1d2021;
+        --surface: #282828;
+        --surface-2: #32302f;
+        --surface-3: #3c3836;
+        --border: rgba(235,219,178,0.08);
+        --border-bright: rgba(235,219,178,0.16);
+        --text: #ebdbb2;
+        --text-dim: #928374;
+        --critical: #fb4934;
+        --critical-dim: rgba(251,73,52,0.12);
+        --high: #fe8019;
+        --high-dim: rgba(254,128,25,0.12);
+        --medium-high: #fabd2f;
+        --medium-high-dim: rgba(250,189,47,0.1);
+        --medium: #b8bb26;
+        --medium-dim: rgba(184,187,38,0.1);
+        --low-medium: #83a598;
+        --low-medium-dim: rgba(131,165,152,0.1);
+        --low: #d3869b;
+        --low-dim: rgba(211,134,155,0.1);
+      }
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--font-body);
+      background: var(--bg);
+      background-image: radial-gradient(ellipse at 50% 0%, var(--medium-high-dim) 0%, transparent 55%);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 48px 24px 80px;
+    }
+
+    .page-wrap { max-width: 980px; margin: 0 auto; }
+
+    /* Hero */
+    .hero {
+      margin-bottom: 52px;
+      padding-bottom: 32px;
+      border-bottom: 2px solid var(--border-bright);
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 24px;
+      align-items: start;
+    }
+    .hero-eyebrow {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--high);
+      margin-bottom: 10px;
+    }
+    .hero h1 {
+      font-size: clamp(1.8rem, 4vw, 2.8rem);
+      font-weight: 700;
+      line-height: 1.15;
+      letter-spacing: -0.02em;
+    }
+    .hero-desc {
+      font-size: 15px;
+      color: var(--text-dim);
+      line-height: 1.65;
+      max-width: 55ch;
+      margin-top: 12px;
+    }
+    .hero-stat {
+      background: var(--surface);
+      border: 1px solid var(--border-bright);
+      border-radius: 8px;
+      padding: 16px 20px;
+      text-align: center;
+      min-width: 120px;
+    }
+    .hero-stat-num {
+      font-family: var(--font-mono);
+      font-size: 2.4rem;
+      font-weight: 500;
+      color: var(--high);
+      line-height: 1;
+      margin-bottom: 6px;
+    }
+    .hero-stat-label {
+      font-size: 12px;
+      color: var(--text-dim);
+    }
+
+    /* Category grid */
+    .category-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1px;
+      background: var(--border-bright);
+      border: 1px solid var(--border-bright);
+      border-radius: 10px;
+      overflow: hidden;
+      margin-bottom: 48px;
+    }
+    .cat-item {
+      background: var(--surface);
+      padding: 16px 16px;
+    }
+    .cat-priority {
+      font-family: var(--font-mono);
+      font-size: 9px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+    .cat-name {
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 4px;
+      line-height: 1.3;
+    }
+    .cat-impact {
+      display: inline-block;
+      font-family: var(--font-mono);
+      font-size: 9px;
+      letter-spacing: 0.06em;
+      padding: 2px 7px;
+      border-radius: 3px;
+      margin-top: 4px;
+    }
+    .cat-count {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--text-dim);
+      margin-top: 6px;
+    }
+
+    .c1 { color: var(--critical); }
+    .c1-i { background: var(--critical-dim); color: var(--critical); border: 1px solid var(--critical); }
+    .c2 { color: var(--high); }
+    .c2-i { background: var(--high-dim); color: var(--high); border: 1px solid var(--high); }
+    .c3 { color: var(--medium-high); }
+    .c3-i { background: var(--medium-high-dim); color: var(--medium-high); border: 1px solid var(--medium-high); }
+    .c4 { color: var(--medium); }
+    .c4-i { background: var(--medium-dim); color: var(--medium); border: 1px solid var(--medium); }
+    .c5 { color: var(--low-medium); }
+    .c5-i { background: var(--low-medium-dim); color: var(--low-medium); border: 1px solid var(--low-medium); }
+    .c6 { color: var(--low); }
+    .c6-i { background: var(--low-dim); color: var(--low); border: 1px solid var(--low); }
+
+    /* Rules sections */
+    .rules-section { margin-bottom: 44px; }
+    .rules-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--border);
+    }
+    .rules-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+    }
+    .rules-impact {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      padding: 2px 8px;
+      border-radius: 3px;
+    }
+    .rules-count {
+      margin-left: auto;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--text-dim);
+    }
+
+    /* Rule chips */
+    .rule-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .rule-chip {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 4px 10px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--text-dim);
+      transition: border-color 0.15s, color 0.15s;
+    }
+    .rule-chip:hover { border-color: var(--border-bright); color: var(--text); }
+
+    /* Detailed rule card */
+    .rule-detail {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 14px 18px;
+      margin-top: 12px;
+      display: grid;
+      grid-template-columns: 180px 1fr;
+      gap: 14px;
+    }
+    .rule-detail-name {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 500;
+      line-height: 1.5;
+    }
+    .rule-detail-desc {
+      font-size: 13px;
+      color: var(--text-dim);
+      line-height: 1.6;
+    }
+    .rule-detail-desc code {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      background: var(--surface-2);
+      padding: 1px 5px;
+      border-radius: 3px;
+    }
+
+    /* Waterfall avoidance diagram */
+    .waterfall-diagram {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-top: 16px;
+    }
+    .wf-col {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .wf-header {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+    .wf-header.bad { background: var(--critical-dim); color: var(--critical); }
+    .wf-header.good { background: var(--medium-dim); color: var(--medium); }
+    .wf-body { padding: 12px 14px; }
+    .wf-step {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 4px 0;
+      font-size: 13px;
+      color: var(--text-dim);
+    }
+    .wf-bar {
+      height: 10px;
+      border-radius: 3px;
+      display: inline-block;
+    }
+    .wf-bar.red { background: var(--critical); }
+    .wf-bar.green { background: var(--medium); }
+
+    /* Section */
+    section { margin-bottom: 48px; }
+
+    /* Animations */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .hero { animation: fadeUp 0.4s ease both; }
+    .category-grid { animation: fadeUp 0.4s 0.06s ease both; }
+    section { animation: fadeUp 0.4s ease both; }
+    section:nth-of-type(1) { animation-delay: 0.12s; }
+    section:nth-of-type(2) { animation-delay: 0.18s; }
+    section:nth-of-type(3) { animation-delay: 0.24s; }
+
+    @media (prefers-reduced-motion: reduce) { * { animation: none !important; } }
+    @media (max-width: 700px) {
+      .category-grid { grid-template-columns: 1fr 1fr; }
+      .hero { grid-template-columns: 1fr; }
+      .rule-detail { grid-template-columns: 1fr; }
+      .waterfall-diagram { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+<div class="page-wrap">
+
+  <!-- Hero -->
+  <div class="hero">
+    <div>
+      <div class="hero-eyebrow">LLM Skill · react-best-practices · by Vercel Engineering</div>
+      <h1>Vercel React<br>Best Practices</h1>
+      <p class="hero-desc">Performance optimization guidelines for React and Next.js. 57 rules across 8 categories, prioritized by impact. Use when writing, reviewing, or refactoring React/Next.js code.</p>
+    </div>
+    <div>
+      <div class="hero-stat">
+        <div class="hero-stat-num">57</div>
+        <div class="hero-stat-label">Rules</div>
+      </div>
+      <div class="hero-stat" style="margin-top:10px;">
+        <div class="hero-stat-num" style="font-size:1.6rem;">8</div>
+        <div class="hero-stat-label">Categories</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Category Overview -->
+  <div class="category-grid">
+    <div class="cat-item">
+      <div class="cat-priority c1">Priority 1</div>
+      <div class="cat-name">Eliminating Waterfalls</div>
+      <div><span class="cat-impact c1-i">CRITICAL</span></div>
+      <div class="cat-count">5 rules · async-</div>
+    </div>
+    <div class="cat-item">
+      <div class="cat-priority c1">Priority 2</div>
+      <div class="cat-name">Bundle Size Optimization</div>
+      <div><span class="cat-impact c1-i">CRITICAL</span></div>
+      <div class="cat-count">5 rules · bundle-</div>
+    </div>
+    <div class="cat-item">
+      <div class="cat-priority c2">Priority 3</div>
+      <div class="cat-name">Server-Side Performance</div>
+      <div><span class="cat-impact c2-i">HIGH</span></div>
+      <div class="cat-count">7 rules · server-</div>
+    </div>
+    <div class="cat-item">
+      <div class="cat-priority c3">Priority 4</div>
+      <div class="cat-name">Client-Side Data Fetching</div>
+      <div><span class="cat-impact c3-i">MEDIUM-HIGH</span></div>
+      <div class="cat-count">4 rules · client-</div>
+    </div>
+    <div class="cat-item">
+      <div class="cat-priority c4">Priority 5</div>
+      <div class="cat-name">Re-render Optimization</div>
+      <div><span class="cat-impact c4-i">MEDIUM</span></div>
+      <div class="cat-count">12 rules · rerender-</div>
+    </div>
+    <div class="cat-item">
+      <div class="cat-priority c4">Priority 6</div>
+      <div class="cat-name">Rendering Performance</div>
+      <div><span class="cat-impact c4-i">MEDIUM</span></div>
+      <div class="cat-count">9 rules · rendering-</div>
+    </div>
+    <div class="cat-item">
+      <div class="cat-priority c5">Priority 7</div>
+      <div class="cat-name">JavaScript Performance</div>
+      <div><span class="cat-impact c5-i">LOW-MEDIUM</span></div>
+      <div class="cat-count">12 rules · js-</div>
+    </div>
+    <div class="cat-item">
+      <div class="cat-priority c6">Priority 8</div>
+      <div class="cat-name">Advanced Patterns</div>
+      <div><span class="cat-impact c6-i">LOW</span></div>
+      <div class="cat-count">3 rules · advanced-</div>
+    </div>
+  </div>
+
+  <!-- Category 1: Waterfalls -->
+  <section>
+    <div class="rules-header">
+      <span class="rules-title">1. Eliminating Waterfalls</span>
+      <span class="rules-impact c1-i">CRITICAL</span>
+      <span class="rules-count">5 rules</span>
+    </div>
+
+    <div class="waterfall-diagram">
+      <div class="wf-col">
+        <div class="wf-header bad">Sequential — Waterfall</div>
+        <div class="wf-body">
+          <div class="wf-step"><div class="wf-bar red" style="width:80px"></div>await fetchUser()</div>
+          <div class="wf-step" style="padding-left:80px;"><div class="wf-bar red" style="width:100px"></div>await fetchPosts()</div>
+          <div class="wf-step" style="padding-left:180px;"><div class="wf-bar red" style="width:70px"></div>await fetchComments()</div>
+        </div>
+      </div>
+      <div class="wf-col">
+        <div class="wf-header good">Parallel — Promise.all()</div>
+        <div class="wf-body">
+          <div class="wf-step"><div class="wf-bar green" style="width:100px"></div>fetchUser()</div>
+          <div class="wf-step"><div class="wf-bar green" style="width:100px"></div>fetchPosts()</div>
+          <div class="wf-step"><div class="wf-bar green" style="width:70px"></div>fetchComments()</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="rule-chips" style="margin-top:16px;">
+      <span class="rule-chip">async-defer-await</span>
+      <span class="rule-chip">async-parallel</span>
+      <span class="rule-chip">async-dependencies</span>
+      <span class="rule-chip">async-api-routes</span>
+      <span class="rule-chip">async-suspense-boundaries</span>
+    </div>
+  </section>
+
+  <!-- Category 2: Bundle Size -->
+  <section>
+    <div class="rules-header">
+      <span class="rules-title">2. Bundle Size Optimization</span>
+      <span class="rules-impact c1-i">CRITICAL</span>
+      <span class="rules-count">5 rules</span>
+    </div>
+    <div class="rule-detail">
+      <span class="rule-detail-name c1">bundle-barrel-imports</span>
+      <span class="rule-detail-desc">Import directly from source, not barrel <code>index.ts</code> files. Barrel imports prevent tree-shaking by forcing the entire module to load.</span>
+    </div>
+    <div class="rule-detail">
+      <span class="rule-detail-name c1">bundle-dynamic-imports</span>
+      <span class="rule-detail-desc">Use <code>next/dynamic</code> for heavy components. Lazy load routes, modals, charts, and third-party widgets that aren't needed on initial render.</span>
+    </div>
+    <div class="rule-chips" style="margin-top:12px;">
+      <span class="rule-chip">bundle-defer-third-party</span>
+      <span class="rule-chip">bundle-conditional</span>
+      <span class="rule-chip">bundle-preload</span>
+    </div>
+  </section>
+
+  <!-- Category 3: Server-Side -->
+  <section>
+    <div class="rules-header">
+      <span class="rules-title">3. Server-Side Performance</span>
+      <span class="rules-impact c2-i">HIGH</span>
+      <span class="rules-count">7 rules</span>
+    </div>
+    <div class="rule-chips">
+      <span class="rule-chip">server-auth-actions</span>
+      <span class="rule-chip">server-cache-react</span>
+      <span class="rule-chip">server-cache-lru</span>
+      <span class="rule-chip">server-dedup-props</span>
+      <span class="rule-chip">server-serialization</span>
+      <span class="rule-chip">server-parallel-fetching</span>
+      <span class="rule-chip">server-after-nonblocking</span>
+    </div>
+    <div class="rule-detail" style="margin-top:14px;">
+      <span class="rule-detail-name c2">server-cache-react</span>
+      <span class="rule-detail-desc">Use <code>React.cache()</code> for per-request deduplication of expensive operations. Ensures the same data isn't fetched twice in a single render pass.</span>
+    </div>
+  </section>
+
+  <!-- Categories 4-8 compact -->
+  <section>
+    <div class="rules-header">
+      <span class="rules-title">4–8. Remaining Categories</span>
+      <span class="rules-impact c3-i">MEDIUM–LOW</span>
+      <span class="rules-count">40 rules</span>
+    </div>
+
+    <div class="rules-section">
+      <div style="font-family:var(--font-mono);font-size:11px;color:var(--low-medium);margin-bottom:8px;letter-spacing:0.06em;">CLIENT-SIDE DATA (4 rules)</div>
+      <div class="rule-chips">
+        <span class="rule-chip">client-swr-dedup</span>
+        <span class="rule-chip">client-event-listeners</span>
+        <span class="rule-chip">client-passive-event-listeners</span>
+        <span class="rule-chip">client-localstorage-schema</span>
+      </div>
+    </div>
+
+    <div class="rules-section" style="margin-top:16px;">
+      <div style="font-family:var(--font-mono);font-size:11px;color:var(--medium);margin-bottom:8px;letter-spacing:0.06em;">RE-RENDER OPTIMIZATION (12 rules)</div>
+      <div class="rule-chips">
+        <span class="rule-chip">rerender-defer-reads</span>
+        <span class="rule-chip">rerender-memo</span>
+        <span class="rule-chip">rerender-memo-with-default-value</span>
+        <span class="rule-chip">rerender-dependencies</span>
+        <span class="rule-chip">rerender-derived-state</span>
+        <span class="rule-chip">rerender-derived-state-no-effect</span>
+        <span class="rule-chip">rerender-functional-setstate</span>
+        <span class="rule-chip">rerender-lazy-state-init</span>
+        <span class="rule-chip">rerender-transitions</span>
+        <span class="rule-chip">rerender-use-ref-transient-values</span>
+      </div>
+    </div>
+
+    <div class="rules-section" style="margin-top:16px;">
+      <div style="font-family:var(--font-mono);font-size:11px;color:var(--medium);margin-bottom:8px;letter-spacing:0.06em;">RENDERING PERFORMANCE (9 rules)</div>
+      <div class="rule-chips">
+        <span class="rule-chip">rendering-animate-svg-wrapper</span>
+        <span class="rule-chip">rendering-content-visibility</span>
+        <span class="rule-chip">rendering-hoist-jsx</span>
+        <span class="rule-chip">rendering-hydration-no-flicker</span>
+        <span class="rule-chip">rendering-activity</span>
+        <span class="rule-chip">rendering-conditional-render</span>
+        <span class="rule-chip">rendering-usetransition-loading</span>
+      </div>
+    </div>
+
+    <div class="rules-section" style="margin-top:16px;">
+      <div style="font-family:var(--font-mono);font-size:11px;color:var(--low-medium);margin-bottom:8px;letter-spacing:0.06em;">JS PERFORMANCE (12 rules)</div>
+      <div class="rule-chips">
+        <span class="rule-chip">js-batch-dom-css</span>
+        <span class="rule-chip">js-index-maps</span>
+        <span class="rule-chip">js-cache-property-access</span>
+        <span class="rule-chip">js-cache-function-results</span>
+        <span class="rule-chip">js-combine-iterations</span>
+        <span class="rule-chip">js-set-map-lookups</span>
+        <span class="rule-chip">js-tosorted-immutable</span>
+        <span class="rule-chip">js-early-exit</span>
+        <span class="rule-chip">js-hoist-regexp</span>
+        <span class="rule-chip">js-min-max-loop</span>
+      </div>
+    </div>
+
+    <div class="rules-section" style="margin-top:16px;">
+      <div style="font-family:var(--font-mono);font-size:11px;color:var(--low);margin-bottom:8px;letter-spacing:0.06em;">ADVANCED (3 rules)</div>
+      <div class="rule-chips">
+        <span class="rule-chip">advanced-event-handler-refs</span>
+        <span class="rule-chip">advanced-init-once</span>
+        <span class="rule-chip">advanced-use-latest</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- How to Use -->
+  <section>
+    <div class="rules-header">
+      <span class="rules-title">How to Use</span>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:16px 18px;">
+        <div style="font-family:var(--font-mono);font-size:11px;color:var(--high);margin-bottom:8px;">Individual Rules</div>
+        <div style="font-size:13px;color:var(--text-dim);line-height:1.6;">Read rule files in <code style="font-family:var(--font-mono);font-size:11px;">rules/async-parallel.md</code> for full explanation, wrong/correct examples, and context.</div>
+      </div>
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:16px 18px;">
+        <div style="font-family:var(--font-mono);font-size:11px;color:var(--high);margin-bottom:8px;">Full Guide</div>
+        <div style="font-size:13px;color:var(--text-dim);line-height:1.6;">All 57 rules expanded in <code style="font-family:var(--font-mono);font-size:11px;">AGENTS.md</code>. Reference when doing full codebase reviews.</div>
+      </div>
+    </div>
+  </section>
+
+</div>
+</body>
+</html>

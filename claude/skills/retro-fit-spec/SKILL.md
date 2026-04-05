@@ -35,3 +35,7 @@ Spec: docs/features/<spec-name>.md
 e.g. `Refs: price-tracking-alerts.md#capabilities`
 
 **Do not bundle retro-fit commits with implementation commits.**
+
+## Diagram
+
+[View diagram](diagram.html)

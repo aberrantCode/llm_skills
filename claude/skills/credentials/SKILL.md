@@ -351,3 +351,7 @@ If yes, provide the path and I'll:
 3. Set up your project's .env file
 4. Tell you which keys are missing
 ```
+
+## Diagram
+
+[View diagram](diagram.html)

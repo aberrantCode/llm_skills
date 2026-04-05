@@ -1978,3 +1978,7 @@ async function getOptimizationStats(
 - [Reddit Developer Portal](https://www.reddit.com/prefs/apps/)
 - [Reddit Ads Help Center](https://business.reddithelp.com/s/article/Reddit-Ads-API)
 - [OAuth2 Documentation](https://www.reddit.com/dev/api/oauth/)
+
+## Diagram
+
+[View diagram](diagram.html)

@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Agentic Development — Build AI Agents</title>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <style>
+    :root {
+      --font-body: 'IBM Plex Sans', system-ui, sans-serif;
+      --font-mono: 'IBM Plex Mono', 'SF Mono', Consolas, monospace;
+      --bg: #f0f4f8;
+      --surface: #ffffff;
+      --surface-elevated: #ffffff;
+      --surface-recessed: #e8edf2;
+      --border: rgba(0, 60, 120, 0.10);
+      --border-bright: rgba(0, 60, 120, 0.20);
+      --text: #0f2744;
+      --text-dim: #4a6080;
+      --accent: #0057b8;
+      --accent-dim: rgba(0, 87, 184, 0.08);
+      --node-a: #0057b8;
+      --node-a-dim: rgba(0, 87, 184, 0.10);
+      --node-b: #00875a;
+      --node-b-dim: rgba(0, 135, 90, 0.10);
+      --node-c: #c46b00;
+      --node-c-dim: rgba(196, 107, 0, 0.10);
+      --node-d: #8b0d4a;
+      --node-d-dim: rgba(139, 13, 74, 0.10);
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #091623;
+        --surface: #0e1f33;
+        --surface-elevated: #152842;
+        --surface-recessed: #070f1a;
+        --border: rgba(100, 180, 255, 0.08);
+        --border-bright: rgba(100, 180, 255, 0.15);
+        --text: #cce4ff;
+        --text-dim: #6a92b8;
+        --accent: #4da6ff;
+        --accent-dim: rgba(77, 166, 255, 0.12);
+        --node-a: #4da6ff;
+        --node-a-dim: rgba(77, 166, 255, 0.12);
+        --node-b: #2dd4a0;
+        --node-b-dim: rgba(45, 212, 160, 0.12);
+        --node-c: #ffb347;
+        --node-c-dim: rgba(255, 179, 71, 0.12);
+        --node-d: #f472b6;
+        --node-d-dim: rgba(244, 114, 182, 0.12);
+      }
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: var(--font-body);
+      background: var(--bg);
+      background-image:
+        radial-gradient(circle, var(--border) 1px, transparent 1px);
+      background-size: 28px 28px;
+      color: var(--text);
+      min-height: 100vh;
+      padding: 48px 24px;
+    }
+    .page-wrap { max-width: 1100px; margin: 0 auto; }
+    .page-header {
+      margin-bottom: 48px;
+      padding-bottom: 24px;
+      border-bottom: 2px solid var(--border-bright);
+    }
+    .page-label {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 10px;
+    }
+    h1 {
+      font-size: clamp(28px, 4vw, 42px);
+      font-weight: 600;
+      line-height: 1.15;
+      color: var(--text);
+      margin-bottom: 12px;
+    }
+    .subtitle {
+      font-size: 16px;
+      color: var(--text-dim);
+      max-width: 640px;
+      line-height: 1.6;
+    }
+    .section { margin-bottom: 48px; }
+    .section-label {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .section-label::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border-bright);
+    }
+    h2 { font-size: 20px; font-weight: 600; margin-bottom: 16px; }
+    /* Framework cards */
+    .framework-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+    @media (max-width: 640px) { .framework-grid { grid-template-columns: 1fr; } }
+    .ve-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 20px 24px;
+      min-width: 0;
+    }
+    .ve-card--hero {
+      background: linear-gradient(135deg, var(--accent-dim), transparent);
+      border-color: var(--border-bright);
+      padding: 28px 32px;
+    }
+    .ve-card--python { border-left: 3px solid var(--node-b); }
+    .ve-card--node { border-left: 3px solid var(--node-a); }
+    .card-lang {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--text-dim);
+      margin-bottom: 8px;
+      letter-spacing: 0.06em;
+    }
+    .card-title { font-size: 17px; font-weight: 600; margin-bottom: 8px; }
+    .card-desc { font-size: 14px; color: var(--text-dim); line-height: 1.5; }
+    /* Phase flow */
+    .phase-flow {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 2px;
+      position: relative;
+    }
+    @media (max-width: 700px) {
+      .phase-flow { grid-template-columns: 1fr 1fr; }
+    }
+    .phase-step {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 18px 16px;
+      position: relative;
+    }
+    .phase-step::after {
+      content: '→';
+      position: absolute;
+      right: -12px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-family: var(--font-mono);
+      font-size: 14px;
+      color: var(--text-dim);
+      z-index: 2;
+    }
+    .phase-step:last-child::after { display: none; }
+    .phase-num {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--accent);
+      margin-bottom: 6px;
+      letter-spacing: 0.08em;
+    }
+    .phase-title { font-size: 14px; font-weight: 600; margin-bottom: 6px; }
+    .phase-items { font-size: 12px; color: var(--text-dim); line-height: 1.6; }
+    /* Multi-agent diagram */
+    .mermaid-wrap {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 24px;
+      overflow: hidden;
+      position: relative;
+    }
+    .zoom-controls {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      display: flex;
+      gap: 4px;
+      z-index: 10;
+    }
+    .zoom-btn {
+      width: 28px; height: 28px;
+      background: var(--surface-elevated);
+      border: 1px solid var(--border-bright);
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--text);
+      user-select: none;
+    }
+    .zoom-btn:hover { background: var(--accent-dim); }
+    .mermaid-inner {
+      transform-origin: top left;
+      transition: transform 0.15s ease;
+    }
+    /* Guardrails */
+    .guardrail-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+    @media (max-width: 700px) { .guardrail-grid { grid-template-columns: 1fr; } }
+    .guard-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px;
+    }
+    .guard-title {
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+    .guard-items {
+      font-size: 12px;
+      color: var(--text-dim);
+      line-height: 1.7;
+      list-style: none;
+      padding: 0;
+    }
+    .guard-items li::before { content: '— '; opacity: 0.5; }
+    /* Memory section */
+    .memory-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+    @media (max-width: 640px) { .memory-grid { grid-template-columns: 1fr; } }
+    /* Model table */
+    .model-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .model-table th {
+      background: var(--surface-recessed);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      padding: 10px 14px;
+      text-align: left;
+      border-bottom: 1px solid var(--border-bright);
+    }
+    .model-table td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+      min-width: 0;
+      overflow-wrap: break-word;
+    }
+    .model-table tr:last-child td { border-bottom: none; }
+    .model-table tr:hover td { background: var(--accent-dim); }
+    .badge {
+      display: inline-block;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-weight: 500;
+    }
+    .badge--blue { background: var(--node-a-dim); color: var(--node-a); }
+    .badge--green { background: var(--node-b-dim); color: var(--node-b); }
+    .badge--amber { background: var(--node-c-dim); color: var(--node-c); }
+    /* Checklist */
+    .checklist {
+      list-style: none;
+      padding: 0;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+    @media (max-width: 640px) { .checklist { grid-template-columns: 1fr; } }
+    .checklist li {
+      font-size: 13px;
+      color: var(--text-dim);
+      padding: 8px 12px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      min-width: 0;
+      overflow-wrap: break-word;
+    }
+    .checklist li::before {
+      content: '□';
+      font-family: var(--font-mono);
+      color: var(--accent);
+      flex-shrink: 0;
+    }
+    /* Animations */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .anim-1 { animation: fadeUp 0.4s ease both; }
+    .anim-2 { animation: fadeUp 0.4s 0.1s ease both; }
+    .anim-3 { animation: fadeUp 0.4s 0.2s ease both; }
+    .anim-4 { animation: fadeUp 0.4s 0.3s ease both; }
+    .anim-5 { animation: fadeUp 0.4s 0.4s ease both; }
+    .anim-6 { animation: fadeUp 0.4s 0.5s ease both; }
+    @media (prefers-reduced-motion: reduce) {
+      * { animation: none !important; transition: none !important; }
+    }
+    .principle-box {
+      background: var(--accent-dim);
+      border: 1px solid var(--border-bright);
+      border-left: 3px solid var(--accent);
+      border-radius: 8px;
+      padding: 16px 20px;
+      font-size: 15px;
+      font-style: italic;
+      color: var(--text);
+      margin-bottom: 32px;
+    }
+    .principle-box strong { font-style: normal; font-weight: 600; }
+    .architecture-diagram {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-bottom: 8px;
+    }
+    @media (max-width: 700px) { .architecture-diagram { grid-template-columns: 1fr; } }
+    .arch-block {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px;
+      text-align: center;
+    }
+    .arch-icon {
+      font-family: var(--font-mono);
+      font-size: 22px;
+      margin-bottom: 8px;
+      display: block;
+    }
+    .arch-name { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+    .arch-desc { font-size: 12px; color: var(--text-dim); line-height: 1.4; }
+  </style>
+</head>
+<body>
+<div class="page-wrap">
+  <!-- Header -->
+  <header class="page-header anim-1">
+    <div class="page-label">Skill Reference · agentic-development</div>
+    <h1>Agentic Development</h1>
+    <p class="subtitle">Build autonomous AI agents using Pydantic AI (Python) or the Claude Agent SDK (Node.js). Agents reason, plan, use tools, and verify their own work.</p>
+  </header>
+
+  <!-- Core Principle -->
+  <div class="principle-box anim-2">
+    <strong>Core Principle:</strong> Plan first, act incrementally, verify always. Agents that research and plan before executing consistently outperform those that jump straight to action.
+  </div>
+
+  <!-- Framework Selection -->
+  <section class="section anim-2">
+    <div class="section-label">Framework Selection by Language</div>
+    <div class="framework-grid">
+      <div class="ve-card ve-card--python">
+        <div class="card-lang">Python Default</div>
+        <div class="card-title">Pydantic AI</div>
+        <div class="card-desc">Type-safe structured outputs via Pydantic models. Multi-model support, production-ready. Use <code style="font-family:var(--font-mono);font-size:12px">result_type=YourModel</code> for validated responses.</div>
+      </div>
+      <div class="ve-card ve-card--node">
+        <div class="card-lang">Node.js / Next.js Default</div>
+        <div class="card-title">Claude Agent SDK</div>
+        <div class="card-desc">Official Anthropic SDK. Native tools, multi-agent support, streaming. Implements the agentic loop with <code style="font-family:var(--font-mono);font-size:12px">stop_reason === "tool_use"</code>.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Agent Architecture -->
+  <section class="section anim-3">
+    <div class="section-label">Agent Architecture — Three Components</div>
+    <div class="architecture-diagram">
+      <div class="arch-block" style="border-top: 3px solid var(--node-a);">
+        <span class="arch-icon" style="color:var(--node-a)">◈</span>
+        <div class="arch-name">Model (Brain)</div>
+        <div class="arch-desc">LLM for reasoning & decision-making. Match complexity to task.</div>
+      </div>
+      <div class="arch-block" style="border-top: 3px solid var(--node-b);">
+        <span class="arch-icon" style="color:var(--node-b)">⊞</span>
+        <div class="arch-name">Tools (Arms/Legs)</div>
+        <div class="arch-desc">APIs, functions, external systems. Defined with schemas &amp; risk levels.</div>
+      </div>
+      <div class="arch-block" style="border-top: 3px solid var(--node-c);">
+        <span class="arch-icon" style="color:var(--node-c)">≡</span>
+        <div class="arch-name">Instructions (Rules)</div>
+        <div class="arch-desc">System prompts defining behavior &amp; scope boundaries.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Workflow -->
+  <section class="section anim-3">
+    <div class="section-label">Workflow Pattern — Explore · Plan · Execute · Verify</div>
+    <div class="phase-flow">
+      <div class="phase-step">
+        <div class="phase-num">01 — EXPLORE</div>
+        <div class="phase-title">Gather Context</div>
+        <div class="phase-items">Search codebase<br>Analyze patterns<br>Identify dependencies</div>
+      </div>
+      <div class="phase-step">
+        <div class="phase-num">02 — PLAN</div>
+        <div class="phase-title">Create Stepwise Plan</div>
+        <div class="phase-items">Action + tools per step<br>Verification criteria<br>Failure handlers</div>
+      </div>
+      <div class="phase-step">
+        <div class="phase-num">03 — EXECUTE</div>
+        <div class="phase-title">Act &amp; Self-Correct</div>
+        <div class="phase-items">Run each step<br>Verify result<br>Self-correct or escalate</div>
+      </div>
+      <div class="phase-step">
+        <div class="phase-num">04 — VERIFY</div>
+        <div class="phase-title">Independent Check</div>
+        <div class="phase-items">Run test commands<br>LLM verification<br>Pass/fail criteria</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Multi-Agent Patterns -->
+  <section class="section anim-4">
+    <div class="section-label">Multi-Agent Patterns</div>
+    <div class="mermaid-wrap">
+      <div class="zoom-controls">
+        <button class="zoom-btn" id="zoomIn1" title="Zoom in">+</button>
+        <button class="zoom-btn" id="zoomOut1" title="Zoom out">−</button>
+        <button class="zoom-btn" id="zoomReset1" title="Reset">⟳</button>
+      </div>
+      <div class="mermaid-inner" id="mermaid1">
+        <div class="mermaid">
+%%{init: {'theme': 'base', 'themeVariables': {'primaryColor': '#0057b8', 'primaryTextColor': '#0f2744', 'primaryBorderColor': '#0057b8', 'lineColor': '#4a6080', 'secondaryColor': '#00875a', 'tertiaryColor': '#c46b00', 'background': '#ffffff', 'mainBkg': '#f0f4f8', 'nodeBorder': '#0057b8', 'clusterBkg': '#e8edf2', 'titleColor': '#0f2744', 'edgeLabelBackground': '#f0f4f8', 'fontFamily': 'IBM Plex Mono'}}}%%
+flowchart TD
+    A["User Request"] --> B{"Single or Multi?"}
+    B -->|"Single Agent\n(default)"| C["Agent Loop\ntool_use → execute → respond"]
+    B -->|"Multi Agent"| D["Orchestrator Agent"]
+    D --> E["Agent-as-Tool\ndelegate to specialist"]
+    D --> F["Handoff Pattern\none-way transfer"]
+    D --> G["Parallel Tasks\nindependent subtasks"]
+    E --> H["Researcher\nweb_search, doc_read"]
+    E --> I["Coder\nread_file, write_file"]
+    F --> J["Billing Specialist"]
+    F --> K["Support Specialist"]
+    C --> L["Final Response"]
+    H --> L
+    I --> L
+    J --> L
+    K --> L
+
+    classDef default fill:#f0f4f8,stroke:#c0cfe0,color:#0f2744
+    classDef decision fill:#e8edf2,stroke:#0057b8,color:#0f2744
+    classDef primary fill:#dbeafe,stroke:#0057b8,color:#0057b8
+    classDef secondary fill:#d1fae5,stroke:#00875a,color:#00875a
+    classDef tertiary fill:#fef3c7,stroke:#c46b00,color:#c46b00
+    class B decision
+    class D primary
+    class E,F,G tertiary
+    class H,I,J,K secondary
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Guardrails -->
+  <section class="section anim-4">
+    <div class="section-label">Guardrails &amp; Safety — Multi-Layer</div>
+    <div class="guardrail-grid">
+      <div class="guard-card" style="border-top: 2px solid var(--node-a);">
+        <div class="guard-title">Input Validation</div>
+        <ul class="guard-items">
+          <li>Input safety classifier</li>
+          <li>Scope boundary check</li>
+          <li>Intent verification</li>
+        </ul>
+      </div>
+      <div class="guard-card" style="border-top: 2px solid var(--node-c);">
+        <div class="guard-title">Tool Risk Levels</div>
+        <ul class="guard-items">
+          <li><span class="badge badge--green">low</span> read operations</li>
+          <li><span class="badge badge--amber">medium</span> write with confirm</li>
+          <li><span class="badge badge--blue">high</span> human-in-the-loop</li>
+        </ul>
+      </div>
+      <div class="guard-card" style="border-top: 2px solid var(--node-b);">
+        <div class="guard-title">Output Validation</div>
+        <ul class="guard-items">
+          <li>Output safety check</li>
+          <li>Schema validation</li>
+          <li>Scope compliance</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- Memory & State -->
+  <section class="section anim-5">
+    <div class="section-label">Memory &amp; State Management</div>
+    <div class="memory-grid">
+      <div class="ve-card">
+        <div class="card-lang">Short-term</div>
+        <div class="card-title">Conversation Memory</div>
+        <div class="card-desc">Messages array with token budget. Summarize when approaching limit. Maintain current plan &amp; completed steps across tool calls.</div>
+      </div>
+      <div class="ve-card">
+        <div class="card-lang">Long-term</div>
+        <div class="card-title">Persistent Memory</div>
+        <div class="card-desc">Store learnings across sessions. Semantic search over past interactions. Structured key/value with vector embeddings for similarity.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Model Selection -->
+  <section class="section anim-5">
+    <div class="section-label">Model Selection — Match to Task Complexity</div>
+    <div class="ve-card" style="padding:0;overflow:hidden;">
+      <table class="model-table">
+        <thead>
+          <tr>
+            <th>Complexity</th>
+            <th>Recommended Models</th>
+            <th>Use When</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="badge badge--green">Simple</span></td>
+            <td style="font-family:var(--font-mono);font-size:12px;">claude-haiku, gpt-4.1-mini</td>
+            <td>Classification, routing, fast tasks</td>
+          </tr>
+          <tr>
+            <td><span class="badge badge--blue">General</span></td>
+            <td style="font-family:var(--font-mono);font-size:12px;">claude-sonnet-4, gpt-4.1</td>
+            <td>Most coding &amp; reasoning tasks</td>
+          </tr>
+          <tr>
+            <td><span class="badge badge--amber">Complex</span></td>
+            <td style="font-family:var(--font-mono);font-size:12px;">claude-opus, o4-mini</td>
+            <td>Deep planning, highest accuracy</td>
+          </tr>
+          <tr>
+            <td><span class="badge badge--blue" style="background:var(--node-d-dim);color:var(--node-d);">Max Reasoning</span></td>
+            <td style="font-family:var(--font-mono);font-size:12px;">ultrathink + claude-opus</td>
+            <td>Architecture, critical decisions</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Thinking Triggers -->
+  <section class="section anim-5">
+    <div class="section-label">Claude Thinking Triggers</div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;">
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:12px;text-align:center;">
+        <div style="font-family:var(--font-mono);font-size:12px;color:var(--node-b);margin-bottom:4px">"think"</div>
+        <div style="font-size:11px;color:var(--text-dim)">Standard analysis</div>
+      </div>
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:12px;text-align:center;">
+        <div style="font-family:var(--font-mono);font-size:12px;color:var(--node-a);margin-bottom:4px">"think hard"</div>
+        <div style="font-size:11px;color:var(--text-dim)">Deeper reasoning</div>
+      </div>
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:12px;text-align:center;">
+        <div style="font-family:var(--font-mono);font-size:12px;color:var(--node-c);margin-bottom:4px">"think harder"</div>
+        <div style="font-size:11px;color:var(--text-dim)">Extensive analysis</div>
+      </div>
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:12px;text-align:center;">
+        <div style="font-family:var(--font-mono);font-size:12px;color:var(--node-d);margin-bottom:4px">"ultrathink"</div>
+        <div style="font-size:11px;color:var(--text-dim)">Max reasoning budget</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Checklist -->
+  <section class="section anim-6">
+    <div class="section-label">Agent Development Checklist</div>
+    <ul class="checklist">
+      <li>Define clear agent scope &amp; boundaries</li>
+      <li>Design tools with explicit schemas &amp; risk levels</li>
+      <li>Implement explore–plan–execute–verify workflow</li>
+      <li>Add multi-layer guardrails</li>
+      <li>Set up conversation &amp; persistent memory</li>
+      <li>Write behavior &amp; evaluation tests</li>
+      <li>Configure appropriate model for task complexity</li>
+      <li>Add human-in-the-loop for high-risk operations</li>
+      <li>Monitor token usage &amp; costs</li>
+      <li>Document skills &amp; instructions</li>
+    </ul>
+  </section>
+</div>
+
+<script>
+  mermaid.initialize({
+    startOnLoad: true,
+    theme: 'base',
+    themeVariables: {
+      primaryColor: '#dbeafe',
+      primaryTextColor: '#0f2744',
+      primaryBorderColor: '#0057b8',
+      lineColor: '#4a6080',
+      fontFamily: 'IBM Plex Mono',
+    }
+  });
+
+  // Zoom controls for mermaid-1
+  let scale1 = 1;
+  const inner1 = document.getElementById('mermaid1');
+  document.getElementById('zoomIn1').addEventListener('click', () => { scale1 = Math.min(scale1 + 0.2, 3); inner1.style.transform = `scale(${scale1})`; });
+  document.getElementById('zoomOut1').addEventListener('click', () => { scale1 = Math.max(scale1 - 0.2, 0.5); inner1.style.transform = `scale(${scale1})`; });
+  document.getElementById('zoomReset1').addEventListener('click', () => { scale1 = 1; inner1.style.transform = `scale(1)`; });
+  document.querySelector('.mermaid-wrap').addEventListener('wheel', (e) => {
+    if (e.ctrlKey || e.metaKey) {
+      e.preventDefault();
+      scale1 = Math.max(0.5, Math.min(3, scale1 + (e.deltaY < 0 ? 0.1 : -0.1)));
+      inner1.style.transform = `scale(${scale1})`;
+    }
+  }, { passive: false });
+</script>
+</body>
+</html>

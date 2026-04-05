@@ -451,3 +451,7 @@ gemini extensions update        # Update all
 - **Ignoring context limits** - Even 1M tokens has limits for huge monorepos
 - **Running on every commit** - Use on PRs only to save quota
 - **Not setting project context** - Add GEMINI.md for better reviews
+
+## Diagram
+
+[View diagram](diagram.html)

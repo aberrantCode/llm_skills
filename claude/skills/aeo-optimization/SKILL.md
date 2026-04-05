@@ -551,3 +551,7 @@ Teams see [result] in [timeframe].
 1. Category Explainer (top)
 2. Product/Feature pages (middle)
 3. Use case / Comparison / Blog (supporting)
+
+## Diagram
+
+[View diagram](diagram.html)

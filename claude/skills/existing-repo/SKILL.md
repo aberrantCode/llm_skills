@@ -629,3 +629,7 @@ ls .husky .pre-commit-config.yaml .eslintrc* 2>/dev/null || echo "None detected"
 echo "=== Entry Points ===" && \
 ls index.* main.* app.* server.* 2>/dev/null
 ```
+
+## Diagram
+
+[View diagram](diagram.html)

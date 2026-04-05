@@ -952,3 +952,7 @@ user_role       // 'admin' | 'member'
 company_id      // For B2B
 feature_context // Where in the app
 ```
+
+## Diagram
+
+[View diagram](diagram.html)

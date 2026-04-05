@@ -461,3 +461,7 @@ Add to project todos when setting up deployment:
 - ❌ Direct production database changes - use migrations
 - ❌ No branch protection - require PR reviews and CI checks
 - ❌ Missing environment separation - keep dev/staging/prod separate
+
+## Diagram
+
+[View diagram](diagram.html)

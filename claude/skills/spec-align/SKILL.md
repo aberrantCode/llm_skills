@@ -237,3 +237,7 @@ Report the result to the user. If any service fails to start, diagnose before de
 - **Every implementation commit must have `Refs: XX-CAP-NN`** — no exceptions.
 - **Retro-fit commits must be isolated** — never bundled with implementation commits.
 - **If start-app fails, do not declare success.** Diagnose the failure first.
+
+## Diagram
+
+[View diagram](diagram.html)

@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>React Composition Patterns — Compound Components, Context, Variants</title>
+  <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,500;0,600;1,400&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --font-body: 'Crimson Pro', Georgia, serif;
+      --font-mono: 'Space Mono', 'SF Mono', Consolas, monospace;
+
+      /* Editorial: deep navy + gold — premium, deliberate */
+      --bg: #f9f7f2;
+      --surface: #ffffff;
+      --surface-2: #f4f1ea;
+      --surface-3: #ede9e0;
+      --border: rgba(30,58,95,0.1);
+      --border-bright: rgba(30,58,95,0.2);
+      --text: #1a1610;
+      --text-dim: #5a5040;
+
+      --navy: #1e3a5f;
+      --navy-dim: rgba(30,58,95,0.1);
+      --gold: #d4a73a;
+      --gold-dim: rgba(212,167,58,0.12);
+      --terracotta: #c2410c;
+      --terracotta-dim: rgba(194,65,12,0.1);
+      --sage: #4a7c59;
+      --sage-dim: rgba(74,124,89,0.1);
+      --muted: #8b7355;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #100e08;
+        --surface: #1a1610;
+        --surface-2: #221e16;
+        --surface-3: #2a251c;
+        --border: rgba(212,167,58,0.1);
+        --border-bright: rgba(212,167,58,0.2);
+        --text: #f0e8d8;
+        --text-dim: #9a8870;
+        --navy: #93c5fd;
+        --navy-dim: rgba(147,197,253,0.1);
+        --gold: #f59e0b;
+        --gold-dim: rgba(245,158,11,0.1);
+        --terracotta: #fb923c;
+        --terracotta-dim: rgba(251,146,60,0.1);
+        --sage: #6ee7b7;
+        --sage-dim: rgba(110,231,183,0.1);
+      }
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--font-body);
+      background: var(--bg);
+      background-image:
+        radial-gradient(at 80% 20%, var(--gold-dim) 0%, transparent 45%),
+        radial-gradient(at 10% 80%, var(--navy-dim) 0%, transparent 45%);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 56px 24px 80px;
+    }
+
+    .page-wrap { max-width: 900px; margin: 0 auto; }
+
+    /* Hero — editorial with generous whitespace */
+    .hero {
+      margin-bottom: 64px;
+      padding-bottom: 40px;
+      border-bottom: 1px solid var(--border-bright);
+      text-align: center;
+    }
+    .hero-eyebrow {
+      font-family: var(--font-mono);
+      font-size: 9px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 20px;
+    }
+    .hero h1 {
+      font-size: clamp(2.4rem, 6vw, 4rem);
+      font-weight: 500;
+      line-height: 1.1;
+      letter-spacing: -0.02em;
+      margin-bottom: 20px;
+    }
+    .hero h1 em { font-style: italic; color: var(--gold); }
+    .hero-desc {
+      font-size: 18px;
+      color: var(--text-dim);
+      line-height: 1.7;
+      max-width: 52ch;
+      margin: 0 auto;
+    }
+    .when-to-use {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-top: 24px;
+    }
+    .use-tag {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 0.06em;
+      padding: 5px 12px;
+      border-radius: 3px;
+      border: 1px solid var(--border-bright);
+      color: var(--text-dim);
+      background: var(--surface-2);
+    }
+
+    /* Rule categories */
+    .priority-table {
+      border: 1px solid var(--border-bright);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    .pt-header {
+      display: grid;
+      grid-template-columns: 50px 1fr 1fr 80px 1fr;
+      background: var(--surface-2);
+      border-bottom: 1px solid var(--border-bright);
+    }
+    .pt-row {
+      display: grid;
+      grid-template-columns: 50px 1fr 1fr 80px 1fr;
+      border-bottom: 1px solid var(--border);
+    }
+    .pt-row:last-child { border-bottom: none; }
+    .pt-row:hover { background: var(--surface-2); }
+    .pt-cell {
+      padding: 12px 16px;
+      font-size: 14px;
+    }
+    .pt-header .pt-cell {
+      font-family: var(--font-mono);
+      font-size: 9px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+    }
+    .pt-num {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--muted);
+      text-align: center;
+    }
+    .pt-priority {
+      display: inline-block;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      padding: 2px 8px;
+      border-radius: 3px;
+    }
+    .pt-priority.high { background: var(--terracotta-dim); color: var(--terracotta); border: 1px solid var(--terracotta); }
+    .pt-priority.medium { background: var(--gold-dim); color: var(--gold); border: 1px solid var(--gold); }
+
+    /* Pattern explanations */
+    .patterns-section { margin-bottom: 56px; }
+    .section-header {
+      display: flex;
+      align-items: baseline;
+      gap: 16px;
+      margin-bottom: 24px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .section-num {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--gold);
+      letter-spacing: 0.08em;
+    }
+    .section-title {
+      font-size: 1.5rem;
+      font-weight: 500;
+    }
+    .section-badge {
+      margin-left: auto;
+      font-family: var(--font-mono);
+      font-size: 9px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 3px 10px;
+      border-radius: 3px;
+    }
+    .section-badge.high { background: var(--terracotta-dim); color: var(--terracotta); border: 1px solid var(--terracotta); }
+    .section-badge.medium { background: var(--gold-dim); color: var(--gold); border: 1px solid var(--gold); }
+
+    /* Before/after pattern cards */
+    .ba-pair {
+      display: grid;
+      grid-template-columns: 1fr 40px 1fr;
+      gap: 0;
+      align-items: start;
+      margin-bottom: 20px;
+    }
+    .ba-card {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .ba-header {
+      padding: 8px 14px;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface-2);
+    }
+    .ba-header.bad { color: var(--terracotta); }
+    .ba-header.good { color: var(--sage); }
+    .ba-body {
+      padding: 12px 14px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      line-height: 1.6;
+      color: var(--text-dim);
+    }
+    .ba-arrow {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--gold);
+      font-size: 20px;
+      padding-top: 20px;
+    }
+
+    /* Rule detail cards */
+    .rule-cards {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .rule-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px 20px;
+      display: grid;
+      grid-template-columns: 200px 1fr;
+      gap: 16px;
+    }
+    .rule-name {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--navy);
+    }
+    .rule-desc { font-size: 14px; color: var(--text-dim); line-height: 1.6; }
+    .rule-desc code { font-family: var(--font-mono); font-size: 12px; color: var(--navy); }
+
+    /* Section spacing */
+    section { margin-bottom: 56px; }
+
+    /* React 19 section */
+    .react19-banner {
+      background: var(--gold-dim);
+      border: 1px solid var(--gold);
+      border-radius: 8px;
+      padding: 12px 16px;
+      margin-bottom: 20px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--gold);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    /* Animations */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(14px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .hero { animation: fadeUp 0.5s ease both; }
+    section { animation: fadeUp 0.5s ease both; }
+    section:nth-of-type(1) { animation-delay: 0.08s; }
+    section:nth-of-type(2) { animation-delay: 0.15s; }
+    section:nth-of-type(3) { animation-delay: 0.22s; }
+    section:nth-of-type(4) { animation-delay: 0.29s; }
+
+    @media (prefers-reduced-motion: reduce) { * { animation: none !important; } }
+    @media (max-width: 640px) {
+      .ba-pair { grid-template-columns: 1fr; }
+      .ba-arrow { display: none; }
+      .rule-card { grid-template-columns: 1fr; }
+      .pt-header, .pt-row { grid-template-columns: 50px 1fr 80px; }
+      .pt-row .pt-cell:nth-child(2), .pt-header .pt-cell:nth-child(2),
+      .pt-row .pt-cell:last-child, .pt-header .pt-cell:last-child { display: none; }
+    }
+  </style>
+</head>
+<body>
+<div class="page-wrap">
+
+  <!-- Hero -->
+  <div class="hero">
+    <div class="hero-eyebrow">LLM Skill · composition-patterns · by Vercel</div>
+    <h1>React<br><em>Composition</em><br>Patterns</h1>
+    <p class="hero-desc">Scale React components without boolean prop proliferation. Compound components, lifted state, explicit variants, and React 19 APIs.</p>
+    <div class="when-to-use">
+      <span class="use-tag">Refactoring boolean props</span>
+      <span class="use-tag">Building component libraries</span>
+      <span class="use-tag">Compound components</span>
+      <span class="use-tag">Context providers</span>
+      <span class="use-tag">Component architecture review</span>
+    </div>
+  </div>
+
+  <!-- Priority table -->
+  <section>
+    <div class="section-header">
+      <span class="section-num">00</span>
+      <h2 class="section-title">Rule Categories by Priority</h2>
+    </div>
+    <div class="priority-table">
+      <div class="pt-header">
+        <div class="pt-cell">#</div>
+        <div class="pt-cell">Category</div>
+        <div class="pt-cell">Prefix</div>
+        <div class="pt-cell">Impact</div>
+        <div class="pt-cell">Key Rules</div>
+      </div>
+      <div class="pt-row">
+        <div class="pt-cell pt-num">1</div>
+        <div class="pt-cell" style="font-weight:500;">Component Architecture</div>
+        <div class="pt-cell" style="font-family:var(--font-mono);font-size:12px;color:var(--navy);">architecture-</div>
+        <div class="pt-cell"><span class="pt-priority high">HIGH</span></div>
+        <div class="pt-cell" style="font-size:13px;color:var(--text-dim);">Avoid boolean props, compound components</div>
+      </div>
+      <div class="pt-row">
+        <div class="pt-cell pt-num">2</div>
+        <div class="pt-cell" style="font-weight:500;">State Management</div>
+        <div class="pt-cell" style="font-family:var(--font-mono);font-size:12px;color:var(--navy);">state-</div>
+        <div class="pt-cell"><span class="pt-priority medium">MEDIUM</span></div>
+        <div class="pt-cell" style="font-size:13px;color:var(--text-dim);">Decouple, context interface, lift state</div>
+      </div>
+      <div class="pt-row">
+        <div class="pt-cell pt-num">3</div>
+        <div class="pt-cell" style="font-weight:500;">Implementation Patterns</div>
+        <div class="pt-cell" style="font-family:var(--font-mono);font-size:12px;color:var(--navy);">patterns-</div>
+        <div class="pt-cell"><span class="pt-priority medium">MEDIUM</span></div>
+        <div class="pt-cell" style="font-size:13px;color:var(--text-dim);">Explicit variants, children over render props</div>
+      </div>
+      <div class="pt-row">
+        <div class="pt-cell pt-num">4</div>
+        <div class="pt-cell" style="font-weight:500;">React 19 APIs</div>
+        <div class="pt-cell" style="font-family:var(--font-mono);font-size:12px;color:var(--navy);">react19-</div>
+        <div class="pt-cell"><span class="pt-priority medium">MEDIUM</span></div>
+        <div class="pt-cell" style="font-size:13px;color:var(--text-dim);">No forwardRef, use() instead of useContext</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Architecture -->
+  <section>
+    <div class="section-header">
+      <span class="section-num">01</span>
+      <h2 class="section-title">Component Architecture</h2>
+      <span class="section-badge high">High Impact</span>
+    </div>
+
+    <div class="ba-pair">
+      <div class="ba-card">
+        <div class="ba-header bad">Anti-pattern — Boolean Props</div>
+        <div class="ba-body">&lt;Modal<br>&nbsp;&nbsp;hasHeader={true}<br>&nbsp;&nbsp;hasFooter={false}<br>&nbsp;&nbsp;isLarge={true}<br>&nbsp;&nbsp;showCloseButton={true}<br>/&gt;</div>
+      </div>
+      <div class="ba-arrow">→</div>
+      <div class="ba-card">
+        <div class="ba-header good">Composition — Compound Components</div>
+        <div class="ba-body">&lt;Modal&gt;<br>&nbsp;&nbsp;&lt;Modal.Header&gt;...&lt;/Modal.Header&gt;<br>&nbsp;&nbsp;&lt;Modal.Body&gt;...&lt;/Modal.Body&gt;<br>&nbsp;&nbsp;{/* No footer = no footer */}<br>&lt;/Modal&gt;</div>
+      </div>
+    </div>
+
+    <div class="rule-cards">
+      <div class="rule-card">
+        <div class="rule-name">architecture-avoid-boolean-props</div>
+        <div class="rule-desc">Every boolean prop is a variation that should be a composition. Add subcomponents or variant exports instead of <code>isLarge</code>, <code>hasHeader</code>, <code>showClose</code>.</div>
+      </div>
+      <div class="rule-card">
+        <div class="rule-name">architecture-compound-components</div>
+        <div class="rule-desc">Structure complex components as a family: <code>Modal</code>, <code>Modal.Header</code>, <code>Modal.Body</code>, <code>Modal.Footer</code>. Share context internally, expose clean API externally.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- State Management -->
+  <section>
+    <div class="section-header">
+      <span class="section-num">02</span>
+      <h2 class="section-title">State Management</h2>
+      <span class="section-badge medium">Medium Impact</span>
+    </div>
+    <div class="rule-cards">
+      <div class="rule-card">
+        <div class="rule-name">state-decouple-implementation</div>
+        <div class="rule-desc">The Provider is the only component that knows how state is managed. Components below consume context without caring about useState vs useReducer vs external store.</div>
+      </div>
+      <div class="rule-card">
+        <div class="rule-name">state-context-interface</div>
+        <div class="rule-desc">Define a generic interface with three buckets: <code>state</code> (data), <code>actions</code> (mutations), <code>meta</code> (loading/error). This enables dependency injection and testing.</div>
+      </div>
+      <div class="rule-card">
+        <div class="rule-name">state-lift-state</div>
+        <div class="rule-desc">Move state into provider components so siblings can access it. Don't thread state down through props — lift it to the nearest common provider ancestor.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Implementation Patterns -->
+  <section>
+    <div class="section-header">
+      <span class="section-num">03</span>
+      <h2 class="section-title">Implementation Patterns</h2>
+      <span class="section-badge medium">Medium Impact</span>
+    </div>
+
+    <div class="ba-pair" style="margin-bottom:20px;">
+      <div class="ba-card">
+        <div class="ba-header bad">Render Props — avoid</div>
+        <div class="ba-body">&lt;List<br>&nbsp;&nbsp;renderItem={(item) =&gt; (<br>&nbsp;&nbsp;&nbsp;&nbsp;&lt;Item data={item} /&gt;<br>&nbsp;&nbsp;)}<br>/&gt;</div>
+      </div>
+      <div class="ba-arrow">→</div>
+      <div class="ba-card">
+        <div class="ba-header good">Children — prefer</div>
+        <div class="ba-body">&lt;List&gt;<br>&nbsp;&nbsp;{items.map(item =&gt; (<br>&nbsp;&nbsp;&nbsp;&nbsp;&lt;Item key={item.id} data={item} /&gt;<br>&nbsp;&nbsp;))}<br>&lt;/List&gt;</div>
+      </div>
+    </div>
+
+    <div class="rule-cards">
+      <div class="rule-card">
+        <div class="rule-name">patterns-explicit-variants</div>
+        <div class="rule-desc">Create <code>&lt;PrimaryButton&gt;</code> and <code>&lt;SecondaryButton&gt;</code> instead of <code>&lt;Button variant="primary"&gt;</code>. Explicit components are self-documenting and tree-shakeable.</div>
+      </div>
+      <div class="rule-card">
+        <div class="rule-name">patterns-children-over-render-props</div>
+        <div class="rule-desc">Use <code>children</code> for composition instead of <code>renderX</code> props. Children compose naturally, colocate with usage, and don't require prop-drilling custom renderers.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- React 19 -->
+  <section>
+    <div class="section-header">
+      <span class="section-num">04</span>
+      <h2 class="section-title">React 19 APIs</h2>
+      <span class="section-badge medium">Medium Impact</span>
+    </div>
+    <div class="react19-banner">
+      ⚠ React 19+ only — skip if using React 18 or earlier
+    </div>
+    <div class="rule-cards">
+      <div class="rule-card">
+        <div class="rule-name">react19-no-forwardref</div>
+        <div class="rule-desc">Don't use <code>forwardRef</code> — React 19 passes refs as regular props. Use <code>use()</code> hook instead of <code>useContext()</code> for cleaner context consumption with conditional usage.</div>
+      </div>
+    </div>
+  </section>
+
+</div>
+</body>
+</html>

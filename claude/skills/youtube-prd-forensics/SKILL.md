@@ -94,3 +94,7 @@ Enforce all of the following in `docs/PRD.md`:
 - Use full keyframes when context matters.
 - Use cropped images when isolating a control/feature is clearer.
 - Name files descriptively with numeric prefixes (for stable PRD references), for example `01_hud_overview.jpg`.
+
+## Diagram
+
+[View diagram](diagram.html)

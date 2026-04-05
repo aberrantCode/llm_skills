@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>React Native Skills — Performance, Animations, Navigation</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Azeret+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --font-body: 'Plus Jakarta Sans', system-ui, sans-serif;
+      --font-mono: 'Azeret Mono', 'SF Mono', Consolas, monospace;
+
+      /* Catppuccin Mocha — committed, not approximate */
+      --bg: #1e1e2e;
+      --surface: #313244;
+      --surface-2: #45475a;
+      --surface-3: #585b70;
+      --crust: #11111b;
+      --border: rgba(203,166,247,0.12);
+      --border-bright: rgba(203,166,247,0.22);
+      --text: #cdd6f4;
+      --text-dim: #a6adc8;
+      --subtext: #bac2de;
+
+      --red: #f38ba8;
+      --red-dim: rgba(243,139,168,0.15);
+      --peach: #fab387;
+      --peach-dim: rgba(250,179,135,0.15);
+      --yellow: #f9e2af;
+      --yellow-dim: rgba(249,226,175,0.12);
+      --green: #a6e3a1;
+      --green-dim: rgba(166,227,161,0.15);
+      --teal: #94e2d5;
+      --teal-dim: rgba(148,226,213,0.15);
+      --blue: #89b4fa;
+      --blue-dim: rgba(137,180,250,0.15);
+      --mauve: #cba6f7;
+      --mauve-dim: rgba(203,166,247,0.15);
+      --pink: #f5c2e7;
+      --pink-dim: rgba(245,194,231,0.12);
+    }
+
+    @media (prefers-color-scheme: light) {
+      :root {
+        --bg: #eff1f5;
+        --surface: #ffffff;
+        --surface-2: #e6e9ef;
+        --surface-3: #dce0e8;
+        --crust: #dce0e8;
+        --border: rgba(114,135,253,0.15);
+        --border-bright: rgba(114,135,253,0.25);
+        --text: #4c4f69;
+        --text-dim: #8c8fa1;
+        --subtext: #6c6f85;
+        --red: #d20f39;
+        --red-dim: rgba(210,15,57,0.1);
+        --peach: #fe640b;
+        --peach-dim: rgba(254,100,11,0.1);
+        --green: #40a02b;
+        --green-dim: rgba(64,160,43,0.1);
+        --teal: #179299;
+        --teal-dim: rgba(23,146,153,0.1);
+        --blue: #1e66f5;
+        --blue-dim: rgba(30,102,245,0.1);
+        --mauve: #8839ef;
+        --mauve-dim: rgba(136,57,239,0.1);
+      }
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--font-body);
+      background: var(--bg);
+      background-image:
+        radial-gradient(at 20% 10%, var(--mauve-dim) 0%, transparent 50%),
+        radial-gradient(at 80% 85%, var(--teal-dim) 0%, transparent 50%);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 48px 24px 80px;
+    }
+
+    .page-wrap { max-width: 960px; margin: 0 auto; }
+
+    /* Hero */
+    .hero {
+      margin-bottom: 52px;
+      padding-bottom: 36px;
+      border-bottom: 1px solid var(--border-bright);
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 24px;
+    }
+    .hero-eyebrow {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--mauve);
+      margin-bottom: 10px;
+    }
+    .hero h1 {
+      font-size: clamp(1.8rem, 4vw, 2.8rem);
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      line-height: 1.15;
+    }
+    .hero h1 .mauve { color: var(--mauve); }
+    .hero-desc {
+      font-size: 14px;
+      color: var(--text-dim);
+      line-height: 1.7;
+      max-width: 55ch;
+      margin-top: 10px;
+    }
+    .priority-legend {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px 18px;
+      min-width: 180px;
+      align-self: start;
+    }
+    .legend-title {
+      font-family: var(--font-mono);
+      font-size: 9px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin-bottom: 10px;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 3px 0;
+      font-size: 12px;
+      color: var(--text-dim);
+    }
+    .legend-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    /* Section label */
+    .section-label {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .section-label::before {
+      content: '';
+      width: 6px; height: 6px;
+      border-radius: 1px;
+      flex-shrink: 0;
+    }
+
+    .section { margin-bottom: 48px; }
+    .section-title {
+      font-size: 1.2rem;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      margin-bottom: 18px;
+    }
+
+    /* Rules grid */
+    .rules-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .rule-item {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px 16px;
+      border-left: 3px solid;
+    }
+    .rule-id {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      margin-bottom: 4px;
+    }
+    .rule-desc {
+      font-size: 12px;
+      color: var(--text-dim);
+      line-height: 1.5;
+    }
+    .rule-desc strong { color: var(--text); }
+
+    /* Category overview */
+    .cat-overview {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1px;
+      background: var(--border-bright);
+      border: 1px solid var(--border-bright);
+      border-radius: 10px;
+      overflow: hidden;
+      margin-bottom: 44px;
+    }
+    .cat-item {
+      background: var(--bg);
+      padding: 14px 16px;
+    }
+    .cat-num {
+      font-family: var(--font-mono);
+      font-size: 9px;
+      letter-spacing: 0.1em;
+      color: var(--text-dim);
+      margin-bottom: 4px;
+    }
+    .cat-name {
+      font-size: 12px;
+      font-weight: 600;
+      margin-bottom: 4px;
+      line-height: 1.3;
+    }
+    .cat-prefix {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--text-dim);
+    }
+    .cat-impact {
+      display: inline-block;
+      font-family: var(--font-mono);
+      font-size: 9px;
+      padding: 2px 6px;
+      border-radius: 3px;
+      margin-top: 5px;
+    }
+
+    /* Animations */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .hero { animation: fadeUp 0.4s ease both; }
+    .cat-overview { animation: fadeUp 0.4s 0.06s ease both; }
+    .section:nth-of-type(1) { animation: fadeUp 0.4s 0.10s ease both; }
+    .section:nth-of-type(2) { animation: fadeUp 0.4s 0.16s ease both; }
+    .section:nth-of-type(3) { animation: fadeUp 0.4s 0.22s ease both; }
+    .section:nth-of-type(4) { animation: fadeUp 0.4s 0.28s ease both; }
+
+    @media (prefers-reduced-motion: reduce) { * { animation: none !important; } }
+    @media (max-width: 640px) {
+      .cat-overview { grid-template-columns: 1fr 1fr; }
+      .rules-grid { grid-template-columns: 1fr; }
+      .hero { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+<div class="page-wrap">
+
+  <!-- Hero -->
+  <div class="hero">
+    <div>
+      <div class="hero-eyebrow">LLM Skill · react-native-skills · by Vercel</div>
+      <h1>React Native<br><span class="mauve">Skills</span></h1>
+      <p class="hero-desc">Best practices for React Native and Expo apps. Performance, animations, navigation, UI patterns, state management, and monorepo configuration. 8 rule categories, CRITICAL to LOW priority.</p>
+    </div>
+    <div class="priority-legend">
+      <div class="legend-title">Impact Levels</div>
+      <div class="legend-item"><span class="legend-dot" style="background:var(--red)"></span>CRITICAL</div>
+      <div class="legend-item"><span class="legend-dot" style="background:var(--peach)"></span>HIGH</div>
+      <div class="legend-item"><span class="legend-dot" style="background:var(--yellow)"></span>MEDIUM</div>
+      <div class="legend-item"><span class="legend-dot" style="background:var(--teal)"></span>LOW</div>
+    </div>
+  </div>
+
+  <!-- Category Overview -->
+  <div class="cat-overview">
+    <div class="cat-item">
+      <div class="cat-num">Priority 1</div>
+      <div class="cat-name">List Performance</div>
+      <div class="cat-prefix">list-performance-</div>
+      <div><span class="cat-impact" style="background:var(--red-dim);color:var(--red);border:1px solid var(--red);">CRITICAL</span></div>
+    </div>
+    <div class="cat-item">
+      <div class="cat-num">Priority 2</div>
+      <div class="cat-name">Animation</div>
+      <div class="cat-prefix">animation-</div>
+      <div><span class="cat-impact" style="background:var(--peach-dim);color:var(--peach);border:1px solid var(--peach);">HIGH</span></div>
+    </div>
+    <div class="cat-item">
+      <div class="cat-num">Priority 3</div>
+      <div class="cat-name">Navigation</div>
+      <div class="cat-prefix">navigation-</div>
+      <div><span class="cat-impact" style="background:var(--peach-dim);color:var(--peach);border:1px solid var(--peach);">HIGH</span></div>
+    </div>
+    <div class="cat-item">
+      <div class="cat-num">Priority 4</div>
+      <div class="cat-name">UI Patterns</div>
+      <div class="cat-prefix">ui-</div>
+      <div><span class="cat-impact" style="background:var(--peach-dim);color:var(--peach);border:1px solid var(--peach);">HIGH</span></div>
+    </div>
+    <div class="cat-item">
+      <div class="cat-num">Priority 5</div>
+      <div class="cat-name">State Management</div>
+      <div class="cat-prefix">react-state-</div>
+      <div><span class="cat-impact" style="background:var(--yellow-dim);color:var(--yellow);border:1px solid var(--yellow);">MEDIUM</span></div>
+    </div>
+    <div class="cat-item">
+      <div class="cat-num">Priority 6</div>
+      <div class="cat-name">Rendering</div>
+      <div class="cat-prefix">rendering-</div>
+      <div><span class="cat-impact" style="background:var(--yellow-dim);color:var(--yellow);border:1px solid var(--yellow);">MEDIUM</span></div>
+    </div>
+    <div class="cat-item">
+      <div class="cat-num">Priority 7</div>
+      <div class="cat-name">Monorepo</div>
+      <div class="cat-prefix">monorepo-</div>
+      <div><span class="cat-impact" style="background:var(--yellow-dim);color:var(--yellow);border:1px solid var(--yellow);">MEDIUM</span></div>
+    </div>
+    <div class="cat-item">
+      <div class="cat-num">Priority 8</div>
+      <div class="cat-name">Configuration</div>
+      <div class="cat-prefix">fonts- imports-</div>
+      <div><span class="cat-impact" style="background:var(--teal-dim);color:var(--teal);border:1px solid var(--teal);">LOW</span></div>
+    </div>
+  </div>
+
+  <!-- List Performance -->
+  <div class="section">
+    <div class="section-label" style="color:var(--red);">
+      <span style="width:6px;height:6px;border-radius:1px;background:var(--red);flex-shrink:0;display:inline-block;"></span>
+      List Performance — CRITICAL
+    </div>
+    <h2 class="section-title">8 Rules for Fast Lists</h2>
+    <div class="rules-grid">
+      <div class="rule-item" style="border-left-color:var(--red);">
+        <div class="rule-id" style="color:var(--red);">list-performance-virtualize</div>
+        <div class="rule-desc">Use <strong>FlashList</strong> instead of FlatList for large datasets. Recycles components instead of remounting.</div>
+      </div>
+      <div class="rule-item" style="border-left-color:var(--red);">
+        <div class="rule-id" style="color:var(--red);">list-performance-item-memo</div>
+        <div class="rule-desc">Wrap list item components with <strong>React.memo()</strong>. Prevents re-render on every parent update.</div>
+      </div>
+      <div class="rule-item" style="border-left-color:var(--red);">
+        <div class="rule-id" style="color:var(--red);">list-performance-callbacks</div>
+        <div class="rule-desc">Stabilize callbacks with <strong>useCallback</strong>. Unstable refs cause memo to miss and re-render.</div>
+      </div>
+      <div class="rule-item" style="border-left-color:var(--red);">
+        <div class="rule-id" style="color:var(--red);">list-performance-inline-objects</div>
+        <div class="rule-desc">No <strong>inline style objects</strong> in list items. New object reference on every render breaks memo.</div>
+      </div>
+      <div class="rule-item" style="border-left-color:var(--red);">
+        <div class="rule-id" style="color:var(--red);">list-performance-images</div>
+        <div class="rule-desc">Optimize images in lists. Use <strong>expo-image</strong> with proper sizing and cache policy.</div>
+      </div>
+      <div class="rule-item" style="border-left-color:var(--red);">
+        <div class="rule-id" style="color:var(--red);">list-performance-item-types</div>
+        <div class="rule-desc">Use <strong>item types</strong> for heterogeneous lists. Allows FlashList to recycle correctly.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Animation -->
+  <div class="section">
+    <div class="section-label" style="color:var(--peach);">
+      <span style="width:6px;height:6px;border-radius:1px;background:var(--peach);flex-shrink:0;display:inline-block;"></span>
+      Animation — HIGH
+    </div>
+    <h2 class="section-title">Reanimated Best Practices</h2>
+    <div class="rules-grid">
+      <div class="rule-item" style="border-left-color:var(--peach);">
+        <div class="rule-id" style="color:var(--peach);">animation-gpu-properties</div>
+        <div class="rule-desc">Animate only <strong>transform</strong> and <strong>opacity</strong>. Other props trigger JS-thread layout recalculation.</div>
+      </div>
+      <div class="rule-item" style="border-left-color:var(--peach);">
+        <div class="rule-id" style="color:var(--peach);">animation-derived-value</div>
+        <div class="rule-desc">Use <strong>useDerivedValue</strong> for computed animation values. Keeps calculations on the UI thread.</div>
+      </div>
+      <div class="rule-item" style="border-left-color:var(--peach);">
+        <div class="rule-id" style="color:var(--peach);">animation-gesture-detector-press</div>
+        <div class="rule-desc">Use <strong>Gesture.Tap()</strong> from gesture-handler instead of Pressable for gesture-driven interactions.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- UI Patterns -->
+  <div class="section">
+    <div class="section-label" style="color:var(--blue);">
+      <span style="width:6px;height:6px;border-radius:1px;background:var(--blue);flex-shrink:0;display:inline-block;"></span>
+      UI Patterns — HIGH
+    </div>
+    <h2 class="section-title">Native UI Rules</h2>
+    <div class="rules-grid">
+      <div class="rule-item" style="border-left-color:var(--blue);">
+        <div class="rule-id" style="color:var(--blue);">ui-expo-image</div>
+        <div class="rule-desc">Use <strong>expo-image</strong> for all images. Blurhash placeholder, better caching, prefetching.</div>
+      </div>
+      <div class="rule-item" style="border-left-color:var(--blue);">
+        <div class="rule-id" style="color:var(--blue);">ui-pressable</div>
+        <div class="rule-desc">Use <strong>Pressable</strong> over TouchableOpacity. More flexible, better feedback, future-proof.</div>
+      </div>
+      <div class="rule-item" style="border-left-color:var(--blue);">
+        <div class="rule-id" style="color:var(--blue);">ui-safe-area-scroll</div>
+        <div class="rule-desc">Handle safe areas in <strong>ScrollViews</strong>. Use contentInsetAdjustmentBehavior or insets.</div>
+      </div>
+      <div class="rule-item" style="border-left-color:var(--blue);">
+        <div class="rule-id" style="color:var(--blue);">ui-native-modals</div>
+        <div class="rule-desc">Use <strong>native modals</strong> when possible. Native sheet behaviors, spring animations, gestures.</div>
+      </div>
+      <div class="rule-item" style="border-left-color:var(--blue);">
+        <div class="rule-id" style="color:var(--blue);">ui-styling</div>
+        <div class="rule-desc">Use <strong>StyleSheet.create</strong> or Nativewind. Never inline style objects in render.</div>
+      </div>
+      <div class="rule-item" style="border-left-color:var(--blue);">
+        <div class="rule-id" style="color:var(--blue);">navigation-native-navigators</div>
+        <div class="rule-desc">Use <strong>native stack</strong> and native tabs over JS navigators for 60fps transitions.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- State + Monorepo -->
+  <div class="section">
+    <div class="section-label" style="color:var(--green);">
+      <span style="width:6px;height:6px;border-radius:1px;background:var(--green);flex-shrink:0;display:inline-block;"></span>
+      State + Monorepo + Config — MEDIUM to LOW
+    </div>
+    <h2 class="section-title">Remaining Rules</h2>
+    <div class="rules-grid">
+      <div class="rule-item" style="border-left-color:var(--green);">
+        <div class="rule-id" style="color:var(--green);">react-state-minimize</div>
+        <div class="rule-desc">Minimize state subscriptions. Subscribe to derived booleans, not raw values where possible.</div>
+      </div>
+      <div class="rule-item" style="border-left-color:var(--green);">
+        <div class="rule-id" style="color:var(--green);">react-state-dispatcher</div>
+        <div class="rule-desc">Use <strong>dispatcher pattern</strong> for callbacks to avoid re-render propagation through callbacks.</div>
+      </div>
+      <div class="rule-item" style="border-left-color:var(--green);">
+        <div class="rule-id" style="color:var(--green);">rendering-text-in-text-component</div>
+        <div class="rule-desc">Always wrap text in <strong>&lt;Text&gt;</strong> components. Raw strings outside Text cause crashes.</div>
+      </div>
+      <div class="rule-item" style="border-left-color:var(--green);">
+        <div class="rule-id" style="color:var(--green);">rendering-no-falsy-and</div>
+        <div class="rule-desc">Avoid <strong>falsy &amp;&amp;</strong> for conditional rendering. Use ternary or explicit null checks.</div>
+      </div>
+      <div class="rule-item" style="border-left-color:var(--teal);">
+        <div class="rule-id" style="color:var(--teal);">monorepo-native-deps-in-app</div>
+        <div class="rule-desc">Keep native dependencies in the <strong>app package</strong>, not shared packages in monorepos.</div>
+      </div>
+      <div class="rule-item" style="border-left-color:var(--teal);">
+        <div class="rule-id" style="color:var(--teal);">fonts-config-plugin</div>
+        <div class="rule-desc">Use <strong>config plugins</strong> for custom fonts. Avoids manual native linking issues.</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

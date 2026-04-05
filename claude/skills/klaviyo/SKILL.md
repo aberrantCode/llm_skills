@@ -805,3 +805,7 @@ Add to `credentials.md`:
 - **Ignoring rate limits** - Implement exponential backoff
 - **Hardcoded API keys** - Use environment variables
 - **Missing revenue tracking** - Include $value for ROI attribution
+
+## Diagram
+
+[View diagram](diagram.html)

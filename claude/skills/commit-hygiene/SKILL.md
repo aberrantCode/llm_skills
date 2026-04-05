@@ -547,3 +547,7 @@ git diff main --shortstat
 - ✅ > 5 files changed
 - ✅ About to switch tasks
 - ✅ Current state is "working"
+
+## Diagram
+
+[View diagram](diagram.html)

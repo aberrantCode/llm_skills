@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Database Schema Awareness Skill — Read Before Coding</title>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <style>
+    :root {
+      --font-body: 'IBM Plex Sans', 'Helvetica Neue', sans-serif;
+      --font-mono: 'IBM Plex Mono', 'SF Mono', monospace;
+      --bg: #fdfcf9;
+      --surface: #ffffff;
+      --surface-mid: #f5f3ee;
+      --surface-elevated: #ffffff;
+      --border: rgba(0,0,0,0.07);
+      --border-bright: rgba(0,0,0,0.13);
+      --text: #1a1510;
+      --text-dim: #6b5f4f;
+      --text-xdim: #a8998a;
+      --accent: #d4a73a;
+      --accent-dim: rgba(212,167,58,0.10);
+      --node-a: #1e3a5f;
+      --node-a-dim: rgba(30,58,95,0.09);
+      --node-b: #166534;
+      --node-b-dim: rgba(22,101,52,0.09);
+      --node-c: #d4a73a;
+      --node-c-dim: rgba(212,167,58,0.10);
+      --node-d: #9c4221;
+      --node-d-dim: rgba(156,66,33,0.09);
+      --node-e: #9f1239;
+      --node-e-dim: rgba(159,18,57,0.08);
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0d0c08;
+        --surface: #1a1810;
+        --surface-mid: #120f08;
+        --surface-elevated: #221e14;
+        --border: rgba(255,255,255,0.07);
+        --border-bright: rgba(255,255,255,0.12);
+        --text: #e8e4d8;
+        --text-dim: #9a8a70;
+        --text-xdim: #504030;
+        --accent: #d4a73a;
+        --accent-dim: rgba(212,167,58,0.12);
+        --node-a: #60a5fa;
+        --node-a-dim: rgba(96,165,250,0.10);
+        --node-b: #4ade80;
+        --node-b-dim: rgba(74,222,128,0.10);
+        --node-c: #d4a73a;
+        --node-c-dim: rgba(212,167,58,0.12);
+        --node-d: #fb923c;
+        --node-d-dim: rgba(251,146,60,0.10);
+        --node-e: #f87171;
+        --node-e-dim: rgba(248,113,113,0.10);
+      }
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: var(--font-body); font-size: 14px; line-height: 1.6; color: var(--text); background-color: var(--bg); background-image: radial-gradient(at 90% 10%, var(--accent-dim) 0%, transparent 50%); min-height: 100vh; }
+    .page { max-width: 1080px; margin: 0 auto; padding: 48px 24px 80px; }
+    .header { margin-bottom: 40px; padding-bottom: 20px; border-bottom: 2px solid var(--accent-dim); }
+    .header__eye { font-family: var(--font-mono); font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--accent); margin-bottom: 8px; }
+    .header__title { font-size: 30px; font-weight: 600; line-height: 1.2; }
+    .header__sub { margin-top: 8px; font-size: 13px; color: var(--text-dim); }
+    .header__tags { margin-top: 12px; display: flex; gap: 8px; flex-wrap: wrap; }
+    .tag { font-family: var(--font-mono); font-size: 10px; padding: 2px 9px; border-radius: 3px; }
+    .ta { background: var(--node-a-dim); color: var(--node-a); } .tb { background: var(--node-b-dim); color: var(--node-b); } .tc { background: var(--node-c-dim); color: var(--node-c); }
+    .section { margin-bottom: 40px; }
+    .sl { font-family: var(--font-mono); font-size: 10px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: var(--accent); display: flex; align-items: center; gap: 8px; margin-bottom: 14px; }
+    .sl::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: var(--accent); }
+    .ve-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 16px 20px; }
+    .ve-card--elevated { box-shadow: 0 2px 10px rgba(0,0,0,0.06); }
+    .ve-card--recessed { background: var(--surface-mid); }
+    .ve-card--hero { background: color-mix(in srgb, var(--surface) 93%, var(--accent) 7%); border-color: var(--accent); box-shadow: 0 4px 20px rgba(0,0,0,0.07); }
+    .ve-card--a { border-left: 3px solid var(--node-a); } .ve-card--b { border-left: 3px solid var(--node-b); } .ve-card--c { border-left: 3px solid var(--node-c); } .ve-card--d { border-left: 3px solid var(--node-d); }
+    .vcl { font-family: var(--font-mono); font-size: 10px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+    .vcl::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+    .la { color: var(--node-a); } .lb { color: var(--node-b); } .lc { color: var(--node-c); } .ld { color: var(--node-d); }
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .three-col { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; }
+    @media (max-width: 700px) { .two-col, .three-col { grid-template-columns: 1fr; } }
+    .code-block { font-family: var(--font-mono); font-size: 12px; line-height: 1.55; background: var(--surface-mid); border: 1px solid var(--border); border-radius: 6px; padding: 13px 15px; overflow-x: auto; white-space: pre-wrap; word-break: break-word; color: var(--text); }
+    .code-block--scroll { max-height: 260px; overflow-y: auto; }
+    .ck { color: var(--node-a); font-weight: 600; } .cs { color: var(--node-b); } .cc { color: var(--text-xdim); } .ce { color: var(--node-e); }
+    .workflow-step { display: flex; gap: 12px; align-items: flex-start; padding: 12px 16px; border-bottom: 1px solid var(--border); }
+    .workflow-step:last-child { border-bottom: none; }
+    .workflow-step__num { font-family: var(--font-mono); font-size: 20px; font-weight: 600; color: var(--accent); opacity: 0.35; flex-shrink: 0; width: 28px; }
+    .workflow-step__phase { font-family: var(--font-mono); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 3px; }
+    .workflow-step__desc { font-size: 13px; color: var(--text-dim); }
+    .mistake-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    .mistake-table th { font-family: var(--font-mono); font-size: 10px; letter-spacing: 1px; text-transform: uppercase; text-align: left; padding: 8px 12px; color: var(--text-xdim); border-bottom: 1px solid var(--border-bright); }
+    .mistake-table td { padding: 8px 12px; border-bottom: 1px solid var(--border); vertical-align: top; }
+    .mistake-table tr:last-child td { border-bottom: none; }
+    .mistake-table tr:hover td { background: var(--surface-mid); }
+    .stack-loc { padding: 12px 16px; }
+    .stack-loc__stack { font-family: var(--font-mono); font-size: 12px; font-weight: 600; margin-bottom: 4px; }
+    .stack-loc__file { font-family: var(--font-mono); font-size: 11px; color: var(--node-b); margin-bottom: 3px; }
+    .stack-loc__gen { font-size: 11px; color: var(--text-dim); }
+    .ap-list { display: flex; flex-direction: column; gap: 7px; }
+    .ap-row { display: flex; gap: 10px; align-items: flex-start; padding: 9px 14px; background: var(--surface); border: 1px solid var(--border); border-radius: 6px; font-size: 12px; }
+    .ap-x { font-family: var(--font-mono); color: var(--node-e); flex-shrink: 0; width: 16px; }
+    .ap-text strong { color: var(--text); font-weight: 600; }
+    .ap-text span { color: var(--text-dim); }
+    .diagram-shell { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+    .diagram-header { display: flex; justify-content: space-between; align-items: center; padding: 10px 16px; background: var(--surface-mid); border-bottom: 1px solid var(--border); font-family: var(--font-mono); font-size: 11px; color: var(--text-dim); }
+    .mermaid-wrap { position: relative; }
+    .zoom-controls { position: absolute; top: 10px; right: 10px; display: flex; gap: 4px; z-index: 10; }
+    .zoom-btn { width: 28px; height: 28px; border: 1px solid var(--border-bright); background: var(--surface); color: var(--text-dim); border-radius: 4px; font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-family: var(--font-mono); transition: background .15s, color .15s; }
+    .zoom-btn:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
+    .mermaid-viewport { overflow: hidden; cursor: grab; padding: 20px 12px; display: flex; justify-content: center; }
+    .mermaid-viewport:active { cursor: grabbing; }
+    .mermaid-canvas { transform-origin: center center; transition: transform 0.1s; display: flex; justify-content: center; }
+    @keyframes fadeUp { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+    .anim { opacity:0; animation: fadeUp .4s ease forwards; }
+    .d1{animation-delay:.05s} .d2{animation-delay:.12s} .d3{animation-delay:.20s} .d4{animation-delay:.28s} .d5{animation-delay:.36s} .d6{animation-delay:.44s}
+    @media (prefers-reduced-motion: reduce) { .anim { animation: none; opacity: 1; } }
+    .footer { border-top: 1px solid var(--border-bright); padding-top: 18px; font-family: var(--font-mono); font-size: 11px; color: var(--text-xdim); display: flex; justify-content: space-between; }
+  </style>
+</head>
+<body>
+<div class="page">
+  <header class="header anim d1">
+    <div class="header__eye">Skill Reference</div>
+    <h1 class="header__title">Database Schema Awareness</h1>
+    <p class="header__sub">Read the schema before writing any database code. Verify column names and types. Use generated types. Prevent column-name errors before they reach runtime.</p>
+    <div class="header__tags">
+      <span class="tag ta">Read First</span>
+      <span class="tag tb">Type Generation</span>
+      <span class="tag tc">TDD-Schema</span>
+    </div>
+  </header>
+
+  <!-- Core rule callout -->
+  <section class="section anim d2">
+    <div class="ve-card ve-card--hero" style="padding:20px 24px;">
+      <div style="font-family:var(--font-mono);font-size:11px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--accent);margin-bottom:12px;">MANDATORY RULE</div>
+      <div style="font-size:16px; font-weight:500; line-height:1.5;">Before writing ANY code that touches the database:</div>
+      <div style="margin-top:14px; display:flex; flex-direction:column; gap:8px;">
+        <div style="display:flex;gap:10px;align-items:center;font-family:var(--font-mono);font-size:12px;"><span style="color:var(--accent);">1.</span> <span>READ the schema file</span></div>
+        <div style="display:flex;gap:10px;align-items:center;font-family:var(--font-mono);font-size:12px;"><span style="color:var(--accent);">2.</span> <span>VERIFY columns/types you are about to use exist</span></div>
+        <div style="display:flex;gap:10px;align-items:center;font-family:var(--font-mono);font-size:12px;"><span style="color:var(--accent);">3.</span> <span>REFERENCE schema in your response when writing queries</span></div>
+        <div style="display:flex;gap:10px;align-items:center;font-family:var(--font-mono);font-size:12px;"><span style="color:var(--accent);">4.</span> <span>TYPE-CHECK using generated types (Drizzle / Prisma / etc.)</span></div>
+      </div>
+      <div style="margin-top:14px;font-family:var(--font-mono);font-size:11px;color:var(--text-dim);">If schema file doesn't exist → CREATE IT before proceeding.</div>
+    </div>
+  </section>
+
+  <!-- TDD Workflow -->
+  <section class="section anim d2">
+    <div class="sl">Schema-Aware TDD Workflow</div>
+    <div class="diagram-shell">
+      <div class="diagram-header"><span>Schema-first development cycle</span><span>flowchart TD</span></div>
+      <div class="mermaid-wrap" id="wrap1">
+        <div class="zoom-controls">
+          <button class="zoom-btn" onclick="zoomIn('c1')">+</button>
+          <button class="zoom-btn" onclick="zoomOut('c1')">−</button>
+          <button class="zoom-btn" onclick="zoomReset('c1')">⊙</button>
+          <button class="zoom-btn" onclick="openInTab('wrap1')">⛶</button>
+        </div>
+        <div class="mermaid-viewport" id="vp1" onwheel="handleWheel(event,'c1')">
+          <div class="mermaid-canvas" id="c1">
+            <pre class="mermaid">
+%%{init:{"theme":"base","themeVariables":{"primaryColor":"#f5f0e8","primaryBorderColor":"#d4a73a","primaryTextColor":"#1a1510","lineColor":"#d4a73a","fontFamily":"IBM Plex Mono, monospace","fontSize":"12px"}}}%%
+flowchart TD
+    START["Start database task"] --> SCHEMA["0. SCHEMA\nRead schema file\nVerify columns + types"]
+    SCHEMA -->|schema missing| CREATE["Create schema file\nbefore proceeding"]
+    CREATE --> SCHEMA
+    SCHEMA -->|schema read| CHECKLIST["Complete Schema\nVerification Checklist"]
+    CHECKLIST --> RED["1. RED\nWrite tests with correct\ncolumn names from schema\nImport generated types"]
+    RED --> FAIL["Tests FAIL\n(expected)"]
+    FAIL --> GREEN["2. GREEN\nImplement with ORM types\nnot raw SQL strings"]
+    GREEN --> PASS["Tests PASS"]
+    PASS --> VALIDATE["3. VALIDATE\ntsc --noEmit / mypy\ncatch schema drift"]
+    VALIDATE -->|type errors| FIX["Fix column\nreferences"]
+    FIX --> VALIDATE
+    VALIDATE -->|clean| DONE["Complete"]
+
+    style START fill:#f5f0e8,stroke:#d4a73a,color:#1a1510
+    style DONE fill:#e8f5ea,stroke:#166534,color:#1a1510
+    style FAIL fill:#fef3e2,stroke:#d4a73a,color:#1a1510
+    style PASS fill:#e8f5ea,stroke:#166534,color:#1a1510
+            </pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Schema locations -->
+  <section class="section anim d3">
+    <div class="sl">Schema File Locations by Stack</div>
+    <div class="three-col">
+      <div class="ve-card ve-card--a ve-card--elevated stack-loc">
+        <div class="vcl la">Drizzle (TypeScript)</div>
+        <div class="stack-loc__file">src/db/schema.ts</div>
+        <div class="stack-loc__gen">Types built-in via $inferSelect / $inferInsert</div>
+      </div>
+      <div class="ve-card ve-card--b ve-card--elevated stack-loc">
+        <div class="vcl lb">Prisma</div>
+        <div class="stack-loc__file">prisma/schema.prisma</div>
+        <div class="stack-loc__gen">npx prisma generate</div>
+      </div>
+      <div class="ve-card ve-card--c ve-card--elevated stack-loc">
+        <div class="vcl lc">Supabase</div>
+        <div class="stack-loc__file">supabase/migrations/*.sql</div>
+        <div class="stack-loc__gen">supabase gen types typescript</div>
+      </div>
+      <div class="ve-card ve-card--a ve-card--elevated stack-loc">
+        <div class="vcl la">SQLAlchemy (Python)</div>
+        <div class="stack-loc__file">app/models/*.py</div>
+        <div class="stack-loc__gen">Pydantic models for API validation</div>
+      </div>
+      <div class="ve-card ve-card--d ve-card--elevated stack-loc">
+        <div class="vcl ld">Raw SQL</div>
+        <div class="stack-loc__file">schema.sql / migrations/</div>
+        <div class="stack-loc__gen">Manual types required — avoid</div>
+      </div>
+      <div class="ve-card ve-card--b ve-card--elevated stack-loc">
+        <div class="vcl lb">Reference File</div>
+        <div class="stack-loc__file">_project_specs/schema-reference.md</div>
+        <div class="stack-loc__gen">Human-readable quick lookup table</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Common mistakes -->
+  <section class="section anim d4">
+    <div class="sl">Common Schema Mistakes</div>
+    <div class="ve-card ve-card--elevated" style="padding:0;overflow:hidden;">
+      <table class="mistake-table">
+        <thead><tr><th>Mistake</th><th>Example</th><th>Prevention</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>Wrong column name</td>
+            <td><code style="font-family:var(--font-mono);font-size:11px;color:var(--node-e);">user.userName</code></td>
+            <td style="color:var(--text-dim);">Read schema; use generated types</td>
+          </tr>
+          <tr>
+            <td>Wrong type</td>
+            <td><code style="font-family:var(--font-mono);font-size:11px;color:var(--node-e);">totalCents as string</code></td>
+            <td style="color:var(--text-dim);">Type generation catches this</td>
+          </tr>
+          <tr>
+            <td>Missing nullable check</td>
+            <td><code style="font-family:var(--font-mono);font-size:11px;color:var(--node-e);">user.name!</code></td>
+            <td style="color:var(--text-dim);">Schema shows nullable columns</td>
+          </tr>
+          <tr>
+            <td>Wrong FK reference</td>
+            <td><code style="font-family:var(--font-mono);font-size:11px;color:var(--node-e);">order.userId vs order.user_id</code></td>
+            <td style="color:var(--text-dim);">Check schema column names</td>
+          </tr>
+          <tr>
+            <td>Wrong enum value</td>
+            <td><code style="font-family:var(--font-mono);font-size:11px;color:var(--node-e);">'complete' vs 'completed'</code></td>
+            <td style="color:var(--text-dim);">Document enums in schema reference</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Migration workflow -->
+  <section class="section anim d5">
+    <div class="sl">Migration Workflow</div>
+    <div class="ve-card ve-card--elevated">
+      <div class="workflow-step"><div class="workflow-step__num">1</div><div><div class="workflow-step__phase" style="color:var(--node-a);">Update Schema File</div><div class="workflow-step__desc">Edit Drizzle/Prisma/SQLAlchemy schema — add new table or column</div></div></div>
+      <div class="workflow-step"><div class="workflow-step__num">2</div><div><div class="workflow-step__phase" style="color:var(--node-b);">Generate Migration</div><div class="workflow-step__desc"><code style="font-family:var(--font-mono);font-size:11px;">npx drizzle-kit generate</code> / <code style="font-family:var(--font-mono);font-size:11px;">npx prisma migrate dev</code> / <code style="font-family:var(--font-mono);font-size:11px;">alembic revision</code></div></div></div>
+      <div class="workflow-step"><div class="workflow-step__num">3</div><div><div class="workflow-step__phase" style="color:var(--node-c);">Regenerate Types</div><div class="workflow-step__desc"><code style="font-family:var(--font-mono);font-size:11px;">npx prisma generate</code> / <code style="font-family:var(--font-mono);font-size:11px;">supabase gen types typescript</code></div></div></div>
+      <div class="workflow-step"><div class="workflow-step__num">4</div><div><div class="workflow-step__phase" style="color:var(--node-d);">Update Schema Reference</div><div class="workflow-step__desc">Update <code style="font-family:var(--font-mono);font-size:11px;">_project_specs/schema-reference.md</code> with new columns/tables</div></div></div>
+      <div class="workflow-step"><div class="workflow-step__num">5</div><div><div class="workflow-step__phase" style="color:var(--accent);">Run Type Check</div><div class="workflow-step__desc"><code style="font-family:var(--font-mono);font-size:11px;">npm run typecheck</code> — find all broken code using removed/renamed columns</div></div></div>
+    </div>
+  </section>
+
+  <!-- Anti-patterns -->
+  <section class="section anim d6">
+    <div class="sl">Anti-Patterns</div>
+    <div class="ap-list">
+      <div class="ap-row"><span class="ap-x">✗</span><div class="ap-text"><strong>Guessing column names</strong> <span>— always read the schema file first; never assume a column name</span></div></div>
+      <div class="ap-row"><span class="ap-x">✗</span><div class="ap-text"><strong>Using raw SQL strings</strong> <span>— use ORM with type generation; raw strings have no compile-time verification</span></div></div>
+      <div class="ap-row"><span class="ap-x">✗</span><div class="ap-text"><strong>Ignoring type errors</strong> <span>— schema drift shows up as TypeScript/mypy errors; fix them, don't suppress</span></div></div>
+      <div class="ap-row"><span class="ap-x">✗</span><div class="ap-text"><strong>Not regenerating types after migration</strong> <span>— stale types hide real schema; always regenerate after every migration</span></div></div>
+      <div class="ap-row"><span class="ap-x">✗</span><div class="ap-text"><strong>Assuming nullable</strong> <span>— check the schema explicitly; a column that looks optional may be NOT NULL with a default</span></div></div>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <span>Database Schema Awareness Skill — diagram.html</span>
+    <span>Read schema first · Use generated types · Never guess column names</span>
+  </footer>
+</div>
+<script>
+  mermaid.initialize({ startOnLoad: true, theme: 'base', themeVariables: { primaryColor: '#f5f0e8', primaryBorderColor: '#d4a73a', primaryTextColor: '#1a1510', lineColor: '#d4a73a', fontFamily: 'IBM Plex Mono, monospace', fontSize: '12px' } });
+  const scales = {};
+  function getScale(id) { return scales[id] || 1.0; }
+  function setScale(id, s) { s = Math.max(0.3, Math.min(3.5, s)); scales[id] = s; const el = document.getElementById(id); if (el) el.style.transform = `scale(${s})`; }
+  function zoomIn(id) { setScale(id, getScale(id) + 0.15); }
+  function zoomOut(id) { setScale(id, getScale(id) - 0.15); }
+  function zoomReset(id) { setScale(id, 1.0); }
+  function handleWheel(e, id) { if (e.ctrlKey || e.metaKey) { e.preventDefault(); setScale(id, getScale(id) + (e.deltaY > 0 ? -0.1 : 0.1)); } }
+  function openInTab(wrapId) { const wrap = document.getElementById(wrapId); if (!wrap) return; const svg = wrap.querySelector('svg'); if (!svg) return; const html = `<!DOCTYPE html><html><body style="margin:0;background:#fdfcf9;display:flex;justify-content:center;padding:24px;">${svg.outerHTML}</body></html>`; window.open(URL.createObjectURL(new Blob([html], { type: 'text/html' })), '_blank'); }
+</script>
+</body>
+</html>

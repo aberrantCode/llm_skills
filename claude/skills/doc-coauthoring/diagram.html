@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>doc-coauthoring — Collaborative Documentation Workflow</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Franklin:wght@400;500;600;700&family=Inconsolata:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ============ THEME — Solarized Light (light-first) ============ */
+:root {
+  --font-body: 'Libre Franklin', system-ui, sans-serif;
+  --font-mono: 'Inconsolata', 'SF Mono', Consolas, monospace;
+
+  /* Solarized Light base */
+  --bg:        #fdf6e3;
+  --surface:   #eee8d5;
+  --surface2:  #e8e0c8;
+  --surface3:  #ddd6bf;
+  --border:    rgba(88,110,117,0.14);
+  --border-bright: rgba(88,110,117,0.28);
+  --text:      #073642;
+  --text-dim:  #657b83;
+
+  /* Solarized accent colors */
+  --cyan:      #2aa198;
+  --cyan-dim:  rgba(42,161,152,0.10);
+  --blue:      #268bd2;
+  --blue-dim:  rgba(38,139,210,0.10);
+  --green:     #859900;
+  --green-dim: rgba(133,153,0,0.10);
+  --yellow:    #b58900;
+  --yellow-dim: rgba(181,137,0,0.10);
+  --orange:    #cb4b16;
+  --orange-dim: rgba(203,75,22,0.10);
+  --red:       #dc322f;
+  --red-dim:   rgba(220,50,47,0.10);
+  --magenta:   #d33682;
+  --magenta-dim: rgba(211,54,130,0.10);
+  --violet:    #6c71c4;  /* one exception: Solarized's own violet — not Tailwind indigo */
+  --violet-dim: rgba(108,113,196,0.10);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    /* Solarized Dark */
+    --bg:        #002b36;
+    --surface:   #073642;
+    --surface2:  #0d3d4a;
+    --surface3:  #164450;
+    --border:    rgba(147,161,161,0.10);
+    --border-bright: rgba(147,161,161,0.22);
+    --text:      #fdf6e3;
+    --text-dim:  #839496;
+
+    --cyan:      #2aa198;
+    --cyan-dim:  rgba(42,161,152,0.15);
+    --blue:      #268bd2;
+    --blue-dim:  rgba(38,139,210,0.15);
+    --green:     #859900;
+    --green-dim: rgba(133,153,0,0.15);
+    --yellow:    #b58900;
+    --yellow-dim: rgba(181,137,0,0.15);
+    --orange:    #cb4b16;
+    --orange-dim: rgba(203,75,22,0.15);
+    --red:       #dc322f;
+    --red-dim:   rgba(220,50,47,0.15);
+    --magenta:   #d33682;
+    --magenta-dim: rgba(211,54,130,0.15);
+    --violet:    #6c71c4;
+    --violet-dim: rgba(108,113,196,0.15);
+  }
+}
+
+/* ============ RESET ============ */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  background-color: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  padding: 48px 44px;
+  min-height: 100vh;
+  overflow-wrap: break-word;
+}
+
+/* ============ ANIMATIONS ============ */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.anim {
+  animation: fadeUp 0.45s ease-out both;
+  animation-delay: calc(var(--i, 0) * 0.06s);
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; animation-delay: 0ms !important; }
+}
+
+/* ============ LAYOUT ============ */
+.container { max-width: 1040px; margin: 0 auto; }
+
+/* ============ HEADER ============ */
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--cyan);
+  background: var(--cyan-dim);
+  border: 1px solid rgba(42,161,152,0.25);
+  display: inline-block; padding: 3px 10px; border-radius: 4px; margin-bottom: 14px;
+}
+
+h1 {
+  font-size: 38px; font-weight: 700; letter-spacing: -0.8px;
+  margin-bottom: 6px; line-height: 1.1;
+}
+h1 .doc  { color: var(--cyan); }
+h1 .auth { color: var(--text-dim); }
+
+.tagline {
+  font-family: var(--font-mono); font-size: 12px; color: var(--text-dim); margin-bottom: 32px;
+}
+
+/* ============ IO STRIP ============ */
+.io-strip {
+  display: grid; grid-template-columns: 1fr auto 1fr;
+  gap: 14px; align-items: center; margin-bottom: 32px;
+}
+@media (max-width: 640px) { .io-strip { grid-template-columns: 1fr; } .io-arrow { display:none; } }
+
+.io-box {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 8px; padding: 14px 16px;
+}
+.io-label {
+  font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase;
+  margin-bottom: 9px; display: flex; align-items: center; gap: 6px;
+}
+.io-label .pip { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+.io-list { list-style: none; display: flex; flex-direction: column; gap: 5px; }
+.io-list li { font-size: 13px; color: var(--text-dim); padding-left: 14px; position: relative; line-height: 1.5; }
+.io-list li::before { content: '›'; position: absolute; left: 0; font-family: var(--font-mono); color: var(--cyan); }
+.io-arrow { font-family: var(--font-mono); font-size: 26px; color: var(--text-dim); text-align: center; user-select: none; }
+
+/* ============ STAGE LAYOUT ============ */
+.stages { display: flex; flex-direction: column; gap: 12px; margin-bottom: 28px; }
+
+.stage {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.stage-header {
+  display: flex; align-items: center; gap: 14px;
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--border);
+}
+.stage-num {
+  font-family: var(--font-mono); font-size: 11px; font-weight: 600;
+  width: 32px; height: 32px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.stage-title { font-size: 15px; font-weight: 600; }
+.stage-tag {
+  font-family: var(--font-mono); font-size: 10px; padding: 2px 8px;
+  border-radius: 4px; border: 1px solid var(--border-bright);
+  color: var(--text-dim); margin-left: auto; flex-shrink: 0;
+}
+
+.stage-body { padding: 16px 20px; }
+
+/* Stage 1 — Context */
+.stage-1 .stage-header { background: var(--cyan-dim); }
+.stage-1 .stage-num   { background: var(--cyan); color: var(--bg); }
+.stage-1 .stage-title { color: var(--cyan); }
+
+/* Stage 2 — Refinement */
+.stage-2 .stage-header { background: var(--blue-dim); }
+.stage-2 .stage-num   { background: var(--blue); color: var(--bg); }
+.stage-2 .stage-title { color: var(--blue); }
+
+/* Stage 3 — Reader Testing */
+.stage-3 .stage-header { background: var(--green-dim); }
+.stage-3 .stage-num   { background: var(--green); color: var(--bg); }
+.stage-3 .stage-title { color: var(--green); }
+
+/* ============ SUBSTEP LOOP ============ */
+.substeps {
+  display: grid; grid-template-columns: repeat(6, 1fr);
+  gap: 8px; margin-top: 10px;
+}
+@media (max-width: 760px) { .substeps { grid-template-columns: repeat(3, 1fr); } }
+@media (max-width: 480px) { .substeps { grid-template-columns: 1fr 1fr; } }
+
+.substep {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 7px; padding: 10px 10px;
+  text-align: center; min-width: 0;
+}
+.substep-letter {
+  font-family: var(--font-mono); font-size: 14px; font-weight: 600;
+  color: var(--blue); display: block; margin-bottom: 4px;
+}
+.substep-name {
+  font-size: 11px; color: var(--text-dim); line-height: 1.4;
+}
+.substep-arrow {
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-mono); font-size: 14px; color: var(--text-dim);
+  padding: 0 2px;
+}
+
+/* ============ STEP LIST ============ */
+.step-cols {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 10px; margin-top: 8px;
+}
+@media (max-width: 600px) { .step-cols { grid-template-columns: 1fr; } }
+
+.step-group { display: flex; flex-direction: column; gap: 7px; }
+.step-group-label {
+  font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.10em; text-transform: uppercase;
+  color: var(--text-dim); padding-bottom: 4px; border-bottom: 1px solid var(--border);
+  margin-bottom: 2px;
+}
+.step-item {
+  display: flex; align-items: flex-start; gap: 8px;
+  font-size: 12px; color: var(--text-dim); line-height: 1.5;
+}
+.step-pip {
+  width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; margin-top: 4px;
+}
+.step-item code {
+  font-family: var(--font-mono); font-size: 11px;
+  background: var(--surface3); color: var(--text); padding: 1px 5px; border-radius: 3px;
+}
+
+/* ============ CONTEXT GATHERING GRID ============ */
+.ctx-grid {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 10px; margin-top: 4px;
+}
+@media (max-width: 600px) { .ctx-grid { grid-template-columns: 1fr; } }
+
+.ctx-card {
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 7px; padding: 10px 12px;
+}
+.ctx-card-label {
+  font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.10em; text-transform: uppercase;
+  margin-bottom: 6px; color: var(--text-dim);
+}
+.ctx-items { display: flex; flex-direction: column; gap: 4px; }
+.ctx-item { font-size: 12px; color: var(--text-dim); padding-left: 12px; position: relative; line-height: 1.4; }
+.ctx-item::before { content: '·'; position: absolute; left: 0; font-family: var(--font-mono); }
+
+/* ============ READER TEST ============ */
+.reader-flow {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  gap: 8px; margin-top: 10px; align-items: stretch;
+}
+@media (max-width: 720px) { .reader-flow { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 400px) { .reader-flow { grid-template-columns: 1fr; } }
+
+.rf-card {
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 7px; padding: 10px 12px;
+}
+.rf-num {
+  font-family: var(--font-mono); font-size: 18px; font-weight: 600;
+  color: var(--green); margin-bottom: 4px;
+}
+.rf-title { font-size: 12px; font-weight: 600; margin-bottom: 4px; }
+.rf-body  { font-size: 11px; color: var(--text-dim); line-height: 1.5; }
+.rf-body code {
+  font-family: var(--font-mono); font-size: 10px;
+  background: var(--surface3); color: var(--text); padding: 1px 4px; border-radius: 3px;
+}
+
+/* ============ DECISION POINTS ============ */
+.decisions {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(200px,1fr));
+  gap: 10px; margin-bottom: 24px;
+}
+.decision {
+  background: var(--surface);
+  border: 1px solid var(--yellow);
+  border-radius: 8px; padding: 10px 14px;
+  min-width: 0;
+}
+.decision-q {
+  font-size: 12px; font-weight: 600; color: var(--yellow); margin-bottom: 4px;
+  font-family: var(--font-mono);
+}
+.decision-opts {
+  font-size: 11px; color: var(--text-dim); line-height: 1.6;
+}
+.decision-opts .yes { color: var(--green); }
+.decision-opts .no  { color: var(--orange); }
+
+/* ============ TIPS ============ */
+.tips-row {
+  display: grid; grid-template-columns: 1fr 1fr 1fr;
+  gap: 10px;
+}
+@media (max-width: 640px) { .tips-row { grid-template-columns: 1fr; } }
+
+.tip-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-left: 3px solid var(--cyan);
+  border-radius: 0 8px 8px 0; padding: 12px 14px;
+}
+.tip-card:nth-child(2) { border-left-color: var(--blue); }
+.tip-card:nth-child(3) { border-left-color: var(--green); }
+.tip-title { font-size: 12px; font-weight: 600; margin-bottom: 5px; }
+.tip-body  { font-size: 12px; color: var(--text-dim); line-height: 1.6; }
+.tip-body code {
+  font-family: var(--font-mono); font-size: 11px;
+  background: var(--surface2); color: var(--text); padding: 1px 4px; border-radius: 3px;
+}
+
+.sec-head {
+  font-family: var(--font-mono); font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--text-dim); margin-bottom: 12px;
+  display: flex; align-items: center; gap: 10px;
+}
+.sec-head::after { content: ''; flex: 1; height: 1px; background: var(--border-bright); }
+.sec-head + * { margin-top: 0; }
+
+@media (max-width: 768px) {
+  body { padding: 24px 16px; }
+  h1 { font-size: 26px; }
+}
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="eyebrow anim" style="--i:0">skill · doc-coauthoring</div>
+  <h1 class="anim" style="--i:1"><span class="doc">Doc</span> <span class="auth">Co-Authoring</span></h1>
+  <p class="tagline anim" style="--i:2">context gathering → section-by-section refinement → reader testing</p>
+
+  <!-- IO -->
+  <div class="io-strip anim" style="--i:3">
+    <div class="io-box">
+      <div class="io-label"><div class="pip" style="background:var(--blue)"></div><span style="color:var(--blue)">Inputs</span></div>
+      <ul class="io-list">
+        <li>Doc topic, type, audience, desired impact</li>
+        <li>Any existing template or shared doc</li>
+        <li>User's context dump — org, history, constraints</li>
+        <li>Links to Slack/Teams/Drive (if integrations available)</li>
+      </ul>
+    </div>
+    <div class="io-arrow">→</div>
+    <div class="io-box">
+      <div class="io-label"><div class="pip" style="background:var(--green)"></div><span style="color:var(--green)">Output</span></div>
+      <ul class="io-list">
+        <li>Polished document that works for its readers</li>
+        <li>Passes Reader Claude testing (no blind spots)</li>
+        <li>Every section refined through iteration</li>
+        <li>Verified: works when pasted into Claude</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Stage 1 -->
+  <div class="stages anim" style="--i:4">
+
+    <div class="stage stage-1">
+      <div class="stage-header">
+        <div class="stage-num">1</div>
+        <div class="stage-title">Context Gathering</div>
+        <div class="stage-tag">until enough is known</div>
+      </div>
+      <div class="stage-body">
+        <div class="ctx-grid">
+          <div class="ctx-card">
+            <div class="ctx-card-label" style="color:var(--cyan)">meta-questions (upfront)</div>
+            <div class="ctx-items">
+              <div class="ctx-item">What type of document is this?</div>
+              <div class="ctx-item">Who is the primary audience?</div>
+              <div class="ctx-item">What's the desired impact?</div>
+              <div class="ctx-item">Any template or format to follow?</div>
+              <div class="ctx-item">Other constraints or context?</div>
+            </div>
+          </div>
+          <div class="ctx-card">
+            <div class="ctx-card-label" style="color:var(--cyan)">info dump (encourage freely)</div>
+            <div class="ctx-items">
+              <div class="ctx-item">Background on project / problem</div>
+              <div class="ctx-item">Related team discussions or threads</div>
+              <div class="ctx-item">Why alternatives aren't being used</div>
+              <div class="ctx-item">Org context: team dynamics, past incidents</div>
+              <div class="ctx-item">Timeline pressures, technical dependencies</div>
+            </div>
+          </div>
+        </div>
+        <div style="margin-top:10px;font-size:12px;color:var(--text-dim);line-height:1.65">
+          After dump, ask <strong style="color:var(--text)">5–10 numbered clarifying questions</strong>.
+          User can answer in shorthand — <em>"1: yes, 2: see #channel, 3: no because backwards compat"</em>.
+          If integrations (Slack/Drive) are available, use them to pull context. Exit when questions show
+          understanding — when edge cases and trade-offs can be asked about without needing basics explained.
+        </div>
+      </div>
+    </div>
+
+    <!-- Stage 2 -->
+    <div class="stage stage-2">
+      <div class="stage-header">
+        <div class="stage-num">2</div>
+        <div class="stage-title">Refinement &amp; Structure</div>
+        <div class="stage-tag">one section at a time — repeat until all done</div>
+      </div>
+      <div class="stage-body">
+        <div style="font-size:12px;color:var(--text-dim);margin-bottom:12px">
+          Start with the section that has the most unknowns (for decision docs: the core proposal; for specs: the technical approach).
+          Summaries are written last. Use <code>str_replace</code> for all edits — never reprint the full document.
+        </div>
+        <div class="substeps">
+          <div class="substep">
+            <span class="substep-letter" style="color:var(--blue)">a</span>
+            <div class="substep-name">Clarifying questions for this section</div>
+          </div>
+          <div class="substep">
+            <span class="substep-letter" style="color:var(--blue)">b</span>
+            <div class="substep-name">Brainstorm 5–20 options to include</div>
+          </div>
+          <div class="substep">
+            <span class="substep-letter" style="color:var(--blue)">c</span>
+            <div class="substep-name">User curates: keep / remove / combine</div>
+          </div>
+          <div class="substep">
+            <span class="substep-letter" style="color:var(--blue)">d</span>
+            <div class="substep-name">Gap check: anything important missing?</div>
+          </div>
+          <div class="substep">
+            <span class="substep-letter" style="color:var(--blue)">e</span>
+            <div class="substep-name">Draft section via str_replace placeholder</div>
+          </div>
+          <div class="substep">
+            <span class="substep-letter" style="color:var(--blue)">f</span>
+            <div class="substep-name">Iterative refinement until satisfied</div>
+          </div>
+        </div>
+        <div style="margin-top:12px;font-size:12px;color:var(--text-dim);line-height:1.65">
+          After 3 consecutive iterations with no substantial changes, ask if anything can be removed without losing information.
+          At 80%+ completion, re-read the entire document for flow, redundancy, contradictions, and "slop" (generic filler sentences that carry no weight).
+        </div>
+      </div>
+    </div>
+
+    <!-- Stage 3 -->
+    <div class="stage stage-3">
+      <div class="stage-header">
+        <div class="stage-num">3</div>
+        <div class="stage-title">Reader Testing</div>
+        <div class="stage-tag">fresh Claude with no context</div>
+      </div>
+      <div class="stage-body">
+        <div class="reader-flow">
+          <div class="rf-card">
+            <div class="rf-num">01</div>
+            <div class="rf-title">Predict</div>
+            <div class="rf-body">Generate 5–10 realistic questions a reader would ask when trying to discover or understand this doc.</div>
+          </div>
+          <div class="rf-card">
+            <div class="rf-num">02</div>
+            <div class="rf-title">Test</div>
+            <div class="rf-body">Invoke sub-agent with just the document + each question. No context from this conversation.</div>
+          </div>
+          <div class="rf-card">
+            <div class="rf-num">03</div>
+            <div class="rf-title">Check</div>
+            <div class="rf-body">Ask Reader Claude for <code>ambiguity</code>, <code>false assumptions</code>, <code>contradictions</code> in the doc.</div>
+          </div>
+          <div class="rf-card">
+            <div class="rf-num">04</div>
+            <div class="rf-title">Iterate</div>
+            <div class="rf-body">Fix any gaps found. Loop back to Stage 2 for problematic sections. Repeat until Reader Claude answers consistently correctly.</div>
+          </div>
+        </div>
+        <div style="margin-top:10px;font-size:12px;color:var(--text-dim);line-height:1.65">
+          If sub-agents are not available, provide the user with step-by-step manual testing instructions using a fresh Claude.ai tab.
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Decision points -->
+  <div class="sec-head anim" style="--i:5">decision points</div>
+  <div class="decisions anim" style="--i:6">
+    <div class="decision">
+      <div class="decision-q">Workflow accepted?</div>
+      <div class="decision-opts">
+        <span class="yes">Yes →</span> proceed to Stage 1<br>
+        <span class="no">No →</span> work freeform
+      </div>
+    </div>
+    <div class="decision">
+      <div class="decision-q">Enough context?</div>
+      <div class="decision-opts">
+        <span class="yes">Yes →</span> move to Stage 2<br>
+        <span class="no">No →</span> ask more questions
+      </div>
+    </div>
+    <div class="decision">
+      <div class="decision-q">Section done?</div>
+      <div class="decision-opts">
+        <span class="yes">Yes →</span> next section<br>
+        <span class="no">No →</span> more refinement (f→f→f)
+      </div>
+    </div>
+    <div class="decision">
+      <div class="decision-q">Reader test passes?</div>
+      <div class="decision-opts">
+        <span class="yes">Yes →</span> final review<br>
+        <span class="no">No →</span> fix gaps, re-test
+      </div>
+    </div>
+  </div>
+
+  <!-- Tips -->
+  <div class="sec-head anim" style="--i:7">effective guidance</div>
+  <div class="tips-row anim" style="--i:8">
+    <div class="tip-card">
+      <div class="tip-title">Context Management</div>
+      <div class="tip-body">Don't let context gaps accumulate — address them as they come up. Proactively ask when something mentioned is unfamiliar.</div>
+    </div>
+    <div class="tip-card">
+      <div class="tip-title">Artifact Management</div>
+      <div class="tip-body">Use <code>create_file</code> for full drafts. Use <code>str_replace</code> for all edits. Never use artifacts for brainstorm lists — that's conversation.</div>
+    </div>
+    <div class="tip-card">
+      <div class="tip-title">Quality over Speed</div>
+      <div class="tip-body">Don't rush through stages. Each iteration should make meaningful improvements. The goal is a document that actually works for readers.</div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Node.js Backend Skill — Express · Repository · DI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ============ THEME — Nord (dark-first) ============ */
+:root {
+  --font-body: 'Sora', system-ui, sans-serif;
+  --font-mono: 'IBM Plex Mono', 'SF Mono', Consolas, monospace;
+
+  /* Nord Polar Night + Snow Storm + Frost + Aurora */
+  --bg:        #2e3440;
+  --surface:   #3b4252;
+  --surface2:  #434c5e;
+  --surface3:  #4c566a;
+  --border:    rgba(216,222,233,0.08);
+  --border-bright: rgba(216,222,233,0.18);
+  --text:      #eceff4;
+  --text-dim:  #9aa0ad;
+
+  /* Frost */
+  --frost1: #8fbcbb;  /* calm teal */
+  --frost1-dim: rgba(143,188,187,0.12);
+  --frost2: #88c0d0;  /* light blue */
+  --frost2-dim: rgba(136,192,208,0.12);
+  --frost3: #81a1c1;  /* blue */
+  --frost3-dim: rgba(129,161,193,0.12);
+  --frost4: #5e81ac;  /* deep blue */
+  --frost4-dim: rgba(94,129,172,0.12);
+
+  /* Aurora */
+  --aurora-red:    #bf616a;
+  --aurora-red-dim: rgba(191,97,106,0.12);
+  --aurora-orange: #d08770;
+  --aurora-orange-dim: rgba(208,135,112,0.12);
+  --aurora-yellow: #ebcb8b;
+  --aurora-yellow-dim: rgba(235,203,139,0.12);
+  --aurora-green:  #a3be8c;
+  --aurora-green-dim: rgba(163,190,140,0.12);
+  --aurora-purple: #b48ead;
+  --aurora-purple-dim: rgba(180,142,173,0.12);
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    --bg:        #eceff4;
+    --surface:   #e5e9f0;
+    --surface2:  #d8dee9;
+    --surface3:  #c8cfd9;
+    --border:    rgba(46,52,64,0.10);
+    --border-bright: rgba(46,52,64,0.20);
+    --text:      #2e3440;
+    --text-dim:  #4c566a;
+
+    --frost1: #5c9e9b;
+    --frost1-dim: rgba(92,158,155,0.10);
+    --frost2: #4d8fa3;
+    --frost2-dim: rgba(77,143,163,0.10);
+    --frost3: #5271a8;
+    --frost3-dim: rgba(82,113,168,0.10);
+    --frost4: #3d5a8a;
+    --frost4-dim: rgba(61,90,138,0.10);
+
+    --aurora-red:    #bf616a;
+    --aurora-red-dim: rgba(191,97,106,0.10);
+    --aurora-orange: #c47050;
+    --aurora-orange-dim: rgba(196,112,80,0.10);
+    --aurora-yellow: #b08040;
+    --aurora-yellow-dim: rgba(176,128,64,0.10);
+    --aurora-green:  #638a48;
+    --aurora-green-dim: rgba(99,138,72,0.10);
+    --aurora-purple: #8a6a80;
+    --aurora-purple-dim: rgba(138,106,128,0.10);
+  }
+}
+
+/* ============ RESET ============ */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  background-color: var(--bg);
+  background-image:
+    radial-gradient(ellipse at 0% 0%, var(--frost4-dim) 0%, transparent 50%),
+    radial-gradient(ellipse at 100% 100%, var(--aurora-purple-dim) 0%, transparent 45%);
+  color: var(--text);
+  font-family: var(--font-body);
+  padding: 48px 40px;
+  min-height: 100vh;
+  overflow-wrap: break-word;
+}
+
+/* ============ ANIMATIONS ============ */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.anim {
+  animation: fadeUp 0.45s ease-out both;
+  animation-delay: calc(var(--i, 0) * 0.055s);
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; animation-delay: 0ms !important; }
+}
+
+/* ============ LAYOUT ============ */
+.container { max-width: 1080px; margin: 0 auto; }
+
+/* ============ HEADER ============ */
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--frost2);
+  background: var(--frost2-dim);
+  border: 1px solid rgba(136,192,208,0.25);
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 4px;
+  margin-bottom: 14px;
+}
+h1 {
+  font-size: 40px;
+  font-weight: 700;
+  letter-spacing: -1.2px;
+  margin-bottom: 4px;
+  line-height: 1.05;
+}
+h1 .node  { color: var(--aurora-green); }
+h1 .stack { font-size: 18px; font-weight: 400; color: var(--text-dim); }
+.tagline {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-dim);
+  margin-bottom: 36px;
+}
+
+/* ============ SECTION HEADING ============ */
+.section-head {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.section-head::after {
+  content: ''; flex: 1; height: 1px; background: var(--border-bright);
+}
+
+/* ============ SECTION CARD ============ */
+.sec {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 18px 20px;
+  min-width: 0;
+}
+.sec-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.sec-label .dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+
+/* ============ GRID LAYOUTS ============ */
+.grid-3 {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 14px;
+  margin-bottom: 16px;
+}
+.grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-bottom: 16px;
+}
+.wide { grid-column: 1 / -1; }
+@media (max-width: 800px) {
+  .grid-3 { grid-template-columns: 1fr; }
+  .grid-2 { grid-template-columns: 1fr; }
+}
+
+/* ============ FILE TREE ============ */
+.tree {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 1.85;
+  color: var(--text-dim);
+}
+.tree .dir  { color: var(--frost1); font-weight: 500; }
+.tree .file { color: var(--aurora-yellow); }
+.tree .cm   { opacity: 0.45; font-size: 11px; }
+
+/* ============ ARCHITECTURE LAYERS ============ */
+.layers {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.layer {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-radius: 7px;
+  padding: 10px 14px;
+  border: 1px solid var(--border);
+  min-width: 0;
+}
+.layer-name {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  flex-shrink: 0;
+  width: 72px;
+}
+.layer-items {
+  display: flex; gap: 6px; flex-wrap: wrap; min-width: 0;
+}
+.chip {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  padding: 2px 7px;
+  border-radius: 4px;
+  border: 1px solid var(--border-bright);
+  background: var(--surface2);
+  color: var(--text-dim);
+  white-space: nowrap;
+}
+
+/* ============ ERROR HIERARCHY ============ */
+.err-tree {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.err-base {
+  background: var(--surface2);
+  border: 1px solid var(--frost4);
+  border-radius: 8px;
+  padding: 10px 14px;
+}
+.err-name {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--frost2);
+  margin-bottom: 3px;
+}
+.err-props {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-dim);
+  line-height: 1.6;
+}
+.err-children {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 6px;
+  padding-left: 14px;
+  position: relative;
+}
+.err-children::before {
+  content: '';
+  position: absolute;
+  left: 5px; top: 0; bottom: 16px;
+  width: 1px;
+  background: var(--frost4);
+  opacity: 0.4;
+}
+.err-child {
+  background: var(--surface3);
+  border: 1px solid var(--aurora-orange);
+  border-radius: 7px;
+  padding: 8px 12px;
+  position: relative;
+}
+.err-child::before {
+  content: '';
+  position: absolute;
+  left: -9px; top: 16px;
+  width: 9px; height: 1px;
+  background: var(--frost4);
+  opacity: 0.4;
+}
+.err-child-name {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--aurora-orange);
+  font-weight: 500;
+  margin-bottom: 2px;
+}
+.err-child-status {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-dim);
+}
+
+/* ============ HANDLER MIDDLEWARE FLOW ============ */
+.flow-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.flow-box {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  padding: 8px 12px;
+  font-size: 12px;
+  min-width: 0;
+  text-align: center;
+}
+.flow-arrow { color: var(--text-dim); font-family: var(--font-mono); font-size: 14px; flex-shrink: 0; }
+.flow-label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-dim);
+  margin-top: 3px;
+}
+
+/* ============ STEP LIST ============ */
+.steps { display: flex; flex-direction: column; gap: 8px; }
+.step {
+  display: flex; align-items: flex-start; gap: 10px;
+  font-size: 13px; color: var(--text-dim);
+}
+.step-num {
+  font-family: var(--font-mono); font-size: 10px;
+  width: 20px; height: 20px; border-radius: 50%; flex-shrink: 0; margin-top: 1px;
+  display: flex; align-items: center; justify-content: center;
+}
+.step code {
+  font-family: var(--font-mono); font-size: 11px;
+  background: var(--surface3); color: var(--text); padding: 1px 5px; border-radius: 3px;
+}
+
+/* ============ ANTI-PATTERNS ============ */
+.anti-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+  gap: 8px;
+}
+.anti {
+  display: flex; align-items: flex-start; gap: 8px;
+  background: var(--aurora-red-dim);
+  border: 1px solid rgba(191,97,106,0.30);
+  border-radius: 7px; padding: 8px 10px;
+  font-size: 12px; color: var(--text-dim); min-width: 0;
+}
+.anti .x { color: var(--aurora-red); font-family: var(--font-mono); font-size: 13px; flex-shrink: 0; margin-top: 1px; }
+.anti code { font-family: var(--font-mono); font-size: 11px; background: rgba(0,0,0,0.2); padding: 1px 4px; border-radius: 3px; color: var(--aurora-red); }
+
+/* ============ REPO PATTERN ============ */
+.repo-card {
+  background: var(--surface2);
+  border: 1px solid var(--frost1);
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-bottom: 8px;
+}
+.repo-card-title {
+  font-family: var(--font-mono); font-size: 11px; color: var(--frost1); font-weight: 500; margin-bottom: 6px;
+}
+.method-list { display: flex; flex-direction: column; gap: 5px; }
+.method-row {
+  display: flex; align-items: baseline; gap: 8px;
+  font-family: var(--font-mono); font-size: 11px;
+}
+.method-name { color: var(--frost2); flex-shrink: 0; }
+.method-sig  { color: var(--text-dim); min-width: 0; overflow-wrap: break-word; }
+
+@media (max-width: 768px) {
+  body { padding: 24px 16px; }
+  h1 { font-size: 28px; }
+}
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="eyebrow anim" style="--i:0">skill · nodejs-backend</div>
+  <h1 class="anim" style="--i:1">
+    <span class="node">Node.js</span> Backend
+    <span class="stack"> Express · Kysely · Zod · Repository</span>
+  </h1>
+  <p class="tagline anim" style="--i:2">load with: base.md + typescript.md</p>
+
+  <!-- Architecture layers -->
+  <div class="section-head anim" style="--i:3">architecture layers</div>
+  <div class="sec wide anim" style="--i:4">
+    <div class="layers">
+      <div class="layer" style="background:var(--aurora-orange-dim);border-color:var(--aurora-orange)">
+        <span class="layer-name" style="color:var(--aurora-orange)">Entry</span>
+        <div class="layer-items">
+          <span class="chip" style="color:var(--aurora-orange);border-color:var(--aurora-orange)">src/index.ts</span>
+          <span class="chip">Composition root</span>
+          <span class="chip">Wire DB → Repos → Routes → App</span>
+          <span class="chip">SIGTERM graceful shutdown</span>
+        </div>
+      </div>
+      <div class="layer" style="background:var(--frost3-dim);border-color:var(--frost3)">
+        <span class="layer-name" style="color:var(--frost3)">HTTP</span>
+        <div class="layer-items">
+          <span class="chip" style="color:var(--frost2)">server.ts</span>
+          <span class="chip" style="color:var(--frost2)">routes/</span>
+          <span class="chip" style="color:var(--frost2)">middleware/errorHandler</span>
+          <span class="chip">Zod validation at boundary</span>
+          <span class="chip">Factory-function routes (DI)</span>
+        </div>
+      </div>
+      <div class="layer" style="background:var(--aurora-purple-dim);border-color:var(--aurora-purple)">
+        <span class="layer-name" style="color:var(--aurora-purple)">Core</span>
+        <div class="layer-items">
+          <span class="chip" style="color:var(--aurora-purple)">types.ts</span>
+          <span class="chip" style="color:var(--aurora-purple)">errors.ts</span>
+          <span class="chip" style="color:var(--aurora-purple)">services/</span>
+          <span class="chip">Pure functions — no side effects</span>
+          <span class="chip">Domain errors only</span>
+        </div>
+      </div>
+      <div class="layer" style="background:var(--frost1-dim);border-color:var(--frost1)">
+        <span class="layer-name" style="color:var(--frost1)">Infra</span>
+        <div class="layer-items">
+          <span class="chip" style="color:var(--frost1)">db/client.ts</span>
+          <span class="chip" style="color:var(--frost1)">repositories/</span>
+          <span class="chip" style="color:var(--frost1)">migrations/</span>
+          <span class="chip">external/</span>
+          <span class="chip">All side effects live here</span>
+        </div>
+      </div>
+      <div class="layer" style="background:var(--aurora-green-dim);border-color:var(--aurora-green)">
+        <span class="layer-name" style="color:var(--aurora-green)">Config</span>
+        <div class="layer-items">
+          <span class="chip" style="color:var(--aurora-green)">config/index.ts</span>
+          <span class="chip">Zod schema parses process.env</span>
+          <span class="chip">Fails fast on startup if env missing</span>
+          <span class="chip">NODE_ENV · PORT · DATABASE_URL · API_KEY</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid-2 anim" style="--i:5">
+
+    <!-- Error hierarchy -->
+    <div class="sec">
+      <div class="sec-label">
+        <div class="dot" style="background:var(--aurora-red)"></div>
+        <span style="color:var(--aurora-red)">domain error hierarchy</span>
+      </div>
+      <div class="err-tree">
+        <div class="err-base">
+          <div class="err-name">DomainError extends Error</div>
+          <div class="err-props">
+            message: string<br>
+            code: string (readonly)<br>
+            statusCode: number = 400
+          </div>
+          <div class="err-children">
+            <div class="err-child">
+              <div class="err-child-name">NotFoundError</div>
+              <div class="err-child-status">statusCode: 404<br>code: NOT_FOUND</div>
+            </div>
+            <div class="err-child">
+              <div class="err-child-name">ValidationError</div>
+              <div class="err-child-status">statusCode: 400<br>code: VALIDATION_ERROR</div>
+            </div>
+          </div>
+        </div>
+        <div style="font-size:13px;color:var(--text-dim);margin-top:4px;line-height:1.6">
+          Global middleware catches <span style="color:var(--aurora-orange);font-family:var(--font-mono);font-size:11px">DomainError</span>,
+          <span style="color:var(--aurora-yellow);font-family:var(--font-mono);font-size:11px">ZodError</span>,
+          and unknown errors — formats each to <span style="font-family:var(--font-mono);font-size:11px;color:var(--frost2)">&#123; error: &#123; code, message &#125; &#125;</span>.
+        </div>
+      </div>
+    </div>
+
+    <!-- Repository pattern -->
+    <div class="sec">
+      <div class="sec-label">
+        <div class="dot" style="background:var(--frost1)"></div>
+        <span style="color:var(--frost1)">repository pattern (Kysely)</span>
+      </div>
+      <div class="repo-card">
+        <div class="repo-card-title">UserRepository</div>
+        <div class="method-list">
+          <div class="method-row">
+            <span class="method-name">findById</span>
+            <span class="method-sig">(id: string) → User | null</span>
+          </div>
+          <div class="method-row">
+            <span class="method-name">create</span>
+            <span class="method-sig">(data: Omit&lt;User,'id'|'createdAt'&gt;) → User</span>
+          </div>
+          <div class="method-row">
+            <span class="method-name">findByEmail</span>
+            <span class="method-sig">(email: string) → User | null</span>
+          </div>
+        </div>
+      </div>
+      <div style="font-size:12px;color:var(--text-dim);line-height:1.6;margin-top:6px">
+        <span style="color:var(--frost2);font-family:var(--font-mono);font-size:11px">db.transaction().execute(async trx =&gt; &#123; ... &#125;)</span>
+        for multi-step operations that must be atomic (e.g. fund transfers).
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Request lifecycle + API design -->
+  <div class="section-head anim" style="--i:6">request lifecycle</div>
+  <div class="sec wide anim" style="--i:7">
+    <div class="flow-row">
+      <div class="flow-box" style="border-color:var(--frost4)">
+        <div style="color:var(--frost4);font-family:var(--font-mono);font-size:11px;font-weight:500">Client</div>
+        <div class="flow-label">POST /users</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box" style="border-color:var(--aurora-yellow)">
+        <div style="color:var(--aurora-yellow);font-family:var(--font-mono);font-size:11px;font-weight:500">Zod.parse</div>
+        <div class="flow-label">validate body</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box" style="border-color:var(--frost3)">
+        <div style="color:var(--frost3);font-family:var(--font-mono);font-size:11px;font-weight:500">Service</div>
+        <div class="flow-label">pure logic</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box" style="border-color:var(--frost1)">
+        <div style="color:var(--frost1);font-family:var(--font-mono);font-size:11px;font-weight:500">Repository</div>
+        <div class="flow-label">DB operation</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box" style="border-color:var(--aurora-green)">
+        <div style="color:var(--aurora-green);font-family:var(--font-mono);font-size:11px;font-weight:500">201 JSON</div>
+        <div class="flow-label">res.status(201)</div>
+      </div>
+      <div class="flow-arrow" style="color:var(--aurora-red)">⇅</div>
+      <div class="flow-box" style="border-color:var(--aurora-red)">
+        <div style="color:var(--aurora-red);font-family:var(--font-mono);font-size:11px;font-weight:500">errorHandler</div>
+        <div class="flow-label">catches all throws</div>
+      </div>
+    </div>
+    <div style="margin-top:14px;font-size:12px;color:var(--text-dim);line-height:1.6">
+      Routes are <strong style="color:var(--text)">factory functions</strong> that receive injected repos:
+      <span style="font-family:var(--font-mono);font-size:11px;color:var(--frost2)">createUserRoutes(userRepo)</span> → returns
+      <span style="font-family:var(--font-mono);font-size:11px;color:var(--frost2)">Router</span>.
+      Wired at composition root in <span style="font-family:var(--font-mono);font-size:11px;color:var(--aurora-orange)">src/index.ts</span>.
+    </div>
+  </div>
+
+  <div class="grid-2 anim" style="--i:8">
+
+    <!-- Testing -->
+    <div class="sec">
+      <div class="sec-label">
+        <div class="dot" style="background:var(--aurora-green)"></div>
+        <span style="color:var(--aurora-green)">testing strategy</span>
+      </div>
+      <div class="steps">
+        <div class="step">
+          <div class="step-num" style="background:var(--aurora-green-dim);color:var(--aurora-green);border:1px solid rgba(163,190,140,0.3)">U</div>
+          <span><strong style="color:var(--text)">Unit</strong> — mock the repo with <code>jest.fn()</code>, test service logic in isolation. No DB, no HTTP.</span>
+        </div>
+        <div class="step">
+          <div class="step-num" style="background:var(--frost2-dim);color:var(--frost2);border:1px solid rgba(136,192,208,0.3)">I</div>
+          <span><strong style="color:var(--text)">Integration</strong> — real test DB, supertest. <code>beforeAll</code> creates test app + DB, <code>afterAll</code> destroys.</span>
+        </div>
+        <div class="step" style="margin-top:4px;padding-top:8px;border-top:1px solid var(--border)">
+          <div class="step-num" style="background:var(--aurora-yellow-dim);color:var(--aurora-yellow);border:1px solid rgba(235,203,139,0.3)">%</div>
+          <span>80%+ coverage enforced via Jest <code>coverageThreshold</code></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Config -->
+    <div class="sec">
+      <div class="sec-label">
+        <div class="dot" style="background:var(--aurora-yellow)"></div>
+        <span style="color:var(--aurora-yellow)">validated config (Zod)</span>
+      </div>
+      <div class="steps">
+        <div class="step">
+          <div class="step-num" style="background:var(--aurora-yellow-dim);color:var(--aurora-yellow);border:1px solid rgba(235,203,139,0.3)">1</div>
+          <span>Define <code>ConfigSchema</code> with <code>z.object(&#123; NODE_ENV, PORT, DATABASE_URL, API_KEY &#125;)</code></span>
+        </div>
+        <div class="step">
+          <div class="step-num" style="background:var(--aurora-yellow-dim);color:var(--aurora-yellow);border:1px solid rgba(235,203,139,0.3)">2</div>
+          <span>Call <code>ConfigSchema.parse(process.env)</code> at startup</span>
+        </div>
+        <div class="step">
+          <div class="step-num" style="background:var(--aurora-yellow-dim);color:var(--aurora-yellow);border:1px solid rgba(235,203,139,0.3)">3</div>
+          <span>Zod throws immediately if any env var is missing or wrong type — fail fast, never silently</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Anti-patterns -->
+  <div class="section-head anim" style="--i:9">anti-patterns — never use</div>
+  <div class="anti-grid anim" style="--i:10">
+    <div class="anti"><span class="x">✕</span><span>Callback hell — use async/await</span></div>
+    <div class="anti"><span class="x">✕</span><span>Unhandled promise rejections</span></div>
+    <div class="anti"><span class="x">✕</span><span>Blocking the event loop</span></div>
+    <div class="anti"><span class="x">✕</span><span>Secrets in code — use env vars</span></div>
+    <div class="anti"><span class="x">✕</span><span>SQL string concatenation</span></div>
+    <div class="anti"><span class="x">✕</span><span>No input validation at API boundary</span></div>
+    <div class="anti"><span class="x">✕</span><span><code>console.log</code> in production</span></div>
+    <div class="anti"><span class="x">✕</span><span>No graceful shutdown on SIGTERM</span></div>
+    <div class="anti"><span class="x">✕</span><span>Monolithic route files — split by resource</span></div>
+  </div>
+
+</div>
+</body>
+</html>

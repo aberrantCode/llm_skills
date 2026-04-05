@@ -343,3 +343,7 @@ Before declaring the implementation complete, verify every item:
 | Apply update check before elevation | Elevation guard must come first |
 | Use `Write-Host` with Spectre markup before module import | Module must be imported before using markup syntax |
 | Overwrite user .env values on update | Merge algorithm: backup values always win |
+
+## Diagram
+
+[View diagram](diagram.html)

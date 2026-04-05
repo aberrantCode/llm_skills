@@ -581,3 +581,7 @@ User can opt out of automatic Ralph loops by saying:
 - "Quick fix for..." (one-liner)
 - "Don't loop..." (explicit opt-out)
 - "Help me understand..." (learning/discussion)
+
+## Diagram
+
+[View diagram](diagram.html)

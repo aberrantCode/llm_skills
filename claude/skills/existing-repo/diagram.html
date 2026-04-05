@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Existing Repo — Analyze, Preserve, Guardrails</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;600;700;800&family=Roboto+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --font-body: 'Nunito Sans', system-ui, sans-serif;
+    --font-mono: 'Roboto Mono', 'SF Mono', Consolas, monospace;
+    --bg: #f4f6fb; --surface: #ffffff; --surface2: #ecf0f9; --surface-elevated: #fafdff;
+    --border: rgba(30,58,120,0.07); --border-bright: rgba(30,58,120,0.15);
+    --text: #101828; --text-dim: #5a6580;
+    --navy: #1e3a78; --navy-dim: rgba(30,58,120,0.08);
+    --sky: #0369a1; --sky-dim: rgba(3,105,161,0.08);
+    --teal: #0f766e; --teal-dim: rgba(15,118,110,0.08);
+    --green: #166534; --green-dim: rgba(22,101,52,0.08);
+    --amber: #92400e; --amber-dim: rgba(146,64,14,0.08);
+    --red: #991b1b; --red-dim: rgba(153,27,27,0.08);
+    --slate: #334155; --slate-dim: rgba(51,65,85,0.06);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #060c1a; --surface: #0b1228; --surface2: #101830; --surface-elevated: #141e38;
+      --border: rgba(100,150,255,0.07); --border-bright: rgba(100,150,255,0.15);
+      --text: #dce8ff; --text-dim: #6880a8;
+      --navy: #93c5fd; --navy-dim: rgba(147,197,253,0.1);
+      --sky: #7dd3fc; --sky-dim: rgba(125,211,252,0.1);
+      --teal: #5eead4; --teal-dim: rgba(94,234,212,0.1);
+      --green: #86efac; --green-dim: rgba(134,239,172,0.1);
+      --amber: #fcd34d; --amber-dim: rgba(252,211,77,0.1);
+      --red: #fca5a5; --red-dim: rgba(252,165,165,0.1);
+      --slate: #94a3b8; --slate-dim: rgba(148,163,184,0.06);
+    }
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    background:var(--bg);
+    background-image:
+      radial-gradient(ellipse at 90% 5%, var(--navy-dim) 0%, transparent 50%),
+      radial-gradient(ellipse at 5% 95%, var(--teal-dim) 0%, transparent 50%);
+    color:var(--text); font-family:var(--font-body); padding:48px 40px; min-height:100vh;
+  }
+  @keyframes fadeUp { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+  .section,.flow-arrow { animation:fadeUp 0.35s ease-out both; animation-delay:calc(var(--i,0)*0.06s); }
+  @media (prefers-reduced-motion:reduce) { *,*::before,*::after { animation-duration:0.01ms!important; animation-delay:0ms!important; } }
+
+  h1 { font-size:36px; font-weight:800; letter-spacing:-1px; margin-bottom:4px; }
+  .subtitle { font-family:var(--font-mono); font-size:11px; color:var(--text-dim); margin-bottom:44px; }
+  .section-label { font-family:var(--font-mono); font-size:10px; font-weight:600; text-transform:uppercase; letter-spacing:2px; margin-bottom:14px; display:flex; align-items:center; gap:8px; }
+  .dot { width:7px; height:7px; border-radius:50%; display:inline-block; }
+
+  .diagram { display:grid; grid-template-columns:1fr; gap:20px; max-width:1100px; margin:0 auto; }
+  .section { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:20px 24px; }
+  .section--hero { background:var(--surface-elevated); border-color:var(--border-bright); box-shadow:0 4px 24px rgba(0,0,0,0.07); padding:28px 32px; }
+  .section--recessed { background:var(--surface2); }
+
+  .section--navy .section-label{color:var(--navy)} .section--navy .dot{background:var(--navy)} .section--navy{border-color:var(--navy-dim)}
+  .section--sky .section-label{color:var(--sky)} .section--sky .dot{background:var(--sky)} .section--sky{border-color:var(--sky-dim)}
+  .section--teal .section-label{color:var(--teal)} .section--teal .dot{background:var(--teal)} .section--teal{border-color:var(--teal-dim)}
+  .section--green .section-label{color:var(--green)} .section--green .dot{background:var(--green)} .section--green{border-color:var(--green-dim)}
+  .section--amber .section-label{color:var(--amber)} .section--amber .dot{background:var(--amber)} .section--amber{border-color:var(--amber-dim)}
+  .section--red .section-label{color:var(--red)} .section--red .dot{background:var(--red)} .section--red{border-color:var(--red-dim)}
+
+  .two-col { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  .three-col { display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; }
+
+  .ve-card { background:var(--surface2); border:1px solid var(--border); border-radius:8px; padding:12px 14px; }
+  .ve-card .title { font-weight:700; font-size:12px; margin-bottom:5px; }
+  .ve-card .desc { font-size:11px; color:var(--text-dim); line-height:1.55; }
+  .ve-card--navy   { border-left:3px solid var(--navy); }
+  .ve-card--sky    { border-left:3px solid var(--sky); }
+  .ve-card--teal   { border-left:3px solid var(--teal); }
+  .ve-card--green  { border-left:3px solid var(--green); }
+  .ve-card--amber  { border-left:3px solid var(--amber); }
+
+  /* Phase pipeline */
+  .phase-pipe { display:flex; align-items:stretch; gap:0; overflow-x:auto; }
+  .phase-box {
+    flex:1; min-width:130px;
+    border:1px solid var(--border); border-radius:8px;
+    padding:14px 14px 12px; text-align:center;
+    background:var(--surface2);
+  }
+  .phase-num { font-family:var(--font-mono); font-size:11px; font-weight:700; margin-bottom:5px; }
+  .phase-name { font-size:13px; font-weight:700; margin-bottom:5px; }
+  .phase-detail { font-size:10px; color:var(--text-dim); line-height:1.4; }
+  .phase-box--1 { border-color:var(--navy-dim); }  .phase-box--1 .phase-num{color:var(--navy)}
+  .phase-box--2 { border-color:var(--sky-dim); }   .phase-box--2 .phase-num{color:var(--sky)}
+  .phase-box--3 { border-color:var(--amber-dim); } .phase-box--3 .phase-num{color:var(--amber)}
+  .phase-box--4 { border-color:var(--green-dim); } .phase-box--4 .phase-num{color:var(--green)}
+  .phase-box--5 { border-color:var(--teal-dim); }  .phase-box--5 .phase-num{color:var(--teal)}
+  .phase-box--6 { border-color:var(--red-dim); }   .phase-box--6 .phase-num{color:var(--red)}
+  .pipe-arrow { display:flex; align-items:center; padding:0 5px; color:var(--border-bright); font-size:18px; flex-shrink:0; }
+
+  /* Timeline */
+  .timeline { list-style:none; }
+  .tl-item { display:flex; gap:12px; padding:10px 0; border-bottom:1px solid var(--border); }
+  .tl-item:last-child { border-bottom:none; }
+  .tl-week { font-family:var(--font-mono); font-size:10px; font-weight:700; color:var(--sky); background:var(--sky-dim); border:1px solid var(--sky); padding:3px 8px; border-radius:4px; height:fit-content; white-space:nowrap; flex-shrink:0; }
+  .tl-focus { font-weight:700; font-size:12px; margin-bottom:2px; }
+  .tl-reason { font-size:11px; color:var(--text-dim); }
+
+  /* Rules table */
+  .rules-split { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-top:8px; }
+  .rule-group-title { font-weight:700; font-size:12px; margin-bottom:8px; }
+  .rule-list { list-style:none; font-size:11px; line-height:1.8; color:var(--text-dim); }
+  .rule-list li { padding-left:18px; position:relative; }
+  .rule-list li::before { position:absolute; left:0; font-weight:700; }
+  .rule-list--never li::before { content:'✗'; color:var(--red); }
+  .rule-list--always li::before { content:'✓'; color:var(--green); }
+  .rule-list li strong { color:var(--text); }
+
+  .flow-arrow { display:flex; justify-content:center; align-items:center; gap:8px; color:var(--text-dim); font-family:var(--font-mono); font-size:11px; padding:2px 0; }
+  .flow-arrow svg { width:18px; height:18px; fill:none; stroke:var(--border-bright); stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
+  .callout { background:var(--surface2); border:1px solid var(--border); border-left:3px solid var(--navy); border-radius:0 8px 8px 0; padding:12px 16px; font-size:12px; line-height:1.6; color:var(--text-dim); }
+  .callout strong { color:var(--text); }
+
+  @media (max-width:860px) { body{padding:24px 16px;} .two-col,.three-col{grid-template-columns:1fr;} .phase-pipe{flex-wrap:wrap;gap:8px;} .pipe-arrow{display:none;} .rules-split{grid-template-columns:1fr;} }
+</style>
+</head>
+<body>
+
+<h1>Existing Repo</h1>
+<p class="subtitle">analyze · preserve conventions · setup guardrails · best practices</p>
+
+<div class="diagram">
+
+  <!-- Core Principle -->
+  <div class="section section--navy section--hero" style="--i:0">
+    <div class="section-label"><span class="dot"></span> Core Principle</div>
+    <div class="callout">
+      <strong>Understand before modifying.</strong> Existing repos have conventions, patterns, and history. Your job is to work within them — not reorganize them. Always run the full analysis before making any changes.
+    </div>
+  </div>
+
+  <div class="flow-arrow" style="--i:1">
+    <svg viewBox="0 0 20 20"><path d="M10 4 L10 16 M6 12 L10 16 L14 12"/></svg>
+    executed as
+  </div>
+
+  <!-- Phase Pipeline -->
+  <div class="section section--sky" style="--i:2">
+    <div class="section-label"><span class="dot"></span> Six-Phase Workflow</div>
+    <div class="phase-pipe">
+      <div class="phase-box phase-box--1">
+        <div class="phase-num">PHASE 1</div>
+        <div class="phase-name">Repository Analysis</div>
+        <div class="phase-detail">git status · tech stack detection · structure type · directory mapping · entry points</div>
+      </div>
+      <div class="pipe-arrow">→</div>
+      <div class="phase-box phase-box--2">
+        <div class="phase-num">PHASE 2</div>
+        <div class="phase-name">Convention Detection</div>
+        <div class="phase-detail">code style · testing setup · CI/CD · docs pattern · formatter config</div>
+      </div>
+      <div class="pipe-arrow">→</div>
+      <div class="phase-box phase-box--3">
+        <div class="phase-num">PHASE 3</div>
+        <div class="phase-name">Guardrails Audit</div>
+        <div class="phase-detail">pre-commit hooks · linting · type checking · commit validation · security scanning</div>
+      </div>
+      <div class="pipe-arrow">→</div>
+      <div class="phase-box phase-box--4">
+        <div class="phase-num">PHASE 4</div>
+        <div class="phase-name">Guardrails Setup</div>
+        <div class="phase-detail">only add missing ones · never overwrite existing · JS: Husky + ESLint · Python: pre-commit</div>
+      </div>
+      <div class="pipe-arrow">→</div>
+      <div class="phase-box phase-box--5">
+        <div class="phase-num">PHASE 5</div>
+        <div class="phase-name">Structure Preservation</div>
+        <div class="phase-detail">respect naming · use existing patterns · match import styles · preserve configs</div>
+      </div>
+      <div class="pipe-arrow">→</div>
+      <div class="phase-box phase-box--6">
+        <div class="phase-num">PHASE 6</div>
+        <div class="phase-name">Analysis Report</div>
+        <div class="phase-detail">repo type · tech stack · guardrails status · conventions · recommendations</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Repo Type Detection + Convention Detection -->
+  <div class="two-col" style="--i:3">
+    <div class="section section--teal">
+      <div class="section-label"><span class="dot"></span> Repo Structure Types</div>
+      <div class="three-col" style="gap:8px">
+        <div class="ve-card ve-card--navy">
+          <div class="title">Monorepo</div>
+          <div class="desc"><code style="font-family:var(--font-mono);font-size:10px">packages/</code> or <code style="font-family:var(--font-mono);font-size:10px">apps/</code> dir · workspaces in package.json</div>
+        </div>
+        <div class="ve-card ve-card--sky">
+          <div class="title">Full-Stack</div>
+          <div class="desc"><code style="font-family:var(--font-mono);font-size:10px">frontend/</code> + <code style="font-family:var(--font-mono);font-size:10px">backend/</code> in same repo</div>
+        </div>
+        <div class="ve-card ve-card--teal">
+          <div class="title">Separate</div>
+          <div class="desc">Only frontend OR backend code. Split repos, separate deploys.</div>
+        </div>
+        <div class="ve-card ve-card--green">
+          <div class="title">Microservices</div>
+          <div class="desc">Multiple <code style="font-family:var(--font-mono);font-size:10px">service-*</code> or domain dirs</div>
+        </div>
+      </div>
+    </div>
+    <div class="section section--amber">
+      <div class="section-label"><span class="dot"></span> Conventions to Detect</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+        <div class="ve-card ve-card--amber" style="padding:8px 10px"><div class="title" style="font-size:11px">Naming</div><div class="desc">camelCase vs snake_case</div></div>
+        <div class="ve-card ve-card--amber" style="padding:8px 10px"><div class="title" style="font-size:11px">File structure</div><div class="desc">feature/ vs type/</div></div>
+        <div class="ve-card ve-card--amber" style="padding:8px 10px"><div class="title" style="font-size:11px">Export style</div><div class="desc">default vs named</div></div>
+        <div class="ve-card ve-card--amber" style="padding:8px 10px"><div class="title" style="font-size:11px">Error handling</div><div class="desc">throw vs return Error</div></div>
+        <div class="ve-card ve-card--amber" style="padding:8px 10px"><div class="title" style="font-size:11px">Testing</div><div class="desc">describe/it vs test()</div></div>
+        <div class="ve-card ve-card--amber" style="padding:8px 10px"><div class="title" style="font-size:11px">Comments</div><div class="desc">JSDoc vs inline</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Never / Always rules -->
+  <div class="section section--red section--recessed" style="--i:4">
+    <div class="section-label"><span class="dot"></span> Structure Preservation Rules</div>
+    <div class="rules-split">
+      <div>
+        <div class="rule-group-title" style="color:var(--red)">Never Do These</div>
+        <ul class="rule-list rule-list--never">
+          <li>Reorganize directory structure</li>
+          <li>Rename files "for consistency"</li>
+          <li>Add new patterns not in codebase</li>
+          <li>Change import styles</li>
+          <li>Change formatting without a formatter config</li>
+          <li>Add dependencies without checking equivalents</li>
+        </ul>
+      </div>
+      <div>
+        <div class="rule-group-title" style="color:var(--green)">Always Do These</div>
+        <ul class="rule-list rule-list--always">
+          <li>Read existing code first — understand patterns</li>
+          <li>Match existing naming conventions</li>
+          <li>Use existing utilities — don't reinvent</li>
+          <li>Follow existing test patterns</li>
+          <li>Preserve existing configs — only add, don't modify</li>
+          <li>Check if similar decision already exists</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Gradual implementation timeline -->
+  <div class="section section--green" style="--i:5">
+    <div class="section-label"><span class="dot"></span> Gradual Guardrails Timeline (Don't Add All At Once)</div>
+    <ul class="timeline">
+      <li class="tl-item"><span class="tl-week">Week 1</span><div><div class="tl-focus">Formatting — Prettier / Ruff</div><div class="tl-reason">Non-breaking, easy wins, builds trust</div></div></li>
+      <li class="tl-item"><span class="tl-week">Week 2</span><div><div class="tl-focus">Linting — ESLint / Ruff</div><div class="tl-reason">Catches obvious issues without blocking workflow</div></div></li>
+      <li class="tl-item"><span class="tl-week">Week 3</span><div><div class="tl-focus">Pre-commit hooks — Husky / pre-commit framework</div><div class="tl-reason">Automates weeks 1–2 checks on every commit</div></div></li>
+      <li class="tl-item"><span class="tl-week">Week 4</span><div><div class="tl-focus">Commit message validation — commitlint</div><div class="tl-reason">Enforces conventional commits for team consistency</div></div></li>
+      <li class="tl-item"><span class="tl-week">Week 5</span><div><div class="tl-focus">Type checking strictness — tsc / mypy</div><div class="tl-reason">Catches runtime errors at compile time</div></div></li>
+      <li class="tl-item"><span class="tl-week">Week 6</span><div><div class="tl-focus">Security scanning — detect-secrets / CodeQL</div><div class="tl-reason">Prevents secret leaks and known vulnerabilities</div></div></li>
+    </ul>
+  </div>
+
+</div>
+</body>
+</html>

@@ -132,3 +132,7 @@ Report which files were created/modified and the one-liner the user can now shar
 ```
 irm 'https://raw.githubusercontent.com/$OWNER/$REPO/main/install.ps1' | iex
 ```
+
+## Diagram
+
+[View diagram](diagram.html)

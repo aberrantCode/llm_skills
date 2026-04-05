@@ -917,3 +917,7 @@ Code → Test → Review → Fix → Commit → Push → PR → Review → Merge
               ↑                              ↑                    ↑
            /code-review                /code-review          /code-review
 ```
+
+## Diagram
+
+[View diagram](diagram.html)

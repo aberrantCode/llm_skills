@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Project Tooling — Skill Diagram</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --font-body: 'Inter', system-ui, sans-serif;
+    --font-mono: 'JetBrains Mono', 'SF Mono', Consolas, monospace;
+
+    --bg: #f5f5f5;
+    --surface: #ffffff;
+    --surface2: #efefef;
+    --surface-elevated: #fafafa;
+    --border: rgba(0, 0, 0, 0.08);
+    --border-bright: rgba(0, 0, 0, 0.18);
+    --text: #111111;
+    --text-dim: #666666;
+
+    --slate: #334155;
+    --slate-dim: rgba(51, 65, 85, 0.08);
+    --teal: #0f766e;
+    --teal-dim: rgba(15, 118, 110, 0.08);
+    --blue: #1d4ed8;
+    --blue-dim: rgba(29, 78, 216, 0.08);
+    --purple: #6d28d9;
+    --purple-dim: rgba(109, 40, 217, 0.08);
+    --orange: #c2410c;
+    --orange-dim: rgba(194, 65, 12, 0.08);
+    --green: #166534;
+    --green-dim: rgba(22, 101, 52, 0.08);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #111111;
+      --surface: #1a1a1a;
+      --surface2: #222222;
+      --surface-elevated: #252525;
+      --border: rgba(255, 255, 255, 0.08);
+      --border-bright: rgba(255, 255, 255, 0.16);
+      --text: #eeeeee;
+      --text-dim: #999999;
+      --slate: #94a3b8;
+      --slate-dim: rgba(148, 163, 184, 0.1);
+      --teal: #2dd4bf;
+      --teal-dim: rgba(45, 212, 191, 0.1);
+      --blue: #60a5fa;
+      --blue-dim: rgba(96, 165, 250, 0.1);
+      --purple: #c084fc;
+      --purple-dim: rgba(192, 132, 252, 0.1);
+      --orange: #fb923c;
+      --orange-dim: rgba(251, 146, 60, 0.1);
+      --green: #4ade80;
+      --green-dim: rgba(74, 222, 128, 0.1);
+    }
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    background-image: repeating-linear-gradient(-45deg, transparent, transparent 40px, var(--border) 40px, var(--border) 41px);
+    color: var(--text);
+    font-family: var(--font-body);
+    padding: 44px 40px;
+    min-height: 100vh;
+  }
+
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+  .animate { animation: fadeUp 0.45s ease-out both; animation-delay: calc(var(--i, 0) * 0.07s); }
+  @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: 0.01ms !important; animation-delay: 0ms !important; } }
+
+  .header { max-width: 1100px; margin: 0 auto 40px; display: flex; align-items: flex-start; gap: 18px; }
+  .icon-box { width: 54px; height: 54px; background: var(--surface); border: 2px solid var(--border-bright); border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 26px; flex-shrink: 0; box-shadow: 2px 2px 0 var(--border-bright); }
+  h1 { font-size: 36px; font-weight: 700; letter-spacing: -0.5px; line-height: 1.1; margin-bottom: 6px; }
+  .subtitle { color: var(--text-dim); font-size: 13px; font-family: var(--font-mono); }
+
+  .diagram { display: grid; grid-template-columns: 1fr; gap: 20px; max-width: 1100px; margin: 0 auto; }
+
+  .section { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 22px 26px; box-shadow: 2px 2px 0 var(--border); }
+  .section--hero { background: var(--surface-elevated); border-color: var(--border-bright); box-shadow: 3px 3px 0 var(--border-bright); padding: 28px 32px; }
+  .section--recessed { background: var(--surface2); box-shadow: inset 1px 1px 3px var(--border); }
+
+  .section-label { font-family: var(--font-mono); font-size: 10.5px; font-weight: 500; text-transform: uppercase; letter-spacing: 1.6px; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+  .dot { width: 8px; height: 8px; border-radius: 2px; display: inline-block; flex-shrink: 0; }
+
+  .section--slate  { border-left: 3px solid var(--slate); }  .section--slate  .section-label { color: var(--slate); }  .section--slate  .dot { background: var(--slate); }
+  .section--teal   { border-left: 3px solid var(--teal); }   .section--teal   .section-label { color: var(--teal); }   .section--teal   .dot { background: var(--teal); }
+  .section--blue   { border-left: 3px solid var(--blue); }   .section--blue   .section-label { color: var(--blue); }   .section--blue   .dot { background: var(--blue); }
+  .section--purple { border-left: 3px solid var(--purple); } .section--purple .section-label { color: var(--purple); } .section--purple .dot { background: var(--purple); }
+  .section--orange { border-left: 3px solid var(--orange); } .section--orange .section-label { color: var(--orange); } .section--orange .dot { background: var(--orange); }
+  .section--green  { border-left: 3px solid var(--green); }  .section--green  .section-label { color: var(--green); }  .section--green  .dot { background: var(--green); }
+
+  /* Tool verification grid */
+  .tool-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+  .tool-card { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; }
+  .tool-card .tool-name { font-weight: 700; font-size: 13px; margin-bottom: 4px; }
+  .tool-card .tool-pkg  { font-family: var(--font-mono); font-size: 10px; color: var(--text-dim); margin-bottom: 8px; }
+  .tool-card .tool-cmds { list-style: none; font-size: 11.5px; }
+  .tool-card .tool-cmds li { font-family: var(--font-mono); font-size: 10.5px; color: var(--text-dim); padding: 2px 0; }
+  .tool-card .tool-cmds li::before { content: '$ '; color: var(--green); }
+  .tool-card--gh     { border-top: 3px solid var(--slate); }
+  .tool-card--vercel { border-top: 3px solid var(--blue); }
+  .tool-card--supa   { border-top: 3px solid var(--teal); }
+  .tool-card--render { border-top: 3px solid var(--orange); }
+
+  /* Platform decision table */
+  .platform-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  .platform-table th { font-family: var(--font-mono); font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: var(--text-dim); padding: 8px 12px; text-align: left; border-bottom: 2px solid var(--border-bright); }
+  .platform-table td { padding: 9px 12px; border-bottom: 1px solid var(--border); color: var(--text-dim); vertical-align: middle; }
+  .platform-table td:first-child { font-weight: 600; color: var(--text); font-family: var(--font-mono); font-size: 11.5px; }
+  .platform-table tr:last-child td { border-bottom: none; }
+  .badge-td { display: inline-block; background: var(--surface2); border: 1px solid var(--border-bright); border-radius: 4px; padding: 2px 8px; font-family: var(--font-mono); font-size: 10.5px; font-weight: 600; }
+  .badge-td--blue   { color: var(--blue); border-color: var(--blue); background: var(--blue-dim); }
+  .badge-td--orange { color: var(--orange); border-color: var(--orange); background: var(--orange-dim); }
+
+  /* CI/CD pipeline */
+  .pipeline { display: flex; align-items: center; gap: 0; overflow-x: auto; padding-bottom: 4px; }
+  .pipe-step { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 12px 16px; min-width: 140px; flex-shrink: 0; text-align: center; box-shadow: 1px 1px 0 var(--border); }
+  .pipe-step .ps-label { font-family: var(--font-mono); font-size: 9.5px; color: var(--text-dim); margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.8px; }
+  .pipe-step .ps-name  { font-weight: 600; font-size: 12.5px; }
+  .pipe-step .ps-code  { font-family: var(--font-mono); font-size: 10px; color: var(--text-dim); margin-top: 3px; }
+  .pipe-arrow { color: var(--text-dim); font-size: 18px; padding: 0 4px; flex-shrink: 0; }
+  .pipe-step--gh     .ps-label { color: var(--slate); }
+  .pipe-step--vercel .ps-label { color: var(--blue); }
+  .pipe-step--supa   .ps-label { color: var(--teal); }
+
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+  .node-list { list-style: none; font-size: 12px; line-height: 1.9; }
+  .node-list li { padding-left: 16px; position: relative; color: var(--text-dim); }
+  .node-list li::before { content: '›'; color: var(--slate); font-weight: 700; position: absolute; left: 0; }
+  .node-list code { font-family: var(--font-mono); font-size: 10.5px; background: var(--slate-dim); color: var(--slate); padding: 1px 5px; border-radius: 3px; }
+  .node-list strong { color: var(--text); }
+
+  .flow-arrow { display: flex; justify-content: center; align-items: center; gap: 8px; color: var(--text-dim); font-family: var(--font-mono); font-size: 11px; padding: 2px 0; }
+  .flow-arrow svg { width: 18px; height: 18px; fill: none; stroke: var(--border-bright); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+  .callout { background: var(--surface2); border: 1px solid var(--border); border-left: 3px solid var(--slate); border-radius: 0 8px 8px 0; padding: 13px 18px; font-size: 12.5px; line-height: 1.65; color: var(--text-dim); box-shadow: 1px 1px 0 var(--border); }
+  .callout strong { color: var(--text); }
+  .callout code { font-family: var(--font-mono); font-size: 11px; background: var(--slate-dim); color: var(--slate); padding: 1px 5px; border-radius: 3px; }
+
+  @media (max-width: 768px) {
+    body { padding: 20px; }
+    .tool-grid { grid-template-columns: 1fr 1fr; }
+    .two-col { grid-template-columns: 1fr; }
+    .pipeline { flex-wrap: wrap; gap: 8px; }
+    .pipe-arrow { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header animate" style="--i:0">
+  <div class="icon-box">⚙️</div>
+  <div>
+    <h1>Project Tooling</h1>
+    <p class="subtitle">project-tooling skill &mdash; gh, vercel, supabase, render CLI + deployment setup</p>
+  </div>
+</div>
+
+<div class="diagram">
+
+  <!-- Required CLI Tools -->
+  <div class="section section--hero animate" style="--i:1">
+    <div class="section-label"><span class="dot" style="background:var(--text-dim)"></span> Required CLI Tools — Verify Before Starting Any Project</div>
+    <div class="tool-grid">
+      <div class="tool-card tool-card--gh">
+        <div class="tool-name">GitHub CLI</div>
+        <div class="tool-pkg">brew install gh</div>
+        <ul class="tool-cmds">
+          <li>gh --version</li>
+          <li>gh auth status</li>
+          <li>gh auth login</li>
+        </ul>
+      </div>
+      <div class="tool-card tool-card--vercel">
+        <div class="tool-name">Vercel CLI</div>
+        <div class="tool-pkg">npm i -g vercel</div>
+        <ul class="tool-cmds">
+          <li>vercel --version</li>
+          <li>vercel whoami</li>
+          <li>vercel login</li>
+        </ul>
+      </div>
+      <div class="tool-card tool-card--supa">
+        <div class="tool-name">Supabase CLI</div>
+        <div class="tool-pkg">brew install supabase/tap/supabase</div>
+        <ul class="tool-cmds">
+          <li>supabase --version</li>
+          <li>supabase projects list</li>
+          <li>supabase login</li>
+        </ul>
+      </div>
+      <div class="tool-card tool-card--render">
+        <div class="tool-name">Render API</div>
+        <div class="tool-pkg">RENDER_API_KEY env var</div>
+        <ul class="tool-cmds">
+          <li>render --version</li>
+          <li>export RENDER_API_KEY=</li>
+          <li>gh secret set RENDER_API_KEY</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Platform Selection -->
+  <div class="section section--slate animate" style="--i:2">
+    <div class="section-label"><span class="dot"></span> Platform Selection by Stack</div>
+    <table class="platform-table">
+      <thead><tr><th>Stack</th><th>Default Platform</th><th>Action Required</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>Next.js / Node.js</td>
+          <td><span class="badge-td badge-td--blue">Vercel</span></td>
+          <td>Connect Git repo via <code style="font-family:var(--font-mono);font-size:10.5px">vercel link</code> or Vercel dashboard → import repository</td>
+        </tr>
+        <tr>
+          <td>Python (FastAPI, Flask)</td>
+          <td><span class="badge-td badge-td--orange">Render</span></td>
+          <td>Get API key from user → connect Git → configure web service or background worker</td>
+        </tr>
+        <tr>
+          <td>Static Sites</td>
+          <td><span class="badge-td badge-td--blue">Vercel</span> or Cloudflare Pages</td>
+          <td>Connect Git repo to either platform. Auto-deploy on push.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="flow-arrow animate" style="--i:3">
+    <svg viewBox="0 0 20 20"><path d="M10 4 L10 16 M6 12 L10 16 L14 12"/></svg>
+    deployment pipeline
+  </div>
+
+  <!-- CI/CD Pipeline -->
+  <div class="section section--blue animate" style="--i:4">
+    <div class="section-label"><span class="dot"></span> Automated Deployment Pipeline (GitHub Actions)</div>
+    <div class="pipeline">
+      <div class="pipe-step pipe-step--gh">
+        <div class="ps-label">Push</div>
+        <div class="ps-name">Git Commit</div>
+        <div class="ps-code">git push origin main</div>
+      </div>
+      <div class="pipe-arrow">→</div>
+      <div class="pipe-step pipe-step--gh">
+        <div class="ps-label">CI Trigger</div>
+        <div class="ps-name">GitHub Actions</div>
+        <div class="ps-code">on: push branches: [main]</div>
+      </div>
+      <div class="pipe-arrow">→</div>
+      <div class="pipe-step pipe-step--vercel">
+        <div class="ps-label">Frontend</div>
+        <div class="ps-name">Vercel Deploy</div>
+        <div class="ps-code">amondnet/vercel-action</div>
+      </div>
+      <div class="pipe-arrow">→</div>
+      <div class="pipe-step pipe-step--supa">
+        <div class="ps-label">Database</div>
+        <div class="ps-name">Supabase Migrate</div>
+        <div class="ps-code">supabase db push</div>
+      </div>
+      <div class="pipe-arrow">→</div>
+      <div class="pipe-step pipe-step--gh">
+        <div class="ps-label">Result</div>
+        <div class="ps-name">Live Production</div>
+        <div class="ps-code">preview on PRs</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Supabase + GitHub sections -->
+  <div class="two-col animate" style="--i:5">
+    <div class="section section--teal">
+      <div class="section-label"><span class="dot"></span> Supabase Setup</div>
+      <ul class="node-list">
+        <li><strong>New project</strong> — <code>supabase projects create</code> → <code>supabase link --project-ref</code></li>
+        <li><strong>Local dev</strong> — <code>supabase start</code> / <code>stop</code> / <code>db reset</code></li>
+        <li><strong>Migrations</strong> — <code>supabase migration new &lt;name&gt;</code> → <code>supabase db push</code></li>
+        <li><strong>Types</strong> — <code>supabase gen types typescript --local &gt; src/types/database.ts</code></li>
+        <li><strong>Pull remote schema</strong> — <code>supabase db pull</code></li>
+        <li><strong>Rule</strong> — always develop locally first, never direct prod DB changes</li>
+      </ul>
+    </div>
+    <div class="section section--slate">
+      <div class="section-label"><span class="dot"></span> GitHub Repository Setup</div>
+      <ul class="node-list">
+        <li><strong>Create &amp; push</strong> — <code>gh repo create &lt;name&gt; --private --source=. --push</code></li>
+        <li><strong>Branch protection</strong> — require PR reviews + CI status checks on main</li>
+        <li><strong>Secrets</strong> — <code>gh secret set VERCEL_TOKEN</code>, <code>SUPABASE_ACCESS_TOKEN</code></li>
+        <li><strong>Default branch</strong> — <code>gh repo edit --default-branch main</code></li>
+        <li><strong>Anti-pattern</strong> — no hardcoded secrets, no manual deploys, no direct prod changes</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- npm scripts -->
+  <div class="section section--green animate" style="--i:6">
+    <div class="section-label"><span class="dot"></span> Standard package.json Scripts</div>
+    <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap: 10px;">
+      <div style="background:var(--surface2); border:1px solid var(--border); border-radius:7px; padding:12px; font-family:var(--font-mono); font-size:11px; color:var(--text-dim);">
+        <div style="color:var(--green); font-weight:600; margin-bottom:6px">Tooling</div>
+        <div>"verify-tools": "./scripts/verify-tooling.sh"</div>
+      </div>
+      <div style="background:var(--surface2); border:1px solid var(--border); border-radius:7px; padding:12px; font-family:var(--font-mono); font-size:11px; color:var(--text-dim);">
+        <div style="color:var(--blue); font-weight:600; margin-bottom:6px">Deploy</div>
+        <div>"deploy:preview": "vercel"<br>"deploy:prod": "vercel --prod"</div>
+      </div>
+      <div style="background:var(--surface2); border:1px solid var(--border); border-radius:7px; padding:12px; font-family:var(--font-mono); font-size:11px; color:var(--text-dim);">
+        <div style="color:var(--teal); font-weight:600; margin-bottom:6px">Database</div>
+        <div>"db:start": "supabase start"<br>"db:reset": "supabase db reset"<br>"db:migrate": "supabase db push"<br>"db:types": "supabase gen types..."</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Anti-patterns callout -->
+  <div class="section section--recessed animate" style="--i:7">
+    <div class="callout">
+      <strong>Anti-patterns:</strong> No hardcoded secrets — use CLI env or GitHub secrets &mdash; automate deploys via CI/CD, never manual &mdash; always develop Supabase locally first &mdash; use migrations for schema changes, never direct DB edits &mdash; require branch protection (PR reviews + CI checks) &mdash; keep dev/staging/prod separate.
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

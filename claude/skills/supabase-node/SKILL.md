@@ -831,3 +831,7 @@ describe('Posts API', () => {
 - **No request logging** - Add morgan or pino
 - **Blocking the event loop** - Use async throughout
 - **Service key in responses** - Never expose
+
+## Diagram
+
+[View diagram](diagram.html)

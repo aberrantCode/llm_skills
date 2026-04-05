@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Remote PowerShell Installer — Skill Diagram</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --font-body: 'Nunito', system-ui, sans-serif;
+    --font-mono: 'Fira Code', Consolas, monospace;
+    --bg: #0f1117;
+    --surface: #161c2b;
+    --surface2: #1d2540;
+    --border: rgba(100,160,255,0.1);
+    --border-bright: rgba(100,160,255,0.22);
+    --text: #dce8ff;
+    --text-dim: #7a90b8;
+    --blue: #6ab0ff;
+    --blue-dim: rgba(106,176,255,0.1);
+    --cyan: #4dd9e8;
+    --cyan-dim: rgba(77,217,232,0.1);
+    --green: #5ce6a0;
+    --green-dim: rgba(92,230,160,0.1);
+    --orange: #ffb347;
+    --orange-dim: rgba(255,179,71,0.1);
+    --red: #ff6b7a;
+    --red-dim: rgba(255,107,122,0.1);
+    --purple: #c9a0f5;
+    --purple-dim: rgba(201,160,245,0.1);
+  }
+  *, *::before, *::after { box-sizing: border-box; margin:0; padding:0; }
+  body {
+    font-family: var(--font-body);
+    background: var(--bg);
+    background-image:
+      radial-gradient(at 80% 5%, rgba(106,176,255,0.07) 0%, transparent 45%),
+      radial-gradient(at 10% 90%, rgba(92,230,160,0.06) 0%, transparent 45%);
+    color: var(--text);
+    padding: 44px 24px 72px;
+    min-height: 100vh;
+  }
+  .page { max-width: 960px; margin: 0 auto; }
+
+  .header { margin-bottom: 48px; text-align: center; }
+  .badge {
+    display: inline-flex; align-items: center; gap: 7px;
+    background: var(--blue-dim); border: 1px solid var(--border-bright);
+    border-radius: 20px; padding: 4px 14px;
+    font-family: var(--font-mono); font-size: 11px; color: var(--blue);
+    margin-bottom: 16px;
+  }
+  h1 { font-size: 38px; font-weight: 800; letter-spacing: -0.03em; margin-bottom: 12px; }
+  .subtitle { color: var(--text-dim); font-size: 14px; line-height: 1.7; max-width: 640px; margin: 0 auto; }
+
+  /* TWO COLUMN LAYOUT */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 24px; }
+  .artifact-section {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+  }
+  .artifact-header {
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 10px;
+  }
+  .artifact-num {
+    width: 26px; height: 26px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-mono); font-size: 11px; font-weight: 600;
+    flex-shrink: 0;
+  }
+  .artifact-title { font-size: 14px; font-weight: 700; }
+
+  .steps-list { padding: 14px; display: flex; flex-direction: column; gap: 2px; }
+  .step-item {
+    display: flex; align-items: flex-start; gap: 10px;
+    padding: 10px 12px; border-radius: 8px;
+    font-size: 12.5px; line-height: 1.5;
+    transition: background 0.15s;
+  }
+  .step-item:hover { background: var(--surface2); }
+  .step-n {
+    font-family: var(--font-mono); font-size: 10px; font-weight: 600;
+    min-width: 22px; text-align: right; padding-top: 1px; flex-shrink: 0;
+  }
+  .step-text { color: var(--text-dim); }
+  .step-text strong { color: var(--text); }
+
+  /* Color classes */
+  .part1 .artifact-header { background: rgba(77,217,232,0.06); }
+  .part1 .artifact-num { background: var(--cyan-dim); color: var(--cyan); border: 1px solid var(--cyan); }
+  .part1 .artifact-title { color: var(--cyan); }
+  .part1 .step-n { color: var(--cyan); }
+  .part2 .artifact-header { background: rgba(201,160,245,0.06); }
+  .part2 .artifact-num { background: var(--purple-dim); color: var(--purple); border: 1px solid var(--purple); }
+  .part2 .artifact-title { color: var(--purple); }
+  .part2 .step-n { color: var(--purple); }
+
+  /* SAFEGUARDS */
+  .safeguards {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 24px;
+    margin-bottom: 24px;
+  }
+  .safeguards-title {
+    font-size: 15px; font-weight: 700; margin-bottom: 16px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .sg-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .sg-item {
+    display: flex; align-items: flex-start; gap: 9px;
+    background: var(--surface2); border-radius: 8px; padding: 10px 12px;
+    font-size: 12px; line-height: 1.5;
+  }
+  .sg-icon { flex-shrink: 0; font-size: 13px; }
+  .sg-label { color: var(--text-dim); }
+  .sg-label strong { color: var(--text); display: block; font-size: 12px; margin-bottom: 2px; }
+
+  /* COMMON MISTAKES */
+  .mistakes {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+  }
+  .mistakes-header {
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--border);
+    font-size: 14px; font-weight: 700; color: var(--orange);
+  }
+  .mistake-row {
+    display: grid; grid-template-columns: 1fr 1fr;
+    border-bottom: 1px solid var(--border);
+    font-size: 12px;
+  }
+  .mistake-row:last-child { border-bottom: none; }
+  .wrong { padding: 11px 16px; color: var(--red); border-right: 1px solid var(--border); }
+  .right { padding: 11px 16px; color: var(--green); }
+  .wrong::before { content: "✗ "; }
+  .right::before { content: "✓ "; }
+
+  /* PREREQ */
+  .prereq-bar {
+    background: var(--red-dim);
+    border: 1px solid var(--red);
+    border-radius: 8px; padding: 12px 18px;
+    margin-bottom: 24px; font-size: 13px;
+    display: flex; align-items: flex-start; gap: 10px;
+  }
+  .prereq-icon { font-size: 16px; flex-shrink: 0; }
+  .prereq-text { color: var(--text-dim); line-height: 1.55; }
+  .prereq-text strong { color: var(--red); }
+
+  @media (max-width: 640px) {
+    .two-col { grid-template-columns: 1fr; }
+    .sg-grid { grid-template-columns: 1fr; }
+    .mistake-row { grid-template-columns: 1fr; }
+    h1 { font-size: 28px; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="header">
+    <div class="badge">⚡ SKILL / REMOTE-INSTALLER</div>
+    <h1>Remote PowerShell Installer</h1>
+    <p class="subtitle">Domain expertise for <code style="font-family:var(--font-mono);color:var(--blue);font-size:13px">install.ps1</code> and the in-app self-update block — covering auto-elevation, GitHub Releases API, safe download-before-delete ordering, .env backup/merge, and module installation.</p>
+  </div>
+
+  <div class="prereq-bar">
+    <span class="prereq-icon">⚠</span>
+    <span class="prereq-text"><strong>Critical Prerequisite:</strong> GitHub Releases must be published with <code style="font-family:var(--font-mono);font-size:11.5px">gh release create</code>. The <code style="font-family:var(--font-mono);font-size:11.5px">/releases/latest</code> API returns 404 if only git tags exist — never assume a tag equals a release.</span>
+  </div>
+
+  <div class="two-col">
+    <!-- PART 1: install.ps1 -->
+    <div class="artifact-section part1">
+      <div class="artifact-header">
+        <div class="artifact-num">1</div>
+        <div class="artifact-title">install.ps1 — Repo Root Bootstrap</div>
+      </div>
+      <div class="steps-list">
+        <div class="step-item">
+          <span class="step-n">S1</span>
+          <span class="step-text"><strong>Auto-elevation</strong> — re-launches via <code style="font-family:var(--font-mono);font-size:10.5px">Start-Process pwsh -Verb RunAs</code>, never sudo</span>
+        </div>
+        <div class="step-item">
+          <span class="step-n">S2</span>
+          <span class="step-text"><strong>Resolve latest release</strong> — GitHub API <code style="font-family:var(--font-mono);font-size:10.5px">/releases/latest</code> wrapped in try/catch → exit 0 on network failure</span>
+        </div>
+        <div class="step-item">
+          <span class="step-n">S3</span>
+          <span class="step-text"><strong>Compare versions</strong> — reads <code style="font-family:var(--font-mono);font-size:10.5px">version.txt</code>; skips install if already up to date, jumps to run prompt</span>
+        </div>
+        <div class="step-item">
+          <span class="step-n">S4</span>
+          <span class="step-text"><strong>Backup .env into memory</strong> — BEFORE any directory deletion; content held in <code style="font-family:var(--font-mono);font-size:10.5px">$envBackup</code></span>
+        </div>
+        <div class="step-item">
+          <span class="step-n">S5</span>
+          <span class="step-text"><strong>Download ZIP first</strong> — Invoke-WebRequest to TEMP; on failure leaves old install intact and exits 1</span>
+        </div>
+        <div class="step-item">
+          <span class="step-n">S6</span>
+          <span class="step-text"><strong>Remove old, extract new</strong> — Remove-Item only AFTER successful download; detect extracted root dynamically</span>
+        </div>
+        <div class="step-item">
+          <span class="step-n">S7</span>
+          <span class="step-text"><strong>Write version.txt</strong> — after successful extract, records installed version string</span>
+        </div>
+        <div class="step-item">
+          <span class="step-n">S8</span>
+          <span class="step-text"><strong>Restore &amp; merge .env</strong> — additive-only algorithm: backup values always win; new keys from .env.example added transparently</span>
+        </div>
+        <div class="step-item">
+          <span class="step-n">S9</span>
+          <span class="step-text"><strong>Install PS module</strong> — only if <code style="font-family:var(--font-mono);font-size:10.5px">Get-Module -ListAvailable</code> returns empty; omit block if no module needed</span>
+        </div>
+        <div class="step-item">
+          <span class="step-n">S10</span>
+          <span class="step-text"><strong>Run prompt</strong> — gated by <code style="font-family:var(--font-mono);font-size:10.5px">$env:REPO_SKIP_RUN_PROMPT</code> so auto-updates don't double-prompt</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- PART 2: Update-check block -->
+    <div class="artifact-section part2">
+      <div class="artifact-header">
+        <div class="artifact-num">2</div>
+        <div class="artifact-title">Update-Check Block — In-App Script</div>
+      </div>
+      <div class="steps-list">
+        <div class="step-item">
+          <span class="step-n">P1</span>
+          <span class="step-text"><strong>Placement:</strong> immediately after elevation guard, before module imports or UI setup</span>
+        </div>
+        <div class="step-item">
+          <span class="step-n">P2</span>
+          <span class="step-text"><strong>Dev-safe guard:</strong> entire block wrapped in <code style="font-family:var(--font-mono);font-size:10.5px">if (Test-Path $versionFile)</code> — dev/clone environments skipped; no network calls</span>
+        </div>
+        <div class="step-item">
+          <span class="step-n">P3</span>
+          <span class="step-text"><strong>Version compare</strong> — reads local version.txt, calls GitHub API with 5s timeout; silently skips if offline</span>
+        </div>
+        <div class="step-item">
+          <span class="step-n">P4</span>
+          <span class="step-text"><strong>Set skip-run-prompt</strong> — sets <code style="font-family:var(--font-mono);font-size:10.5px">$env:REPO_SKIP_RUN_PROMPT=1</code> before invoking installer; clears after</span>
+        </div>
+        <div class="step-item">
+          <span class="step-n">P5</span>
+          <span class="step-text"><strong>Re-launch &amp; return</strong> — starts new version via Start-Script; <code style="font-family:var(--font-mono);font-size:10.5px">return</code> exits stale instance</span>
+        </div>
+        <div class="step-item">
+          <span class="step-n">P6</span>
+          <span class="step-text"><strong>PSScriptRoot depth:</strong> adjust <code style="font-family:var(--font-mono);font-size:10.5px">..\..\ </code>segments to match actual script depth in repo</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SAFEGUARDS -->
+  <div class="safeguards">
+    <div class="safeguards-title" style="color:var(--orange)">
+      <span>🛡</span> Safeguards Checklist — verify before declaring complete
+    </div>
+    <div class="sg-grid">
+      <div class="sg-item">
+        <span class="sg-icon" style="color:var(--cyan)">⬇</span>
+        <span class="sg-label"><strong>Download-before-delete</strong>ZIP downloaded to TEMP before Remove-Item on install dir</span>
+      </div>
+      <div class="sg-item">
+        <span class="sg-icon" style="color:var(--cyan)">💾</span>
+        <span class="sg-label"><strong>.env backup first</strong>Read into $envBackup before any directory removal</span>
+      </div>
+      <div class="sg-item">
+        <span class="sg-icon" style="color:var(--green)">🔍</span>
+        <span class="sg-label"><strong>Dynamic root detection</strong>Get-ChildItem -Directory | Select-Object -First 1; never hardcode zip folder name</span>
+      </div>
+      <div class="sg-item">
+        <span class="sg-icon" style="color:var(--green)">🌐</span>
+        <span class="sg-label"><strong>Offline = exit 0</strong>API unreachable → clean exit; being offline is not an error</span>
+      </div>
+      <div class="sg-item">
+        <span class="sg-icon" style="color:var(--purple)">🔒</span>
+        <span class="sg-label"><strong>Dev-safe update check</strong>Test-Path $versionFile guard; dev clones never trigger network calls</span>
+      </div>
+      <div class="sg-item">
+        <span class="sg-icon" style="color:var(--purple)">🏷</span>
+        <span class="sg-label"><strong>Repo-unique env var</strong>Use ${REPO}_SKIP_RUN_PROMPT to avoid collisions across multiple installed apps</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- MISTAKES -->
+  <div class="mistakes">
+    <div class="mistakes-header">⚠ Common Mistakes to Avoid</div>
+    <div class="mistake-row">
+      <div class="wrong">Delete install dir before downloading</div>
+      <div class="right">Download first, then delete, then extract</div>
+    </div>
+    <div class="mistake-row">
+      <div class="wrong">Read .env after removing install dir</div>
+      <div class="right">Backup .env into memory before any deletion</div>
+    </div>
+    <div class="mistake-row">
+      <div class="wrong">Hardcode extracted folder name</div>
+      <div class="right">Get-ChildItem -Directory | Select-Object -First 1</div>
+    </div>
+    <div class="mistake-row">
+      <div class="wrong">exit 1 when GitHub API unreachable</div>
+      <div class="right">exit 0 — being offline is not an error</div>
+    </div>
+    <div class="mistake-row">
+      <div class="wrong">Apply update check before elevation</div>
+      <div class="right">Elevation guard must come first</div>
+    </div>
+    <div class="mistake-row">
+      <div class="wrong">Overwrite user .env values on update</div>
+      <div class="right">Merge algorithm: backup values always win</div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

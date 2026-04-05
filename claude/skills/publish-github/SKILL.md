@@ -530,3 +530,7 @@ gh repo view --web
 | `gitleaks protect` crashes (version mismatch) | Fall back to `gitleaks detect`; note the issue |
 | Existing repo has uncommitted changes | Warn; ask user to commit or stash before proceeding |
 | `git init --initial-branch` flag unsupported | Fall back to `git init` + `git symbolic-ref HEAD refs/heads/main` |
+
+## Diagram
+
+[View diagram](diagram.html)

@@ -30,3 +30,7 @@ Spec: docs/features/<spec-name>.md
 
 **Reference:** `docs/workflow/SDLC.md` — full 6-phase Feature Track
 **Per-phase checklist:** `docs/workflow/feature-checklist.md`
+
+## Diagram
+
+[View diagram](diagram.html)

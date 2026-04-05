@@ -324,3 +324,7 @@ export async function llmCallWithMetrics<T>(
 - ❌ No evaluation suite - measure accuracy over time
 - ❌ Using LLM for deterministic logic - use code for validation, auth, math
 - ❌ Giant monolithic prompts - compose smaller focused prompts
+
+## Diagram
+
+[View diagram](diagram.html)

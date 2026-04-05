@@ -705,3 +705,7 @@ uvicorn src.main:app --host 0.0.0.0 --port 8000 --workers 4
 - **Missing auth dependency** - Always validate JWT
 - **Not closing sessions** - Use context managers
 - **Blocking I/O in async** - Use async libraries
+
+## Diagram
+
+[View diagram](diagram.html)

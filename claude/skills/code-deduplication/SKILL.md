@@ -539,3 +539,7 @@ export function name(params): ReturnType {
 ```markdown
 | `functionName()` | path/file.ts:line | Does what in plain English | `(params)` |
 ```
+
+## Diagram
+
+[View diagram](diagram.html)
