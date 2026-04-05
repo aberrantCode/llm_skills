@@ -8,8 +8,8 @@ Consolidated archive of custom agents, commands, and skills for Claude Code, Ope
 llm_skills/
 ├── claude/
 │   ├── agents/     # 15 sub-agents invoked via the Task tool
-│   ├── commands/   # 31 slash commands
-│   └── skills/     # 93 domain-specific knowledge modules
+│   ├── commands/   # 26 slash commands
+│   └── skills/     # 89 domain-specific knowledge modules
 ├── codex/
 │   └── skills/     # 65 domain-specific knowledge modules
 └── gemini/         # Google Gemini CLI skills (future)
@@ -86,11 +86,6 @@ Slash commands available globally in Claude Code. Most delegate to a specialized
 | [`/generate-web-diagram`](claude/commands/generate-web-diagram.md) | Generate a beautiful standalone HTML diagram and open it in the browser |
 | [`/plan-review`](claude/commands/plan-review.md) | Visual HTML plan review — current codebase vs. proposed plan with risk assessment |
 | [`/project-recap`](claude/commands/project-recap.md) | Visual HTML project recap — architecture snapshot, decision log, and cognitive debt hotspots |
-| [`/add-feature`](claude/commands/add-feature.md) | Create a new HomeRadar feature spec — interviews user, checks for overlaps, populates template, generates diagram, updates README |
-| [`/analyze-features`](claude/commands/analyze-features.md) | Audit all feature specs in docs/features/ against the current template, CAP-ID standards, open questions, and plan coverage — then request user authorization before making any changes |
-| [`/continue-tasks`](claude/commands/continue-tasks.md) | Run the full HomeRadar project orchestration loop — picks up the next todo task, spawns the appropriate agent, and iterates until all tasks are complete |
-| [`/feature-start`](claude/commands/feature-start.md) | Start a HomeRadar feature — read spec, verify approval, create worktree, scaffold plan |
-| [`/fix-start`](claude/commands/fix-start.md) | Start a HomeRadar bug fix — classify severity, write Fix Brief if SEV-1, create worktree |
 | [`/sync-skills`](claude/commands/sync-skills.md) | Scan the Claude profile and all `C:\development` projects for new/changed skills, copy them into the archive, update this README, and print a change summary |
 
 ---
@@ -116,16 +111,11 @@ Domain-specific knowledge modules loaded into AI context. Claude skills live in 
 | [`commit-hygiene`](claude/skills/commit-hygiene/) | Foundations & Workflow | Atomic commits, PR size limits, commit thresholds, stacked PRs | ✓ | ✓ | |
 | [`git-cleanup`](claude/skills/git-cleanup/) | Foundations & Workflow | Audits and removes stale git worktrees and branches (local + remote origin) that have been merged into `dev` — squash-merge aware, dirty-check protected | ✓ | | |
 | [`guide-assistant`](claude/skills/guide-assistant/) | Foundations & Workflow | Personal assistant for walking the user step-by-step through any markdown file, manual, guide, runbook, or instruction document | ✓ | | |
-| [`feature-start`](claude/skills/feature-start/) | Foundations & Workflow | Use when starting any HomeRadar feature — before reading code, writing plans, or creating a worktree | ✓ | | |
-| [`fix-start`](claude/skills/fix-start/) | Foundations & Workflow | Use when starting any HomeRadar bug fix or regression investigation, before writing any code | ✓ | | |
-| [`pre-pr`](claude/skills/pre-pr/) | Foundations & Workflow | Use before opening any HomeRadar pull request — three self-gates must all pass | ✓ | | |
-| [`retro-fit-spec`](claude/skills/retro-fit-spec/) | Foundations & Workflow | Use when editing a HomeRadar feature spec that has no CAP-IDs in its Capabilities section | ✓ | | |
-| [`spec-align`](claude/skills/spec-align/) | Foundations & Workflow | Use when the user provides a HomeRadar feature spec name and wants the codebase brought into full alignment with that spec — gap analysis through implementation, tests, and merge | ✓ | | |
-| [`analyze-features`](claude/skills/analyze-features/) | Foundations & Workflow | Audit all feature specs in docs/features/ against the current template, CAP-ID standards, open questions, logical gaps, and plan coverage — then request user authorization before making any changes | ✓ | | |
-| [`continue-tasks`](claude/skills/continue-tasks/) | Foundations & Workflow | Run the full HomeRadar project orchestration loop — picks up the next todo task, spawns the appropriate agent, and iterates until all tasks are complete | ✓ | | |
-| [`reinit`](claude/skills/reinit/) | Foundations & Workflow | Archive legacy plans and tasks, normalize all feature specs to the current template, then launch the full orchestration loop | ✓ | | |
-| [`review-tasks`](claude/skills/review-tasks/) | Foundations & Workflow | Dry-run project status report — read-only snapshot of all feature specs, plans, and task progress without spawning agents or modifying files | ✓ | | |
-| [`update-tasks`](claude/skills/update-tasks/) | Foundations & Workflow | Sync active task files — checks for completion sentinels and updates plan status without re-running any tasks | ✓ | | |
+| [`feature-start`](claude/skills/feature-start/) | Foundations & Workflow | Use when starting any HomeRadar feature — before reading code, writing plans, or creating a worktree — ships with `/feature-start` | ✓ | | |
+| [`fix-start`](claude/skills/fix-start/) | Foundations & Workflow | Use when starting any HomeRadar bug fix or regression investigation, before writing any code — ships with `/fix-start` | ✓ | | |
+| [`pre-pr`](claude/skills/pre-pr/) | Foundations & Workflow | Use before opening any HomeRadar pull request — three self-gates must all pass — ships with `/pre-pr` | ✓ | | |
+| [`retro-fit-spec`](claude/skills/retro-fit-spec/) | Foundations & Workflow | Use when editing a HomeRadar feature spec that has no CAP-IDs in its Capabilities section — ships with `/retro-fit-spec` | ✓ | | |
+| [`spec-align`](claude/skills/spec-align/) | Foundations & Workflow | Use when the user provides a HomeRadar feature spec name and wants the codebase brought into full alignment with that spec — gap analysis through implementation, tests, and merge — ships with `/spec-align` | ✓ | | |
 | [`typescript`](claude/skills/typescript/) | Languages & Runtimes | TypeScript strict mode with eslint and jest | ✓ | ✓ | |
 | [`python`](claude/skills/python/) | Languages & Runtimes | Python development with ruff, mypy, pytest — TDD and type safety | ✓ | ✓ | |
 | [`nodejs-backend`](claude/skills/nodejs-backend/) | Languages & Runtimes | Node.js backend patterns with Express/Fastify, repository pattern | ✓ | ✓ | |
@@ -171,7 +161,7 @@ Domain-specific knowledge modules loaded into AI context. Claude skills live in 
 | [`agentic-development`](claude/skills/agentic-development/) | AI & LLM | Build AI agents with Pydantic AI (Python) and Claude SDK (Node.js) | ✓ | ✓ | |
 | [`llm-patterns`](claude/skills/llm-patterns/) | AI & LLM | AI-first application patterns, LLM testing, prompt management | ✓ | ✓ | |
 | [`ai-models`](claude/skills/ai-models/) | AI & LLM | Latest AI models reference — Claude, OpenAI, Gemini, Eleven Labs, Replicate | ✓ | ✓ | |
-| [`project-manager`](claude/skills/project-manager/) | AI & LLM | Automated project implementation orchestrator — drives feature-driven development from initial prompt through completed code via typed agents, phased plans, and markdown state files | ✓ | | |
+| [`project-manager`](claude/skills/project-manager/) | AI & LLM | Automated project implementation orchestrator — drives feature-driven development from initial prompt through completed code via typed agents, phased plans, and markdown state files — ships with 5 sub-skills (`reinit`, `continue-tasks`, `update-tasks`, `review-tasks`, `analyze-features`) and 6 commands (`/add-feature`, `/continue-tasks`, `/analyze-features`, `/reinit`, `/update-tasks`, `/review-tasks`) | ✓ | | |
 | [`shopify-apps`](claude/skills/shopify-apps/) | Commerce & Payments | Shopify app development — Remix, Admin API, checkout extensions | ✓ | ✓ | |
 | [`woocommerce`](claude/skills/woocommerce/) | Commerce & Payments | WooCommerce REST API — products, orders, customers, webhooks | ✓ | ✓ | |
 | [`medusa`](claude/skills/medusa/) | Commerce & Payments | Medusa headless commerce — modules, workflows, API routes, admin UI | ✓ | ✓ | |
@@ -203,8 +193,8 @@ Domain-specific knowledge modules loaded into AI context. Claude skills live in 
 | Type | Count |
 |------|-------|
 | Agents | 15 |
-| Commands | 31 |
-| Skills (Claude) | 94 |
+| Commands | 26 |
+| Skills (Claude) | 89 |
 | Skills (Codex) | 65 |
 | Skills (Gemini) | 0 |
-| **Total Skills** | **159** |
+| **Total Skills** | **154** |
