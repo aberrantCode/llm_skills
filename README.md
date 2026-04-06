@@ -11,7 +11,7 @@ llm_skills/
 │   ├── commands/   # 27 slash commands
 │   └── skills/     # 90 domain-specific knowledge modules
 ├── codex/
-│   └── skills/     # 65 domain-specific knowledge modules
+│   └── skills/     # 70 domain-specific knowledge modules
 └── gemini/         # Google Gemini CLI skills (future)
 ```
 
@@ -125,7 +125,7 @@ Domain-specific knowledge modules loaded into AI context. Claude skills live in 
 | [`react-native`](claude/skills/react-native/) [(diagram)](claude/skills/react-native/diagram.html) | Frontend Frameworks | React Native and Expo patterns, platform-specific code, list performance, animations, and navigation best practices | ✓ | ✓ | |
 | [`flutter`](claude/skills/flutter/) [(diagram)](claude/skills/flutter/diagram.html) | Frontend Frameworks | Flutter with Riverpod, Freezed, go_router, and mocktail testing | ✓ | ✓ | |
 | [`pwa-development`](claude/skills/pwa-development/) [(diagram)](claude/skills/pwa-development/diagram.html) | Frontend Frameworks | Progressive Web Apps — service workers, caching strategies, offline support, Workbox | ✓ | ✓ | |
-| [`chrome-extension-builder`](claude/skills/chrome-extension-builder/) [(diagram)](claude/skills/chrome-extension-builder/diagram.html) | Frontend Frameworks | Scaffold production-ready Chrome MV3 extensions using WXT + React + TypeScript + shadcn-UI — content scripts, background service workers, side panels, popups, native messaging, and Google Docs/Overleaf integrations | ✓ | | |
+| [`chrome-extension-builder`](claude/skills/chrome-extension-builder/) [(diagram)](claude/skills/chrome-extension-builder/diagram.html) | Frontend Frameworks | Scaffold production-ready Chrome MV3 extensions using WXT + React + TypeScript + shadcn-UI — content scripts, background service workers, side panels, popups, native messaging, and Google Docs/Overleaf integrations | ✓ | ✓ | |
 | [`composition-patterns`](claude/skills/composition-patterns/) [(diagram)](claude/skills/composition-patterns/diagram.html) | Frontend Frameworks | React composition patterns that scale — for refactoring components with boolean prop proliferation and building flexible component libraries | ✓ | | |
 | [`react-best-practices`](claude/skills/react-best-practices/) [(diagram)](claude/skills/react-best-practices/diagram.html) | Frontend Frameworks | React and Next.js performance optimization guidelines from Vercel Engineering — components, data fetching, bundle optimization | ✓ | | |
 | [`android-java`](claude/skills/android-java/) [(diagram)](claude/skills/android-java/diagram.html) | Mobile (Native) | Android Java development with MVVM, ViewBinding, and Espresso testing | ✓ | ✓ | |
@@ -155,14 +155,14 @@ Domain-specific knowledge modules loaded into AI context. Claude skills live in 
 | [`codex-review`](claude/skills/codex-review/) [(diagram)](claude/skills/codex-review/diagram.html) | Code Quality | OpenAI Codex CLI code review with GPT-5.2-Codex, CI/CD integration | ✓ | ✓ | |
 | [`gemini-review`](claude/skills/gemini-review/) [(diagram)](claude/skills/gemini-review/diagram.html) | Code Quality | Google Gemini CLI code review with Gemini 2.5 Pro and 1M token context | ✓ | ✓ | |
 | [`playwright-testing`](claude/skills/playwright-testing/) [(diagram)](claude/skills/playwright-testing/diagram.html) | Code Quality | E2E testing with Playwright — Page Objects, cross-browser, CI/CD integration | ✓ | ✓ | |
-| [`tdd-workflow`](claude/skills/tdd-workflow/) [(diagram)](claude/skills/tdd-workflow/diagram.html) | Code Quality | Enforce TDD when writing features, fixing bugs, or refactoring — Red/Green/Refactor with 80%+ coverage including unit, integration, and E2E | ✓ | | |
+| [`tdd-workflow`](claude/skills/tdd-workflow/) [(diagram)](claude/skills/tdd-workflow/diagram.html) | Code Quality | Enforce TDD when writing features, fixing bugs, or refactoring — Red/Green/Refactor with 80%+ coverage including unit, integration, and E2E | ✓ | ✓ | |
 | [`security`](claude/skills/security/) [(diagram)](claude/skills/security/diagram.html) | Security & Credentials | OWASP security patterns, secrets management, security testing | ✓ | ✓ | |
 | [`credentials`](claude/skills/credentials/) [(diagram)](claude/skills/credentials/diagram.html) | Security & Credentials | Centralized API key management from Access.txt | ✓ | ✓ | |
-| [`security-review`](claude/skills/security-review/) [(diagram)](claude/skills/security-review/diagram.html) | Security & Credentials | Comprehensive security checklist when adding auth, handling user input, working with secrets, API endpoints, or payments | ✓ | | |
+| [`security-review`](claude/skills/security-review/) [(diagram)](claude/skills/security-review/diagram.html) | Security & Credentials | Comprehensive security checklist when adding auth, handling user input, working with secrets, API endpoints, or payments | ✓ | ✓ | |
 | [`agentic-development`](claude/skills/agentic-development/) [(diagram)](claude/skills/agentic-development/diagram.html) | AI & LLM | Build AI agents with Pydantic AI (Python) and Claude SDK (Node.js) | ✓ | ✓ | |
 | [`llm-patterns`](claude/skills/llm-patterns/) [(diagram)](claude/skills/llm-patterns/diagram.html) | AI & LLM | AI-first application patterns, LLM testing, prompt management | ✓ | ✓ | |
 | [`ai-models`](claude/skills/ai-models/) [(diagram)](claude/skills/ai-models/diagram.html) | AI & LLM | Latest AI models reference — Claude, OpenAI, Gemini, Eleven Labs, Replicate | ✓ | ✓ | |
-| [`project-manager`](claude/skills/project-manager/) [(diagram)](claude/skills/project-manager/diagram.html) | AI & LLM | Automated project implementation orchestrator — drives feature-driven development from initial prompt through completed code via typed agents, phased plans, and markdown state files — ships with 5 sub-skills (`reinit`, `continue-tasks`, `update-tasks`, `review-tasks`, `analyze-features`) and 6 commands (`/add-feature`, `/continue-tasks`, `/analyze-features`, `/reinit`, `/update-tasks`, `/review-tasks`) | ✓ | | |
+| [`project-manager`](claude/skills/project-manager/) [(diagram)](claude/skills/project-manager/diagram.html) | AI & LLM | Automated project implementation orchestrator — drives feature-driven development from initial prompt through completed code via typed agents, phased plans, and markdown state files — ships with 5 sub-skills (`reinit`, `continue-tasks`, `update-tasks`, `review-tasks`, `analyze-features`) and 6 commands (`/add-feature`, `/continue-tasks`, `/analyze-features`, `/reinit`, `/update-tasks`, `/review-tasks`) | ✓ | ✓ | |
 | [`shopify-apps`](claude/skills/shopify-apps/) [(diagram)](claude/skills/shopify-apps/diagram.html) | Commerce & Payments | Shopify app development — Remix, Admin API, checkout extensions | ✓ | ✓ | |
 | [`woocommerce`](claude/skills/woocommerce/) [(diagram)](claude/skills/woocommerce/diagram.html) | Commerce & Payments | WooCommerce REST API — products, orders, customers, webhooks | ✓ | ✓ | |
 | [`medusa`](claude/skills/medusa/) [(diagram)](claude/skills/medusa/diagram.html) | Commerce & Payments | Medusa headless commerce — modules, workflows, API routes, admin UI | ✓ | ✓ | |
@@ -180,7 +180,7 @@ Domain-specific knowledge modules loaded into AI context. Claude skills live in 
 | [`add-remote-installer`](claude/skills/add-remote-installer/) [(diagram)](claude/skills/add-remote-installer/diagram.html) | Tooling & DevOps | Add a remote install script (install.ps1) and self-update capability to a PowerShell repository — detects GitHub remote, locates primary app script, applies remote-installer skill | ✓ | | |
 | [`publish-github`](claude/skills/publish-github/) [(diagram)](claude/skills/publish-github/diagram.html) | Tooling & DevOps | End-to-end workflow for publishing a local project as a new GitHub repository — gitleaks secrets-detection hook, .gitignore/.gitattributes, main/dev branch setup, and branch protection rules | ✓ | | |
 | [`remote-installer`](claude/skills/remote-installer/) [(diagram)](claude/skills/remote-installer/diagram.html) | Tooling & DevOps | Domain expertise for implementing a remote PowerShell install script and self-update check — auto-elevation, GitHub Releases API version resolution, safe download ordering, .env backup/merge | ✓ | | |
-| [`skills-manager`](claude/skills/skills-manager/) [(diagram)](claude/skills/skills-manager/diagram.html) | Tooling & DevOps | Full lifecycle management of LLM skills — find, sync, install, update, import, push, search, audit, and backfill diagrams; lifecycle status, versioning, and dependency resolution; all interactions via AskUserQuestion — ships with `/find-skills`, `/sync-skill`, `/install-skill`, `/update-skill`, `/import-skill`, `/backfill-diagrams`, `/search-skill`, `/audit-skills`, `/push-skill` | ✓ | | |
+| [`skills-manager`](claude/skills/skills-manager/) [(diagram)](claude/skills/skills-manager/diagram.html) | Tooling & DevOps | Full lifecycle management of LLM skills — find, sync, install, update, import, push, search, audit, and backfill diagrams; lifecycle status, versioning, and dependency resolution; all interactions via AskUserQuestion — ships with `/find-skills`, `/sync-skill`, `/install-skill`, `/update-skill`, `/import-skill`, `/backfill-diagrams`, `/search-skill`, `/audit-skills`, `/push-skill` | ✓ | ✓ | |
 | [`start-app`](claude/skills/start-app/) [(diagram)](claude/skills/start-app/diagram.html) | Tooling & DevOps | Discovers startup scripts, selects the right one, executes it, validates success, and recovers from failures — ships with `/start-app` | ✓ | | |
 | [`vercel-deploy-claimable`](claude/skills/vercel-deploy-claimable/) [(diagram)](claude/skills/vercel-deploy-claimable/diagram.html) | Tooling & DevOps | Deploy applications to Vercel — preview URLs and claimable deployment links, no authentication required | ✓ | | |
 | [`youtube-prd-forensics`](claude/skills/youtube-prd-forensics/) [(diagram)](claude/skills/youtube-prd-forensics/diagram.html) | Research & OSINT | Create or update a detailed PRD from a YouTube demo video using evidence-first analysis — timestamps, keyframes, transcript, and embedded screenshots | ✓ | ✓ | |
@@ -197,6 +197,6 @@ Domain-specific knowledge modules loaded into AI context. Claude skills live in 
 | Agents | 15 |
 | Commands | 27 |
 | Skills (Claude) | 90 |
-| Skills (Codex) | 65 |
+| Skills (Codex) | 70 |
 | Skills (Gemini) | 0 |
-| **Total Skills** | **155** |
+| **Total Skills** | **160** |
