@@ -1,6 +1,7 @@
 ---
 name: supabase-nextjs
 description: Next.js with Supabase and Drizzle ORM
+requires: [supabase]
 ---
 
 # Supabase + Next.js Skill

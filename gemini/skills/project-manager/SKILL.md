@@ -2,15 +2,10 @@
 name: project-manager
 description: >
   Automated project implementation orchestrator that drives feature-driven development from a single
-  initial prompt through to completed code. Use this skill when the user invokes /continue-tasks,
-  /review-tasks, /update-tasks, /init-features, or /reinit. Also trigger proactively when
-  docs/INITIAL_PROMPT.md exists and the user says anything like "move forward", "keep building",
-  "what's next", "continue the implementation", or "start working on the project". This skill
-  manages the full lifecycle: extracting feature specs via interview, generating phased implementation
-  plans, spawning typed agents to execute tasks, monitoring completion sentinels, recovering from
-  failures, and archiving finished work — all driven by markdown files that act as the shared state
-  between orchestrator and worker agents.
-requires: [base]
+  initial prompt through to completed code. Manages the full lifecycle: extracting feature specs via
+  interview, generating phased implementation plans, delegating tasks to worker agents, monitoring
+  completion sentinels, recovering from failures, and archiving finished work — all driven by
+  markdown files that act as shared state.
 ---
 
 # Project Manager Skill
@@ -44,7 +39,7 @@ Read `references/feature-spec-template.md`, `references/plan-template.md`, and
 
 ## Commands
 
-### `/continue-tasks` — Full Orchestration Loop
+### `continue-tasks` — Full Orchestration Loop
 
 This is the main driver. It runs the complete pipeline end-to-end.
 
@@ -76,10 +71,10 @@ Create `docs/tasks/active/{feature-slug}-p{N}-t{M}.md` using the task file templ
 
 Update the plan: mark the task as `in-progress`.
 
-**Step 5 — Select and spawn agent**
-Map the task's `role` field to an agent type using this table:
+**Step 5 — Select and delegate agent**
+Map the task's `role` field to a worker type using this table:
 
-| Role | Agent Type |
+| Role | Worker Type |
 |---|---|
 | `architecture`, `design`, `planning` | `planner` |
 | `feature`, `implementation`, `api` | `tdd-guide` |
@@ -91,7 +86,7 @@ Map the task's `role` field to an agent type using this table:
 | `cleanup`, `refactor` | `refactor-cleaner` |
 | anything else | `general-purpose` |
 
-Spawn the agent with the task file path and this instruction:
+Delegate to a subagent by providing the task file path and this instruction:
 > "Read the task file at `{path}`. Perform all actions described. When complete, append a
 > `## Completion` sentinel to the task file exactly as specified in the template. Do not delete or
 > modify any existing content above the sentinel."
@@ -122,7 +117,7 @@ When a task fails, do NOT retry the same task blindly. Instead:
 
 ---
 
-### `/review-tasks` — Dry-Run Analysis (no agents spawned)
+### `review-tasks` — Dry-Run Analysis (no agents spawned)
 
 Produce a read-only status report. Do not modify any files.
 
@@ -140,7 +135,7 @@ This command is safe to run at any time to get a project snapshot.
 
 ---
 
-### `/update-tasks` — Sync Active Task Files
+### `update-tasks` — Sync Active Task Files
 
 Use this when you suspect task agents have completed work but the plan hasn't been updated yet.
 
@@ -157,12 +152,12 @@ This command is idempotent — safe to run multiple times.
 
 ---
 
-### `/reinit` — Archive Legacy State, Normalize Specs, Then Launch
+### `reinit` — Archive Legacy State, Normalize Specs, Then Launch
 
 Use when starting the orchestration loop on a project that has existing (possibly non-conforming)
 plans, tasks, and feature specs — e.g., after manual planning work, importing legacy docs, or
 recovering from an inconsistent state. Produces a clean slate conforming to the directory
-conventions, then immediately runs `/continue-tasks`.
+conventions, then immediately runs `continue-tasks`.
 
 **Step 1 — Archive existing plans**
 Move every file in `docs/plans/` (non-archive) to `docs/plans/archive/`. Create
@@ -208,7 +203,7 @@ Report a summary table when done:
 | property-data-model.md | normalized | added frontmatter, remapped Metadata table |
 
 **Step 4 — Launch**
-Run `/continue-tasks` from Step 1 (bootstrap check).
+Run `continue-tasks` from Step 1 (bootstrap check).
 
 ---
 
@@ -223,7 +218,7 @@ Models & Engine", "Onboarding & Profiles", "Dashboard & Logging", "Planner & Vis
 proceeding.
 
 ### Step 2 — Interview one area at a time
-For each area, use the AskUserQuestion tool to collect:
+For each area, prompt the user to collect:
 - Which capabilities in this area are must-have vs. nice-to-have
 - Any constraints or non-obvious requirements not captured in the prompt
 - Acceptance criteria: what does "done" look like for this area?
@@ -244,7 +239,7 @@ Read `references/feature-spec-template.md` for the exact format. Key fields:
 ### Spec Authority Rule
 Feature specs are the final authority on scope. They may only be changed by:
 1. The user directly editing the file
-2. An agent that has used AskUserQuestion to confirm the change with the user
+2. An agent that has confirmed the change with the user via a conversational prompt
 
 Never silently update a spec during implementation to match what was built. If an implementation
 diverges from a spec, pause and surface the discrepancy.
@@ -267,8 +262,4 @@ from specs and plans into the task file.
 directory should contain at most one file per active work stream.
 
 **Specs before plans, plans before tasks.** Never generate a task for a feature without an approved
-spec. Never spawn an agent for a task that isn't in a plan. The pipeline flows in one direction.
-
-## Diagram
-
-[View diagram](diagram.html)
+spec. Never delegate to a subagent for a task that isn't in a plan. The pipeline flows in one direction.

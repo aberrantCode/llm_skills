@@ -1,7 +1,6 @@
 ---
 name: vercel-react-best-practices
 description: React and Next.js performance optimization guidelines from Vercel Engineering. This skill should be used when writing, reviewing, or refactoring React/Next.js code to ensure optimal performance patterns. Triggers on tasks involving React components, Next.js pages, data fetching, bundle optimization, or performance improvements.
-requires: [react-web]
 license: MIT
 metadata:
   author: vercel
@@ -117,25 +116,102 @@ Reference these guidelines when:
 - `advanced-init-once` - Initialize app once per app load
 - `advanced-use-latest` - useLatest for stable callback refs
 
-## How to Use
+## Key Rules Expanded
 
-Read individual rule files for detailed explanations and code examples:
+### async-parallel
 
+Use `Promise.all()` for independent async operations to eliminate waterfalls:
+
+```tsx
+// BAD: sequential waterfall
+const user = await getUser(id)
+const posts = await getPosts(id)
+const comments = await getComments(id)
+
+// GOOD: parallel
+const [user, posts, comments] = await Promise.all([
+  getUser(id),
+  getPosts(id),
+  getComments(id),
+])
 ```
-rules/async-parallel.md
-rules/bundle-barrel-imports.md
+
+### bundle-barrel-imports
+
+Import directly from source files instead of barrel (index) files:
+
+```tsx
+// BAD: imports entire barrel, bundles everything
+import { Button, Input, Modal } from '@/components'
+
+// GOOD: direct import, tree-shakeable
+import { Button } from '@/components/Button'
+import { Input } from '@/components/Input'
 ```
 
-Each rule file contains:
-- Brief explanation of why it matters
-- Incorrect code example with explanation
-- Correct code example with explanation
-- Additional context and references
+### server-cache-react
 
-## Full Compiled Document
+Use `React.cache()` for per-request deduplication in Server Components:
 
-For the complete guide with all rules expanded: `AGENTS.md`
+```tsx
+import { cache } from 'react'
 
-## Diagram
+const getUser = cache(async (id: string) => {
+  return db.user.findUnique({ where: { id } })
+})
 
-[View diagram](diagram.html)
+// Multiple components calling getUser(id) with the same id
+// only hit the database once per request
+```
+
+### rerender-memo
+
+Extract expensive computations into memoized components:
+
+```tsx
+// BAD: recalculates on every parent render
+const Parent = ({ items, filter }) => {
+  const filtered = items.filter(item => item.type === filter) // expensive
+  return <List items={filtered} />
+}
+
+// GOOD: memoized child
+const FilteredList = memo(({ items, filter }) => {
+  const filtered = items.filter(item => item.type === filter)
+  return <List items={filtered} />
+})
+```
+
+### rerender-functional-setstate
+
+Use functional setState for stable callbacks that don't depend on current state:
+
+```tsx
+// BAD: callback depends on count, changes on every render
+const increment = useCallback(() => setCount(count + 1), [count])
+
+// GOOD: stable callback, no dependency on count
+const increment = useCallback(() => setCount(c => c + 1), [])
+```
+
+### rendering-conditional-render
+
+Use ternary instead of `&&` for conditional rendering to avoid rendering `0`:
+
+```tsx
+// BAD: renders "0" when count is 0
+{count && <Badge>{count}</Badge>}
+
+// GOOD: ternary is explicit
+{count > 0 ? <Badge>{count}</Badge> : null}
+```
+
+## Full Rule Reference
+
+For detailed explanations and code examples for all 57 rules, fetch the complete Vercel React
+Best Practices documentation from:
+```
+https://raw.githubusercontent.com/vercel/next.js/canary/packages/eslint-config-next/README.md
+```
+
+Or consult the Vercel documentation at https://nextjs.org/docs/app/building-your-application/optimizing.

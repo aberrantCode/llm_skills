@@ -1,7 +1,6 @@
 ---
 name: tdd-workflow
 description: Use this skill when writing new features, fixing bugs, or refactoring code. Enforces test-driven development with 80%+ coverage including unit, integration, and E2E tests.
-requires: [base]
 ---
 
 # Test-Driven Development Workflow
@@ -115,6 +114,13 @@ Improve code quality while keeping tests green:
 npm run test:coverage
 # Verify 80%+ coverage achieved
 ```
+
+### Step 8: Review Code Quality
+After all tests pass and coverage is verified, perform a manual or automated code review pass to confirm:
+- No dead code or unused imports
+- Error handling is comprehensive
+- Code follows project conventions
+- No security issues introduced
 
 ## Testing Patterns
 
@@ -314,39 +320,39 @@ npm run test:coverage
 
 ## Common Testing Mistakes to Avoid
 
-### ❌ WRONG: Testing Implementation Details
+### Wrong: Testing Implementation Details
 ```typescript
 // Don't test internal state
 expect(component.state.count).toBe(5)
 ```
 
-### ✅ CORRECT: Test User-Visible Behavior
+### Correct: Test User-Visible Behavior
 ```typescript
 // Test what users see
 expect(screen.getByText('Count: 5')).toBeInTheDocument()
 ```
 
-### ❌ WRONG: Brittle Selectors
+### Wrong: Brittle Selectors
 ```typescript
 // Breaks easily
 await page.click('.css-class-xyz')
 ```
 
-### ✅ CORRECT: Semantic Selectors
+### Correct: Semantic Selectors
 ```typescript
 // Resilient to changes
 await page.click('button:has-text("Submit")')
 await page.click('[data-testid="submit-button"]')
 ```
 
-### ❌ WRONG: No Test Isolation
+### Wrong: No Test Isolation
 ```typescript
 // Tests depend on each other
 test('creates user', () => { /* ... */ })
 test('updates same user', () => { /* depends on previous test */ })
 ```
 
-### ✅ CORRECT: Independent Tests
+### Correct: Independent Tests
 ```typescript
 // Each test sets up its own data
 test('creates user', () => {
@@ -408,7 +414,3 @@ npm test && npm run lint
 ---
 
 **Remember**: Tests are not optional. They are the safety net that enables confident refactoring, rapid development, and production reliability.
-
-## Diagram
-
-[View diagram](diagram.html)
