@@ -85,7 +85,7 @@ function Show-Selector {
 
     $header = '  Claude Skills Selector  '
     Write-Host $header.PadRight($width) -ForegroundColor Cyan -BackgroundColor DarkBlue
-    Write-Host ('  ' + ([char]0x2500) * ($width - 4) + '  ') -ForegroundColor DarkGray
+    Write-Host ('  ' + ([string][char]0x2500 * ($width - 4)) + '  ') -ForegroundColor DarkGray
     Write-Host '  [↑↓] Navigate   [Space] Toggle   [A] All   [N] None   [I] Invert   [Enter] Apply   [Q] Quit  '.PadRight($width) -ForegroundColor DarkGray
     Write-Host ''
 
