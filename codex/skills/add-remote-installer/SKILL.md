@@ -1,7 +1,6 @@
 ---
 name: add-remote-installer
 description: Use when the user wants to add a remote install script (install.ps1) and self-update capability to the current PowerShell repository. Detects the GitHub remote, locates the primary app script, asks for the install directory, then applies the remote-installer skill to implement both artifacts correctly.
-requires: [remote-installer]
 ---
 
 # Add Remote Installer
@@ -42,52 +41,35 @@ launcher). The launcher (`scripts/Start-App.ps1`) typically calls it.
 **Check in this order:**
 1. Read `scripts/Start-App.ps1` — find the `& $target` or `& $script` line and extract
    the path it calls. That resolved path is `$APP_SCRIPT`.
-2. If `Start-App.ps1` does not exist or the target cannot be parsed, use **AskUserQuestion**:
+2. If `Start-App.ps1` does not exist or the target cannot be parsed, ask the user:
 
 ```
-AskUserQuestion(
-  questions: [{
-    question: "Which script is the primary app entry point?",
-    header: "App script",
-    options: [
-      { label: "scripts/Start-App.ps1", description: "Use the launcher directly" },
-      { label: "src/<detected-folder>/Main.ps1", description: "Detected from src/ layout" }
-    ]
-    // add any other paths found by scanning src/**/*.ps1
-  }]
-)
+Ask the user: "Which script is the primary app entry point?"
+Options:
+- "scripts/Start-App.ps1" — Use the launcher directly
+- "src/<detected-folder>/Main.ps1" — Detected from src/ layout
+// add any other paths found by scanning src/**/*.ps1
 ```
 
 ---
 
 ## Step 3 — Ask for required context
 
-Use a single **AskUserQuestion** call with all missing values. Only ask for what
-could not be auto-detected:
+Use a single prompt with all missing values. Only ask for what could not be auto-detected:
 
 ```
-AskUserQuestion(
-  questions: [
-    {
-      question: "Where should the app be installed on target machines?",
-      header: "Install dir",
-      options: [
-        { label: "C:\\osm\\<repo-slug>", description: "Suggested default" },
-        { label: "C:\\Program Files\\<repo-slug>", description: "System-wide alternative" }
-      ]
-    },
-    // Include the module question ONLY if the primary app script imports a module
-    // (scan for Import-Module lines in $APP_SCRIPT):
-    {
-      question: "Which PowerShell module should install.ps1 ensure is present?",
-      header: "PS Module",
-      options: [
-        { label: "<detected-module> <detected-version>", description: "Found in app script" },
-        { label: "None", description: "No module dependency" }
-      ]
-    }
-  ]
-)
+Ask the user:
+1. "Where should the app be installed on target machines?"
+   Options:
+   - "C:\osm\<repo-slug>" — Suggested default
+   - "C:\Program Files\<repo-slug>" — System-wide alternative
+
+2. [Include this ONLY if the primary app script imports a module —
+   scan for Import-Module lines in $APP_SCRIPT:]
+   "Which PowerShell module should install.ps1 ensure is present?"
+   Options:
+   - "<detected-module> <detected-version>" — Found in app script
+   - "None" — No module dependency
 ```
 
 Do not ask for `OWNER`, `REPO`, or `$APP_SCRIPT` if they were successfully auto-detected.
@@ -98,7 +80,7 @@ Do not ask for `OWNER`, `REPO`, or `$APP_SCRIPT` if they were successfully auto-
 
 Announce: "I'm using the remote-installer skill to implement this."
 
-Invoke the **remote-installer** skill with the collected context:
+Delegate to a worker agent running the **remote-installer** skill with the collected context:
 
 | Variable | Value |
 |----------|-------|
@@ -133,7 +115,3 @@ Report which files were created/modified and the one-liner the user can now shar
 ```
 irm 'https://raw.githubusercontent.com/$OWNER/$REPO/main/install.ps1' | iex
 ```
-
-## Diagram
-
-[View diagram](diagram.html)

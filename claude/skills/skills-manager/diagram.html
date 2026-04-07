@@ -3,378 +3,1219 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Skills Manager — Skill Diagram</title>
+<title>skills-manager — Lifecycle Operations</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
+  /* ============ BLUEPRINT DARK THEME ============ */
   :root {
-    --font-body: 'DM Sans', system-ui, sans-serif;
-    --font-mono: 'DM Mono', Consolas, monospace;
-    --bg: #f7f5ff;
-    --surface: #ffffff;
-    --surface2: #f0eeff;
-    --border: rgba(100,80,200,0.1);
-    --border-bright: rgba(100,80,200,0.22);
-    --text: #1e1640;
-    --text-dim: #7868a8;
-    --violet: #6d28d9;
-    --violet-dim: rgba(109,40,217,0.08);
-    --indigo: #4338ca;
-    --indigo-dim: rgba(67,56,202,0.08);
-    --green: #059669;
-    --green-dim: rgba(5,150,105,0.08);
-    --orange: #d97706;
-    --orange-dim: rgba(217,119,6,0.08);
-    --rose: #e11d48;
-    --rose-dim: rgba(225,29,72,0.08);
-    --teal: #0891b2;
-    --teal-dim: rgba(8,145,178,0.08);
+    --bg: #0a0e1a;
+    --bg2: #0d1220;
+    --surface: #111827;
+    --surface2: #1a2235;
+    --surface3: #1e293b;
+    --border: rgba(56, 189, 248, 0.1);
+    --border-bright: rgba(56, 189, 248, 0.25);
+    --grid-line: rgba(56, 189, 248, 0.04);
+
+    --text: #e2e8f0;
+    --text-dim: #64748b;
+    --text-mid: #94a3b8;
+
+    --cyan: #22d3ee;
+    --cyan-dim: rgba(34, 211, 238, 0.12);
+    --cyan-glow: rgba(34, 211, 238, 0.06);
+    --blue: #38bdf8;
+    --blue-dim: rgba(56, 189, 248, 0.1);
+    --green: #34d399;
+    --green-dim: rgba(52, 211, 153, 0.1);
+    --amber: #fbbf24;
+    --amber-dim: rgba(251, 191, 36, 0.1);
+    --red: #f87171;
+    --red-dim: rgba(248, 113, 113, 0.1);
+    --violet: #a78bfa;
+    --violet-dim: rgba(167, 139, 250, 0.1);
+
+    --font-body: 'Inter', system-ui, sans-serif;
+    --font-mono: 'JetBrains Mono', 'SF Mono', Consolas, monospace;
   }
-  @media (prefers-color-scheme: dark) {
-    :root {
-      --bg: #0e0b1f; --surface: #160f30; --surface2: #1d1540;
-      --border: rgba(167,139,250,0.1); --border-bright: rgba(167,139,250,0.22);
-      --text: #ede9fe; --text-dim: #9d91cc;
-      --violet: #a78bfa; --violet-dim: rgba(167,139,250,0.12);
-      --indigo: #818cf8; --indigo-dim: rgba(129,140,248,0.12);
-      --green: #34d399; --green-dim: rgba(52,211,153,0.12);
-      --orange: #fbbf24; --orange-dim: rgba(251,191,36,0.12);
-      --rose: #fb7185; --rose-dim: rgba(251,113,133,0.12);
-      --teal: #22d3ee; --teal-dim: rgba(34,211,238,0.12);
+
+  /* ============ RESET ============ */
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background-color: var(--bg);
+    background-image:
+      linear-gradient(var(--grid-line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+    background-size: 32px 32px;
+    color: var(--text);
+    font-family: var(--font-body);
+    min-height: 100vh;
+    overflow-wrap: break-word;
+  }
+
+  /* ============ ANIMATIONS ============ */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes pulse-dot {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+  @keyframes flicker {
+    0%, 94%, 100% { opacity: 1; }
+    95% { opacity: 0.85; }
+    97% { opacity: 1; }
+    99% { opacity: 0.9; }
+  }
+
+  .animate { animation: fadeUp 0.5s ease-out both; animation-delay: calc(var(--i,0) * 0.07s); }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-delay: 0ms !important;
+      transition-duration: 0.01ms !important;
     }
   }
-  *, *::before, *::after { box-sizing:border-box; margin:0; padding:0; }
-  body {
-    font-family: var(--font-body);
-    background: var(--bg);
-    background-image:
-      radial-gradient(at 30% 0%, var(--violet-dim) 0%, transparent 50%),
-      radial-gradient(at 80% 100%, var(--teal-dim) 0%, transparent 50%);
-    color: var(--text);
-    padding: 44px 24px 72px;
-    min-height: 100vh;
+
+  /* ============ LAYOUT ============ */
+  .page { max-width: 1100px; margin: 0 auto; padding: 48px 32px 80px; }
+
+  /* ============ HEADER ============ */
+  .header {
+    margin-bottom: 56px;
+    padding-bottom: 32px;
+    border-bottom: 1px solid var(--border-bright);
+    position: relative;
   }
-  .page { max-width: 1000px; margin: 0 auto; }
+  .header::before {
+    content: '';
+    position: absolute;
+    top: 0; left: -32px; right: -32px; bottom: 0;
+    background: radial-gradient(ellipse at 30% 0%, rgba(34, 211, 238, 0.05) 0%, transparent 60%);
+    pointer-events: none;
+  }
 
-  .header { text-align: center; margin-bottom: 52px; }
-  .label { font-family: var(--font-mono); font-size: 11px; color: var(--violet); letter-spacing: 0.12em; margin-bottom: 12px; }
-  h1 { font-size: 40px; font-weight: 700; letter-spacing: -0.03em; margin-bottom: 10px; }
-  .subtitle { color: var(--text-dim); font-size: 14px; line-height: 1.7; max-width: 580px; margin: 0 auto; }
+  .breadcrumb {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-dim);
+    margin-bottom: 16px;
+    letter-spacing: 0.05em;
+  }
+  .breadcrumb span { color: var(--cyan); }
 
-  /* OPERATIONS GRID */
-  .ops-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; margin-bottom: 32px; }
+  h1 {
+    font-size: 42px;
+    font-weight: 700;
+    letter-spacing: -1.5px;
+    line-height: 1.1;
+    margin-bottom: 12px;
+    background: linear-gradient(135deg, var(--text) 0%, var(--cyan) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: flicker 8s ease-in-out infinite;
+  }
+
+  .tagline {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--cyan);
+    opacity: 0.7;
+    letter-spacing: 0.08em;
+  }
+
+  .header-meta {
+    display: flex;
+    gap: 24px;
+    margin-top: 20px;
+    flex-wrap: wrap;
+  }
+
+  .meta-badge {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: 3px;
+    border: 1px solid;
+  }
+  .meta-badge--cyan  { color: var(--cyan);  border-color: rgba(34,211,238,0.3);  background: var(--cyan-dim); }
+  .meta-badge--green { color: var(--green); border-color: rgba(52,211,153,0.3);  background: var(--green-dim); }
+  .meta-badge--amber { color: var(--amber); border-color: rgba(251,191,36,0.3);  background: var(--amber-dim); }
+
+  /* ============ SECTION TITLE ============ */
+  .section-title {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    color: var(--cyan);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .section-title::before {
+    content: '';
+    display: block;
+    width: 20px;
+    height: 1px;
+    background: var(--cyan);
+  }
+  .section-title::after {
+    content: '';
+    display: block;
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* ============ ARCHITECTURE BLOCK ============ */
+  .arch-block { margin-bottom: 56px; }
+
+  .arch-grid {
+    display: grid;
+    grid-template-columns: 1fr 44px 1fr 44px 1fr 44px 1fr;
+    align-items: center;
+    gap: 0;
+    margin-bottom: 24px;
+  }
+
+  @media (max-width: 900px) {
+    .arch-grid { grid-template-columns: 1fr; gap: 4px; }
+    .arch-arrow { display: none; }
+  }
+
+  .arch-tier {
+    background: var(--surface);
+    border: 1px solid var(--border-bright);
+    border-radius: 8px;
+    padding: 20px 14px;
+    position: relative;
+  }
+  .arch-tier::before {
+    content: attr(data-label);
+    position: absolute;
+    top: -9px; left: 10px;
+    font-family: var(--font-mono);
+    font-size: 9px;
+    font-weight: 600;
+    padding: 1px 6px;
+    border-radius: 2px;
+    letter-spacing: 0.05em;
+  }
+  .arch-tier--source  { border-color: rgba(167,139,250,0.3); }
+  .arch-tier--source::before  { background: var(--violet-dim); color: var(--violet); border: 1px solid rgba(167,139,250,0.3); }
+  .arch-tier--archive { border-color: rgba(34,211,238,0.4); box-shadow: 0 0 24px rgba(34,211,238,0.06); }
+  .arch-tier--archive::before { background: var(--cyan-dim);   color: var(--cyan);   border: 1px solid rgba(34,211,238,0.4); }
+  .arch-tier--install { border-color: rgba(52,211,153,0.3); }
+  .arch-tier--install::before { background: var(--green-dim);  color: var(--green);  border: 1px solid rgba(52,211,153,0.3); }
+  .arch-tier--global  { border-color: rgba(56,189,248,0.3); }
+  .arch-tier--global::before  { background: var(--blue-dim);   color: var(--blue);   border: 1px solid rgba(56,189,248,0.3); }
+
+  .tier-title {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+  .arch-tier--source  .tier-title { color: var(--violet); }
+  .arch-tier--archive .tier-title { color: var(--cyan); }
+  .arch-tier--install .tier-title { color: var(--green); }
+  .arch-tier--global  .tier-title { color: var(--blue); }
+
+  .tier-paths {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .tier-paths li {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    color: var(--text-dim);
+    padding: 3px 6px;
+    background: var(--bg2);
+    border-radius: 3px;
+    border-left: 2px solid var(--border);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .arch-tier--source  .tier-paths li { border-left-color: rgba(167,139,250,0.4); }
+  .arch-tier--archive .tier-paths li { border-left-color: rgba(34,211,238,0.4); }
+  .arch-tier--install .tier-paths li { border-left-color: rgba(52,211,153,0.4); }
+  .arch-tier--global  .tier-paths li { border-left-color: rgba(56,189,248,0.4); }
+
+  .arch-arrow {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+  }
+  .arch-arrow svg { color: var(--cyan); opacity: 0.45; }
+  .arch-arrow-label {
+    font-family: var(--font-mono);
+    font-size: 8px;
+    color: var(--cyan);
+    opacity: 0.5;
+    text-align: center;
+    letter-spacing: 0.05em;
+    white-space: nowrap;
+  }
+
+  /* ============ BUNDLE STRUCTURE ============ */
+  .bundle-box {
+    background: var(--surface);
+    border: 1px solid var(--border-bright);
+    border-radius: 8px;
+    padding: 20px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    line-height: 2;
+    color: var(--text-mid);
+  }
+  .bundle-box .dir   { color: var(--cyan); }
+  .bundle-box .file  { color: var(--green); }
+  .bundle-box .badge {
+    font-size: 9px;
+    padding: 1px 5px;
+    border-radius: 2px;
+    margin-left: 6px;
+    vertical-align: middle;
+  }
+  .badge--req  { background: rgba(34,211,238,0.15); color: var(--cyan); }
+  .badge--opt  { background: rgba(100,116,139,0.2);  color: var(--text-dim); }
+
+  /* ============ OPS GRID ============ */
+  .ops-block { margin-bottom: 56px; }
+
+  .ops-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 16px;
+  }
+
   .op-card {
     background: var(--surface);
     border: 1px solid var(--border);
-    border-radius: 14px;
+    border-radius: 8px;
     overflow: hidden;
-    animation: popIn 0.4s ease both;
-    animation-delay: calc(var(--i,0) * 0.06s);
-    transition: box-shadow 0.2s, border-color 0.2s;
+    transition: border-color 0.2s, box-shadow 0.2s;
   }
-  .op-card:hover { border-color: var(--border-bright); box-shadow: 0 4px 20px rgba(0,0,0,0.06); }
-  .op-head {
-    padding: 14px 16px;
+  .op-card:hover {
+    border-color: var(--border-bright);
+    box-shadow: 0 0 20px rgba(34, 211, 238, 0.05);
+  }
+
+  .op-header {
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
     border-bottom: 1px solid var(--border);
-    display: flex; align-items: center; gap: 9px;
   }
-  .op-icon {
-    width: 30px; height: 30px; border-radius: 8px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 14px; flex-shrink: 0;
+  .op-cmd {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--cyan);
+    flex: 1;
+    min-width: 0;
   }
-  .op-cmd { font-family: var(--font-mono); font-size: 12px; font-weight: 500; }
+  .op-mode {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding: 3px 7px;
+    border-radius: 3px;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .op-mode--ro  { color: var(--green); background: var(--green-dim); border: 1px solid rgba(52,211,153,0.2); }
+  .op-mode--mut { color: var(--amber); background: var(--amber-dim); border: 1px solid rgba(251,191,36,0.2); }
+
   .op-body { padding: 14px 16px; }
-  .op-desc { font-size: 12.5px; color: var(--text-dim); line-height: 1.6; margin-bottom: 10px; }
-  .op-steps { list-style: none; }
-  .op-steps li {
-    font-size: 12px; color: var(--text-dim);
-    padding: 3px 0; display: flex; align-items: flex-start; gap: 7px; line-height: 1.5;
+
+  .op-desc {
+    font-size: 12px;
+    color: var(--text-mid);
+    line-height: 1.6;
+    margin-bottom: 12px;
   }
-  .op-steps li::before { content: "→"; flex-shrink: 0; }
 
-  /* Color variants */
-  .op-find .op-head { background: var(--indigo-dim); }
-  .op-find .op-icon { background: var(--indigo-dim); color: var(--indigo); }
-  .op-find .op-cmd { color: var(--indigo); }
-  .op-find .op-steps li::before { color: var(--indigo); }
-
-  .op-sync .op-head { background: var(--violet-dim); }
-  .op-sync .op-icon { background: var(--violet-dim); color: var(--violet); }
-  .op-sync .op-cmd { color: var(--violet); }
-  .op-sync .op-steps li::before { color: var(--violet); }
-
-  .op-install .op-head { background: var(--green-dim); }
-  .op-install .op-icon { background: var(--green-dim); color: var(--green); }
-  .op-install .op-cmd { color: var(--green); }
-  .op-install .op-steps li::before { color: var(--green); }
-
-  .op-update .op-head { background: var(--teal-dim); }
-  .op-update .op-icon { background: var(--teal-dim); color: var(--teal); }
-  .op-update .op-cmd { color: var(--teal); }
-  .op-update .op-steps li::before { color: var(--teal); }
-
-  .op-import .op-head { background: var(--orange-dim); }
-  .op-import .op-icon { background: var(--orange-dim); color: var(--orange); }
-  .op-import .op-cmd { color: var(--orange); }
-  .op-import .op-steps li::before { color: var(--orange); }
-
-  .op-search .op-head { background: var(--rose-dim); }
-  .op-search .op-icon { background: var(--rose-dim); color: var(--rose); }
-  .op-search .op-cmd { color: var(--rose); }
-  .op-search .op-steps li::before { color: var(--rose); }
-
-  .op-audit .op-head { background: var(--orange-dim); }
-  .op-audit .op-icon { background: var(--orange-dim); color: var(--orange); }
-  .op-audit .op-cmd { color: var(--orange); }
-  .op-audit .op-steps li::before { color: var(--orange); }
-
-  .op-push .op-head { background: var(--violet-dim); }
-  .op-push .op-icon { background: var(--violet-dim); color: var(--violet); }
-  .op-push .op-cmd { color: var(--violet); }
-  .op-push .op-steps li::before { color: var(--violet); }
-
-  .op-backfill .op-head { background: var(--teal-dim); }
-  .op-backfill .op-icon { background: var(--teal-dim); color: var(--teal); }
-  .op-backfill .op-cmd { color: var(--teal); }
-  .op-backfill .op-steps li::before { color: var(--teal); }
-
-  /* CONCEPTS ROW */
-  .concepts {
-    display: grid; grid-template-columns: 1fr 1fr 1fr 1fr;
-    gap: 12px; margin-bottom: 32px;
+  .op-flow {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
   }
-  .concept {
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 16px;
-  }
-  .concept-title { font-size: 12px; font-weight: 600; margin-bottom: 6px; }
-  .concept-body { font-size: 11.5px; color: var(--text-dim); line-height: 1.55; }
 
-  /* INVARIANTS */
-  .invariants {
+  .flow-step {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--text-dim);
+    line-height: 1.5;
+  }
+
+  .flow-step-icon {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 8px;
+    font-weight: 700;
+    margin-top: 1px;
+  }
+  .flow-step--action   .flow-step-icon { background: var(--cyan-dim);   color: var(--cyan);   border: 1px solid rgba(34,211,238,0.3); }
+  .flow-step--decision .flow-step-icon { background: var(--amber-dim);  color: var(--amber);  border: 1px solid rgba(251,191,36,0.3); }
+  .flow-step--guard    .flow-step-icon { background: var(--red-dim);    color: var(--red);    border: 1px solid rgba(248,113,113,0.3); }
+  .flow-step--output   .flow-step-icon { background: var(--green-dim);  color: var(--green);  border: 1px solid rgba(52,211,153,0.3); }
+  .flow-step--confirm  .flow-step-icon { background: var(--violet-dim); color: var(--violet); border: 1px solid rgba(167,139,250,0.3); }
+
+  .flow-step-text { padding-top: 1px; }
+  .flow-step-text strong { color: var(--text); font-weight: 500; }
+  .flow-step-text code {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    background: rgba(34,211,238,0.08);
+    color: var(--cyan);
+    padding: 1px 4px;
+    border-radius: 2px;
+  }
+
+  /* ============ MERMAID SECTION ============ */
+  .diagram-block { margin-bottom: 56px; }
+
+  .mermaid-wrap {
+    position: relative;
     background: var(--surface);
-    border: 1px solid var(--rose-dim);
-    border-left: 3px solid var(--rose);
-    border-radius: 10px;
-    padding: 18px 22px;
+    border: 1px solid var(--border-bright);
+    border-radius: 8px;
+    padding: 32px 24px;
+    overflow: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-bright) transparent;
   }
-  .inv-title { font-size: 13px; font-weight: 600; color: var(--rose); margin-bottom: 10px; }
-  .inv-list { display: flex; flex-wrap: wrap; gap: 8px; }
-  .inv-item {
-    background: var(--rose-dim); color: var(--rose);
-    font-size: 12px; border-radius: 5px;
-    padding: 4px 10px;
-    border: 1px solid var(--rose);
+  .mermaid-wrap::-webkit-scrollbar { width: 6px; height: 6px; }
+  .mermaid-wrap::-webkit-scrollbar-track { background: transparent; }
+  .mermaid-wrap::-webkit-scrollbar-thumb { background: var(--border-bright); border-radius: 3px; }
+
+  .mermaid-wrap .mermaid {
+    display: flex;
+    justify-content: center;
+    transition: transform 0.2s ease;
+    transform-origin: top center;
+  }
+  .mermaid-wrap.is-zoomed { cursor: grab; }
+  .mermaid-wrap.is-panning { cursor: grabbing; user-select: none; }
+
+  .zoom-controls {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    display: flex;
+    gap: 2px;
+    z-index: 10;
+    background: var(--surface2);
+    border: 1px solid var(--border-bright);
+    border-radius: 5px;
+    padding: 2px;
+  }
+  .zoom-controls button {
+    width: 26px;
+    height: 26px;
+    border: none;
+    background: transparent;
+    color: var(--text-dim);
+    font-family: var(--font-mono);
+    font-size: 13px;
+    cursor: pointer;
+    border-radius: 3px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s, color 0.15s;
+  }
+  .zoom-controls button:hover { background: rgba(34,211,238,0.1); color: var(--cyan); }
+
+  .mermaid .nodeLabel { font-family: var(--font-body) !important; font-size: 14px !important; }
+  .mermaid .edgeLabel { font-family: var(--font-mono) !important; font-size: 11px !important; }
+
+  .diagram-caption {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--text-dim);
+    margin-top: 10px;
+    text-align: center;
+    letter-spacing: 0.05em;
   }
 
-  @keyframes popIn {
-    from { opacity: 0; transform: scale(0.96) translateY(8px); }
-    to   { opacity: 1; transform: scale(1) translateY(0); }
+  /* ============ LEGEND ============ */
+  .legend-block {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 56px;
   }
-  @media (prefers-reduced-motion: reduce) { * { animation: none !important; } }
-  @media (max-width: 760px) {
-    .ops-grid { grid-template-columns: 1fr 1fr; }
-    .concepts { grid-template-columns: 1fr 1fr; }
+  .legend-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-top: 12px;
   }
-  @media (max-width: 480px) {
-    .ops-grid { grid-template-columns: 1fr; }
-    .concepts { grid-template-columns: 1fr; }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--text-mid);
+    letter-spacing: 0.03em;
+  }
+  .legend-swatch  { width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; }
+  .legend-diamond { width: 10px; height: 10px; transform: rotate(45deg); flex-shrink: 0; }
+  .legend-circle  { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+
+  /* ============ INVARIANTS ============ */
+  .invariants-block { margin-bottom: 40px; }
+
+  .invariants-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 12px;
+  }
+
+  .invariant-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--cyan);
+    border-radius: 0 6px 6px 0;
+    padding: 12px 14px;
+    font-size: 12px;
+    line-height: 1.6;
+    color: var(--text-dim);
+  }
+  .invariant-item strong { color: var(--text); font-weight: 500; }
+  .invariant-item code {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    background: var(--cyan-dim);
+    color: var(--cyan);
+    padding: 1px 4px;
+    border-radius: 2px;
+  }
+
+  /* ============ FOOTER ============ */
+  .footer {
+    padding-top: 32px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .footer-label {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--text-dim);
+  }
+  .footer-label span { color: var(--cyan); }
+  .pulse-dot {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    background: var(--cyan);
+    border-radius: 50%;
+    margin-right: 6px;
+    animation: pulse-dot 2s ease-in-out infinite;
+    vertical-align: middle;
+  }
+
+  /* ============ RESPONSIVE ============ */
+  @media (max-width: 768px) {
+    .page { padding: 24px 16px 60px; }
     h1 { font-size: 28px; }
+    .ops-grid { grid-template-columns: 1fr; }
+    .mermaid-wrap { padding: 16px 12px; }
   }
 </style>
 </head>
 <body>
+
 <div class="page">
-  <div class="header">
-    <div class="label">SKILL / SKILLS-MANAGER</div>
-    <h1>Skills Manager</h1>
-    <p class="subtitle">Full lifecycle management of LLM skills across the workstation — nine operations covering discovery, archiving, deployment, updating, and health-checking.</p>
-  </div>
 
-  <!-- CORE CONCEPTS -->
-  <div class="concepts">
-    <div class="concept">
-      <div class="concept-title" style="color:var(--violet)">Archive</div>
-      <div class="concept-body">Single source of truth at <code style="font-family:var(--font-mono);font-size:10.5px">C:\development\llm_skills</code>. Consolidates all skills from global profile and all projects.</div>
+  <!-- HEADER -->
+  <header class="header animate" style="--i:0">
+    <div class="breadcrumb">llm_skills / claude / skills / <span>skills-manager</span></div>
+    <h1>skills-manager</h1>
+    <div class="tagline">// full lifecycle management for LLM skills across the workstation</div>
+    <div class="header-meta">
+      <span class="meta-badge meta-badge--cyan">9 operations</span>
+      <span class="meta-badge meta-badge--green">3 read-only</span>
+      <span class="meta-badge meta-badge--amber">6 mutating</span>
     </div>
-    <div class="concept">
-      <div class="concept-title" style="color:var(--green)">Skill Bundle</div>
-      <div class="concept-body">SKILL.md + <code style="font-family:var(--font-mono);font-size:10.5px">sub-skills/</code> + <code style="font-family:var(--font-mono);font-size:10.5px">commands/</code> — all travel together on install/push.</div>
-    </div>
-    <div class="concept">
-      <div class="concept-title" style="color:var(--teal)">Installed Copy</div>
-      <div class="concept-body">Marked <code style="font-family:var(--font-mono);font-size:10.5px">installed-from: llm_skills</code> in frontmatter. Skipped by find and sync — not a project-developed skill.</div>
-    </div>
-    <div class="concept">
-      <div class="concept-title" style="color:var(--orange)">Source Priority</div>
-      <div class="concept-body">Global profile → this repo → other projects (alphabetical). Highest priority source wins on conflict.</div>
-    </div>
-  </div>
+  </header>
 
-  <!-- OPERATIONS GRID -->
-  <div class="ops-grid">
+  <!-- ARCHITECTURE TIERS -->
+  <section class="arch-block animate" style="--i:1">
+    <div class="section-title">System Architecture — Four Tiers</div>
 
-    <div class="op-card op-find" style="--i:0">
-      <div class="op-head">
-        <div class="op-icon">🔍</div>
-        <div class="op-cmd">/find-skills</div>
+    <div class="arch-grid">
+      <div class="arch-tier arch-tier--source" data-label="01 Sources">
+        <div class="tier-title">Sources</div>
+        <ul class="tier-paths">
+          <li>~/.claude/skills/*/SKILL.md</li>
+          <li>.claude/skills/*/SKILL.md</li>
+          <li>skills/*/SKILL.md</li>
+          <li>codex/skills/*/SKILL.md</li>
+          <li>gemini/skills/*/SKILL.md</li>
+        </ul>
       </div>
-      <div class="op-body">
-        <div class="op-desc">Read-only discovery. Classifies each SKILL.md as New, Changed, Unchanged, Orphan, or Deprecated.</div>
-        <ul class="op-steps">
-          <li>Skip installed-from copies</li>
-          <li>Compare vs archive (diff)</li>
-          <li>Detect companion commands</li>
-          <li>Outputs structured report</li>
+
+      <div class="arch-arrow">
+        <svg width="22" height="14" viewBox="0 0 22 14" fill="none">
+          <path d="M1 7h18M13 2l6 5-6 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <div class="arch-arrow-label">sync</div>
+      </div>
+
+      <div class="arch-tier arch-tier--archive" data-label="02 Archive ★">
+        <div class="tier-title">Archive — Source of Truth</div>
+        <ul class="tier-paths">
+          <li>llm_skills/claude/skills/&lt;n&gt;/</li>
+          <li>&nbsp;&nbsp;SKILL.md</li>
+          <li>&nbsp;&nbsp;sub-skills/*/SKILL.md</li>
+          <li>&nbsp;&nbsp;commands/*.md</li>
+          <li>&nbsp;&nbsp;diagram.html</li>
+        </ul>
+      </div>
+
+      <div class="arch-arrow">
+        <svg width="22" height="14" viewBox="0 0 22 14" fill="none">
+          <path d="M1 7h18M13 2l6 5-6 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <div class="arch-arrow-label">install</div>
+      </div>
+
+      <div class="arch-tier arch-tier--install" data-label="03 Installed">
+        <div class="tier-title">Installed Copies</div>
+        <ul class="tier-paths">
+          <li>&lt;project&gt;/.claude/skills/</li>
+          <li>&lt;name&gt;/SKILL.md</li>
+          <li>installed-from:</li>
+          <li>&nbsp;&nbsp;llm_skills</li>
+        </ul>
+      </div>
+
+      <div class="arch-arrow">
+        <svg width="22" height="14" viewBox="0 0 22 14" fill="none">
+          <path d="M1 7h18M13 2l6 5-6 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <div class="arch-arrow-label">push</div>
+      </div>
+
+      <div class="arch-tier arch-tier--global" data-label="04 Global">
+        <div class="tier-title">Global Profile</div>
+        <ul class="tier-paths">
+          <li>~/.claude/skills/&lt;n&gt;/</li>
+          <li>~/.claude/commands/*.md</li>
+          <li>(no installed-from)</li>
+          <li>all projects scope</li>
         </ul>
       </div>
     </div>
 
-    <div class="op-card op-sync" style="--i:1">
-      <div class="op-head">
-        <div class="op-icon">⬆</div>
-        <div class="op-cmd">/sync-skill</div>
-      </div>
-      <div class="op-body">
-        <div class="op-desc">Archive a skill bundle: SKILL.md + commands + sub-skills + diagram + README update.</div>
-        <ul class="op-steps">
-          <li>Resolve highest-priority source</li>
-          <li>Write full bundle to archive</li>
-          <li>Generate diagram.html</li>
-          <li>Update README row</li>
-        </ul>
-      </div>
+    <!-- Bundle structure -->
+    <div class="bundle-box animate" style="--i:2">
+      <span class="dir">claude/skills/&lt;name&gt;/</span><br>
+      &nbsp;&nbsp;&#9500;&#9472;&#9472; <span class="file">SKILL.md</span><span class="badge badge--req">required</span><br>
+      &nbsp;&nbsp;&#9500;&#9472;&#9472; <span class="file">diagram.html</span><span class="badge badge--opt">generated</span><br>
+      &nbsp;&nbsp;&#9500;&#9472;&#9472; <span class="dir">sub-skills/</span><span class="badge badge--opt">optional bundle</span><br>
+      &nbsp;&nbsp;&#9474;&nbsp;&nbsp;&nbsp;&#9492;&#9472;&#9472; <span class="dir">&lt;sub-name&gt;/</span>SKILL.md<br>
+      &nbsp;&nbsp;&#9492;&#9472;&#9472; <span class="dir">commands/</span><span class="badge badge--opt">optional bundle</span><br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&#9492;&#9472;&#9472; <span class="file">&lt;cmd&gt;.md</span>
     </div>
+  </section>
 
-    <div class="op-card op-install" style="--i:2">
-      <div class="op-head">
-        <div class="op-icon">⬇</div>
-        <div class="op-cmd">/install-skill</div>
+  <!-- OPERATIONS -->
+  <section class="ops-block animate" style="--i:3">
+    <div class="section-title">Operations Reference — All 9 Commands</div>
+
+    <div class="ops-grid">
+
+      <!-- /find-skills -->
+      <div class="op-card">
+        <div class="op-header">
+          <div class="op-cmd">/find-skills [path]</div>
+          <div class="op-mode op-mode--ro">read-only</div>
+        </div>
+        <div class="op-body">
+          <div class="op-desc">Discover new or changed skills across the workstation. Never writes anything.</div>
+          <div class="op-flow">
+            <div class="flow-step flow-step--decision">
+              <div class="flow-step-icon">?</div>
+              <div class="flow-step-text"><strong>path given?</strong> scan that dir : AskUserQuestion confirm → scan all</div>
+            </div>
+            <div class="flow-step flow-step--guard">
+              <div class="flow-step-icon">✕</div>
+              <div class="flow-step-text">Skip <code>installed-from: llm_skills</code> files</div>
+            </div>
+            <div class="flow-step flow-step--guard">
+              <div class="flow-step-icon">!</div>
+              <div class="flow-step-text"><code>status: deprecated</code> → always Deprecated (ignores diff)</div>
+            </div>
+            <div class="flow-step flow-step--action">
+              <div class="flow-step-icon">≡</div>
+              <div class="flow-step-text">Classify: <strong>New</strong> | <strong>Changed</strong> | <strong>Unchanged</strong> | <strong>Orphan</strong> | <strong>Deprecated</strong></div>
+            </div>
+            <div class="flow-step flow-step--action">
+              <div class="flow-step-icon">≈</div>
+              <div class="flow-step-text">Note <code>version:</code> delta if archive differs</div>
+            </div>
+            <div class="flow-step flow-step--action">
+              <div class="flow-step-icon">⌖</div>
+              <div class="flow-step-text">Detect companion commands for New/Changed skills</div>
+            </div>
+            <div class="flow-step flow-step--output">
+              <div class="flow-step-icon">▶</div>
+              <div class="flow-step-text">Output structured <strong>Find Report</strong></div>
+            </div>
+          </div>
+        </div>
       </div>
-      <div class="op-body">
-        <div class="op-desc">Deploy a skill bundle from archive into a project, resolving all dependencies first.</div>
-        <ul class="op-steps">
-          <li>Resolve requires: dependencies</li>
-          <li>Inject installed-from marker</li>
-          <li>Write sub-skills + commands</li>
-          <li>AskUserQuestion confirms</li>
-        </ul>
+
+      <!-- /sync-skill -->
+      <div class="op-card">
+        <div class="op-header">
+          <div class="op-cmd">/sync-skill [name]</div>
+          <div class="op-mode op-mode--mut">mutating</div>
+        </div>
+        <div class="op-body">
+          <div class="op-desc">Archive a skill including its full bundle. Resolves source conflicts and generates a diagram.</div>
+          <div class="op-flow">
+            <div class="flow-step flow-step--decision">
+              <div class="flow-step-icon">?</div>
+              <div class="flow-step-text"><strong>name given?</strong> search sources : find-skills scan → AskUserQuestion confirm all</div>
+            </div>
+            <div class="flow-step flow-step--action">
+              <div class="flow-step-icon">⊕</div>
+              <div class="flow-step-text">Conflict resolution: global &gt; this repo &gt; other projects (alpha)</div>
+            </div>
+            <div class="flow-step flow-step--action">
+              <div class="flow-step-icon">⌖</div>
+              <div class="flow-step-text">Detect companion commands + sub-skills</div>
+            </div>
+            <div class="flow-step flow-step--output">
+              <div class="flow-step-icon">▶</div>
+              <div class="flow-step-text">Write SKILL.md, commands/, sub-skills/ to archive</div>
+            </div>
+            <div class="flow-step flow-step--action">
+              <div class="flow-step-icon">◈</div>
+              <div class="flow-step-text">Invoke <code>visual-explainer:generate-web-diagram</code> → save diagram.html</div>
+            </div>
+            <div class="flow-step flow-step--output">
+              <div class="flow-step-icon">▶</div>
+              <div class="flow-step-text">Update SKILL.md <code>## Diagram</code> section + README row</div>
+            </div>
+          </div>
+        </div>
       </div>
+
+      <!-- /install-skill -->
+      <div class="op-card">
+        <div class="op-header">
+          <div class="op-cmd">/install-skill [name] [target]</div>
+          <div class="op-mode op-mode--mut">mutating</div>
+        </div>
+        <div class="op-body">
+          <div class="op-desc">Deploy a skill bundle from archive into a project. Resolves dependencies via <code>requires:</code> and injects the installed-from marker.</div>
+          <div class="op-flow">
+            <div class="flow-step flow-step--decision">
+              <div class="flow-step-icon">?</div>
+              <div class="flow-step-text"><strong>name given?</strong> locate bundle : enumerate not-installed → AskUserQuestion confirm</div>
+            </div>
+            <div class="flow-step flow-step--decision">
+              <div class="flow-step-icon">?</div>
+              <div class="flow-step-text"><strong>target-dir?</strong> use it : AskUserQuestion for path</div>
+            </div>
+            <div class="flow-step flow-step--action">
+              <div class="flow-step-icon">⟳</div>
+              <div class="flow-step-text">Resolve <code>requires:</code> list recursively; deduplicate</div>
+            </div>
+            <div class="flow-step flow-step--confirm">
+              <div class="flow-step-icon">◇</div>
+              <div class="flow-step-text">AskUserQuestion: confirm N files to write</div>
+            </div>
+            <div class="flow-step flow-step--output">
+              <div class="flow-step-icon">▶</div>
+              <div class="flow-step-text">Write SKILL.md + inject <code>installed-from: llm_skills</code>; sub-skills with marker; commands without marker</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- /update-skill -->
+      <div class="op-card">
+        <div class="op-header">
+          <div class="op-cmd">/update-skill [name]</div>
+          <div class="op-mode op-mode--mut">mutating</div>
+        </div>
+        <div class="op-body">
+          <div class="op-desc">Update installed skills in the current project to match newer archive versions. Preserves the installed-from marker.</div>
+          <div class="op-flow">
+            <div class="flow-step flow-step--action">
+              <div class="flow-step-icon">⌖</div>
+              <div class="flow-step-text">Scan project's <code>.claude/skills/</code> for <code>installed-from: llm_skills</code></div>
+            </div>
+            <div class="flow-step flow-step--action">
+              <div class="flow-step-icon">≈</div>
+              <div class="flow-step-text">Diff each against archive; skip if identical</div>
+            </div>
+            <div class="flow-step flow-step--confirm">
+              <div class="flow-step-icon">◇</div>
+              <div class="flow-step-text">AskUserQuestion: confirm with version delta (v1.0→v1.2)</div>
+            </div>
+            <div class="flow-step flow-step--output">
+              <div class="flow-step-icon">▶</div>
+              <div class="flow-step-text">Overwrite SKILL.md preserving marker; update commands + sub-skills</div>
+            </div>
+            <div class="flow-step flow-step--action">
+              <div class="flow-step-icon">◈</div>
+              <div class="flow-step-text">Regenerate diagram for each updated skill</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- /import-skill -->
+      <div class="op-card">
+        <div class="op-header">
+          <div class="op-cmd">/import-skill [name]</div>
+          <div class="op-mode op-mode--mut">mutating — reverse</div>
+        </div>
+        <div class="op-body">
+          <div class="op-desc">Import project-level skill changes back into the archive and global profile. The only reverse-flow operation.</div>
+          <div class="op-flow">
+            <div class="flow-step flow-step--decision">
+              <div class="flow-step-icon">?</div>
+              <div class="flow-step-text"><strong>name given?</strong> locate in project : scan non-installed changed → AskUserQuestion confirm</div>
+            </div>
+            <div class="flow-step flow-step--guard">
+              <div class="flow-step-icon">!</div>
+              <div class="flow-step-text"><code>installed-from</code> guard: force-import warning (default Cancel)</div>
+            </div>
+            <div class="flow-step flow-step--action">
+              <div class="flow-step-icon">≈</div>
+              <div class="flow-step-text">Show diff summary (lines added / removed)</div>
+            </div>
+            <div class="flow-step flow-step--confirm">
+              <div class="flow-step-icon">◇</div>
+              <div class="flow-step-text">AskUserQuestion: "Yes, import both" | "Archive only" | Cancel</div>
+            </div>
+            <div class="flow-step flow-step--output">
+              <div class="flow-step-icon">▶</div>
+              <div class="flow-step-text">Write to archive + user profile; bundle new companion commands</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- /push-skill -->
+      <div class="op-card">
+        <div class="op-header">
+          <div class="op-cmd">/push-skill [name]</div>
+          <div class="op-mode op-mode--mut">mutating</div>
+        </div>
+        <div class="op-body">
+          <div class="op-desc">Push a skill bundle from the archive to the global user profile (~/.claude/). No installed-from marker is added — global profile is a source tier.</div>
+          <div class="op-flow">
+            <div class="flow-step flow-step--decision">
+              <div class="flow-step-icon">?</div>
+              <div class="flow-step-text"><strong>name given?</strong> push that bundle : enumerate all → AskUserQuestion confirm</div>
+            </div>
+            <div class="flow-step flow-step--guard">
+              <div class="flow-step-icon">!</div>
+              <div class="flow-step-text"><code>status: draft</code> → skip with warning (drafts not pushed)</div>
+            </div>
+            <div class="flow-step flow-step--decision">
+              <div class="flow-step-icon">?</div>
+              <div class="flow-step-text"><code>~/.claude/skills/&lt;name&gt;</code> exists &amp; differs? → AskUserQuestion overwrite/skip</div>
+            </div>
+            <div class="flow-step flow-step--output">
+              <div class="flow-step-icon">▶</div>
+              <div class="flow-step-text">Write SKILL.md, sub-skills, commands to ~/.claude/ (no marker)</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- /search-skill -->
+      <div class="op-card">
+        <div class="op-header">
+          <div class="op-cmd">/search-skill [query]</div>
+          <div class="op-mode op-mode--ro">read-only</div>
+        </div>
+        <div class="op-body">
+          <div class="op-desc">Full-text search across all archived skills. Ranked by field priority. Never writes anything.</div>
+          <div class="op-flow">
+            <div class="flow-step flow-step--decision">
+              <div class="flow-step-icon">?</div>
+              <div class="flow-step-text"><strong>query given?</strong> use it : AskUserQuestion "What are you looking for?"</div>
+            </div>
+            <div class="flow-step flow-step--action">
+              <div class="flow-step-icon">⌖</div>
+              <div class="flow-step-text">Search: <code>name</code> &gt; <code>description</code> &gt; headings &gt; body</div>
+            </div>
+            <div class="flow-step flow-step--action">
+              <div class="flow-step-icon">≡</div>
+              <div class="flow-step-text">Rank: exact name &gt; desc hit &gt; heading hit &gt; body; ties alphabetical</div>
+            </div>
+            <div class="flow-step flow-step--output">
+              <div class="flow-step-icon">▶</div>
+              <div class="flow-step-text">Output ranked Search Results with diagram links</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- /audit-skills -->
+      <div class="op-card">
+        <div class="op-header">
+          <div class="op-cmd">/audit-skills</div>
+          <div class="op-mode op-mode--ro">read-only</div>
+        </div>
+        <div class="op-body">
+          <div class="op-desc">Comprehensive health check. No confirmation needed — no changes made.</div>
+          <div class="op-flow">
+            <div class="flow-step flow-step--action">
+              <div class="flow-step-icon">1</div>
+              <div class="flow-step-text">Missing diagrams: skills lacking <code>diagram.html</code></div>
+            </div>
+            <div class="flow-step flow-step--action">
+              <div class="flow-step-icon">2</div>
+              <div class="flow-step-text">README broken links: row targets that don't exist</div>
+            </div>
+            <div class="flow-step flow-step--action">
+              <div class="flow-step-icon">3</div>
+              <div class="flow-step-text">README missing rows: skill dirs with no README entry</div>
+            </div>
+            <div class="flow-step flow-step--action">
+              <div class="flow-step-icon">4</div>
+              <div class="flow-step-text">Bad frontmatter: missing <code>name:</code> or <code>description:</code></div>
+            </div>
+            <div class="flow-step flow-step--action">
+              <div class="flow-step-icon">5</div>
+              <div class="flow-step-text">Deprecated installs: projects using <code>status: deprecated</code> skills</div>
+            </div>
+            <div class="flow-step flow-step--action">
+              <div class="flow-step-icon">6</div>
+              <div class="flow-step-text">Parity gaps: Claude-only skills (no Codex/Gemini port)</div>
+            </div>
+            <div class="flow-step flow-step--output">
+              <div class="flow-step-icon">▶</div>
+              <div class="flow-step-text">Output structured <strong>Audit Report</strong></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- /backfill-diagrams -->
+      <div class="op-card">
+        <div class="op-header">
+          <div class="op-cmd">/backfill-diagrams [name]</div>
+          <div class="op-mode op-mode--mut">mutating</div>
+        </div>
+        <div class="op-body">
+          <div class="op-desc">Retroactively generate diagram.html for all archived skills missing one.</div>
+          <div class="op-flow">
+            <div class="flow-step flow-step--decision">
+              <div class="flow-step-icon">?</div>
+              <div class="flow-step-text"><strong>name given?</strong> check that skill : scan all <code>claude/skills/*/</code> for missing diagram.html</div>
+            </div>
+            <div class="flow-step flow-step--confirm">
+              <div class="flow-step-icon">◇</div>
+              <div class="flow-step-text">AskUserQuestion: confirm N skills to generate</div>
+            </div>
+            <div class="flow-step flow-step--action">
+              <div class="flow-step-icon">◈</div>
+              <div class="flow-step-text">Invoke <code>visual-explainer:generate-web-diagram</code> → save diagram.html</div>
+            </div>
+            <div class="flow-step flow-step--output">
+              <div class="flow-step-icon">▶</div>
+              <div class="flow-step-text">Update SKILL.md Diagram sections + README diagram links</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
     </div>
+  </section>
 
-    <div class="op-card op-update" style="--i:3">
-      <div class="op-head">
-        <div class="op-icon">🔄</div>
-        <div class="op-cmd">/update-skill</div>
+  <!-- DATA FLOW DIAGRAM -->
+  <section class="diagram-block animate" style="--i:4">
+    <div class="section-title">Data Flow — Source Discovery to Deployment</div>
+
+    <div class="mermaid-wrap">
+      <div class="zoom-controls">
+        <button onclick="zoomDiagram(this, 1.2)" title="Zoom in">+</button>
+        <button onclick="zoomDiagram(this, 0.8)" title="Zoom out">&minus;</button>
+        <button onclick="resetZoom(this)" title="Reset">&#8634;</button>
       </div>
-      <div class="op-body">
-        <div class="op-desc">Update installed skills when archive has newer versions. Shows version delta before confirming.</div>
-        <ul class="op-steps">
-          <li>Scan for installed-from marker</li>
-          <li>Diff vs archive version</li>
-          <li>Confirm with version delta</li>
-          <li>Regenerate diagram on update</li>
-        </ul>
-      </div>
+      <pre class="mermaid">
+flowchart TD
+    subgraph SRC["① SOURCE LOCATIONS"]
+        S1["~/.claude/skills/"]
+        S2["project/.claude/skills/"]
+        S3["project/skills/"]
+        S4["codex/ · gemini/"]
+    end
+
+    subgraph FILTER["② FILTER &amp; CLASSIFY  /find-skills"]
+        F1{{"installed-from:\nllm_skills?"}}
+        F2{{"status:\ndeprecated?"}}
+        F3["Classify:\nNew · Changed\nUnchanged · Orphan"]
+        F4["Detect companions\n&amp; sub-skills"]
+    end
+
+    subgraph PRIO["③ CONFLICT RESOLUTION  /sync-skill"]
+        P1["global ~/.claude/ ①"]
+        P2["this repo .claude/ ②"]
+        P3["other projects ③ alpha"]
+        WIN(["winning source"])
+    end
+
+    subgraph ARC["④ ARCHIVE  llm_skills/claude/skills/&#60;name&#62;/"]
+        A1["SKILL.md"]
+        A2["sub-skills/ + commands/"]
+        A3["diagram.html"]
+    end
+
+    subgraph DEPLOY["⑤ DEPLOY"]
+        D1["project/.claude/skills/\n+ installed-from marker"]
+        D2["~/.claude/skills/\nno marker — source tier"]
+    end
+
+    SRC --> F1
+    F1 -->|"yes"| SKIP(("skip"))
+    F1 -->|"no"| F2
+    F2 -->|"yes"| DEP(["Deprecated"])
+    F2 -->|"no"| F3 --> F4
+    F4 --> P1
+    F4 --> P2
+    F4 --> P3
+    P1 --> WIN
+    P2 --> WIN
+    P3 --> WIN
+    WIN --> ARC
+    ARC -->|"/install-skill"| D1
+    ARC -->|"/push-skill"| D2
+    D1 -.->|"/import-skill reverse"| ARC
+
+    style SRC fill:#1a1f35,stroke:#a78bfa,stroke-width:1.5px,color:#c4b5fd
+    style FILTER fill:#1a1f35,stroke:#fbbf24,stroke-width:1.5px,color:#fde68a
+    style PRIO fill:#1a1f35,stroke:#22d3ee,stroke-width:1.5px,color:#a5f3fc
+    style ARC fill:#0d1f2d,stroke:#22d3ee,stroke-width:2px,color:#a5f3fc
+    style DEPLOY fill:#0d1f18,stroke:#34d399,stroke-width:1.5px,color:#6ee7b7
+    style SKIP fill:#1e293b,stroke:#475569,color:#64748b
+    style DEP fill:#2e1515,stroke:#f87171,color:#fca5a5
+    style WIN fill:#0d2520,stroke:#34d399,color:#6ee7b7
+      </pre>
     </div>
+    <div class="diagram-caption">fig. 1 — skill data flow: discovery → archive → deployment. /import-skill is the only reverse path.</div>
+  </section>
 
-    <div class="op-card op-import" style="--i:4">
-      <div class="op-head">
-        <div class="op-icon">📥</div>
-        <div class="op-cmd">/import-skill</div>
+  <!-- GUARD PATTERN DIAGRAM -->
+  <section class="diagram-block animate" style="--i:5">
+    <div class="section-title">Confirmation Gate Pattern — All Mutating Operations</div>
+
+    <div class="mermaid-wrap">
+      <div class="zoom-controls">
+        <button onclick="zoomDiagram(this, 1.2)" title="Zoom in">+</button>
+        <button onclick="zoomDiagram(this, 0.8)" title="Zoom out">&minus;</button>
+        <button onclick="resetZoom(this)" title="Reset">&#8634;</button>
       </div>
-      <div class="op-body">
-        <div class="op-desc">Reverse flow: push project-developed changes back to archive and global profile.</div>
-        <ul class="op-steps">
-          <li>Reject installed-from copies</li>
-          <li>Show diff (lines added/removed)</li>
-          <li>Write to archive + ~/.claude</li>
-          <li>Bundle new companion commands</li>
-        </ul>
-      </div>
+      <pre class="mermaid">
+flowchart LR
+    subgraph GUARDS["FILTER GUARDS applied before any confirmation"]
+        G1{{"installed-from:\nllm_skills?"}}
+        G2{{"status:\ndraft?"}}
+        G3{{"status:\ndeprecated?"}}
+    end
+
+    subgraph CONFIRM["AskUserQuestion GATES"]
+        C1{{"scope\nconfirm"}}
+        C2{{"file-write\nconfirm"}}
+        C3{{"force-import\nwarning"}}
+    end
+
+    subgraph OUT["OUTCOME"]
+        O1(["proceed\nwrite files"])
+        O2(["cancel\nor skip"])
+    end
+
+    G1 -->|"yes — import guard"| C3
+    G1 -->|"no"| C1
+    G2 -->|"yes — skip + warn"| O2
+    G2 -->|"no"| C1
+    G3 -->|"yes — skip"| O2
+    G3 -->|"no"| C1
+    C1 -->|"confirmed"| C2
+    C1 -->|"Cancel"| O2
+    C2 -->|"confirmed"| O1
+    C2 -->|"Cancel"| O2
+    C3 -->|"force"| C2
+    C3 -->|"Cancel (default)"| O2
+
+    style GUARDS fill:#1f1515,stroke:#f87171,stroke-width:1.5px,color:#fca5a5
+    style CONFIRM fill:#1a1530,stroke:#a78bfa,stroke-width:1.5px,color:#c4b5fd
+    style OUT fill:#0d1f18,stroke:#34d399,stroke-width:1.5px,color:#6ee7b7
+      </pre>
     </div>
+    <div class="diagram-caption">fig. 2 — all mutating operations pass through filter guards then AskUserQuestion confirmation gates before touching any files.</div>
+  </section>
 
-    <div class="op-card op-push" style="--i:5">
-      <div class="op-head">
-        <div class="op-icon">🌐</div>
-        <div class="op-cmd">/push-skill</div>
-      </div>
-      <div class="op-body">
-        <div class="op-desc">Push archive skills to global profile so they're available in all projects.</div>
-        <ul class="op-steps">
-          <li>Skip draft status skills</li>
-          <li>Confirm overwrite if differs</li>
-          <li>No installed-from marker added</li>
-          <li>Writes sub-skills + commands</li>
-        </ul>
-      </div>
+  <!-- LEGEND -->
+  <section class="legend-block animate" style="--i:6">
+    <div class="section-title" style="margin-bottom:0">Legend</div>
+    <div class="legend-grid">
+      <div class="legend-item"><div class="legend-swatch" style="background:var(--green)"></div> Read-only operation</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:var(--amber)"></div> Mutating operation</div>
+      <div class="legend-item"><div class="legend-diamond" style="background:var(--amber)"></div> AskUserQuestion confirmation gate</div>
+      <div class="legend-item"><div class="legend-circle" style="background:var(--red)"></div> Filter / guard (blocks flow)</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:var(--cyan)"></div> Action step</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:var(--violet)"></div> AskUserQuestion interaction</div>
+      <div class="legend-item"><div class="legend-circle" style="background:var(--green)"></div> Output / result node</div>
     </div>
+  </section>
 
-    <div class="op-card op-search" style="--i:6">
-      <div class="op-head">
-        <div class="op-icon">🗂</div>
-        <div class="op-cmd">/search-skill</div>
-      </div>
-      <div class="op-body">
-        <div class="op-desc">Keyword search across all archived skills, ranked by match quality.</div>
-        <ul class="op-steps">
-          <li>name match → highest priority</li>
-          <li>description → high priority</li>
-          <li>section headings → medium</li>
-          <li>body text → lower</li>
-        </ul>
-      </div>
+  <!-- ARCHIVE INVARIANTS -->
+  <section class="invariants-block animate" style="--i:7">
+    <div class="section-title">Archive Invariants — Never Violate</div>
+    <div class="invariants-grid">
+      <div class="invariant-item"><strong>1. Never delete from archive.</strong> Copies are permanent. Deletions are manual curatorial decisions only.</div>
+      <div class="invariant-item"><strong>2. Flow is source → archive</strong> — except <code>/import-skill</code>, the only explicit reverse path.</div>
+      <div class="invariant-item"><strong>3. README is the authoritative index.</strong> Every archived skill has a row; every row points to a real file.</div>
+      <div class="invariant-item"><strong>4. Toolset by directory, not content.</strong> <code>claude/</code>, <code>codex/</code>, <code>gemini/</code> determine the toolset column.</div>
+      <div class="invariant-item"><strong>5. <code>installed-from</code> gating.</strong> Installed copies are not project-developed skills — never synced back without force.</div>
     </div>
+  </section>
 
-    <div class="op-card op-audit" style="--i:7">
-      <div class="op-head">
-        <div class="op-icon">🏥</div>
-        <div class="op-cmd">/audit-skills</div>
-      </div>
-      <div class="op-body">
-        <div class="op-desc">Read-only health check: missing diagrams, README drift, bad frontmatter, deprecated installs, parity gaps.</div>
-        <ul class="op-steps">
-          <li>Missing diagram.html files</li>
-          <li>README broken/missing rows</li>
-          <li>Deprecated skill installs</li>
-          <li>Claude-only parity gaps</li>
-        </ul>
-      </div>
+  <!-- FOOTER -->
+  <footer class="footer animate" style="--i:8">
+    <div class="footer-label">
+      <span class="pulse-dot"></span>
+      <span>skills-manager</span> &middot; 9 operations &middot; 2026-04-05
     </div>
-
-    <div class="op-card op-backfill" style="--i:8">
-      <div class="op-head">
-        <div class="op-icon">🖼</div>
-        <div class="op-cmd">/backfill-diagrams</div>
-      </div>
-      <div class="op-body">
-        <div class="op-desc">Retroactively generate diagram.html for archived skills that don't have one yet.</div>
-        <ul class="op-steps">
-          <li>Find skills lacking diagram.html</li>
-          <li>Generate via visual-explainer</li>
-          <li>Add ## Diagram section</li>
-          <li>Update README diagram links</li>
-        </ul>
-      </div>
+    <div class="footer-label">
+      archive: <span>C:\development\llm_skills</span>
     </div>
+  </footer>
 
-  </div>
-
-  <!-- INVARIANTS -->
-  <div class="invariants">
-    <div class="inv-title">Archive Invariants — Never Violate</div>
-    <div class="inv-list">
-      <span class="inv-item">Never delete from archive</span>
-      <span class="inv-item">Flow: source → archive (except /import-skill)</span>
-      <span class="inv-item">README is authoritative index</span>
-      <span class="inv-item">Toolset by directory, not content</span>
-      <span class="inv-item">installed-from marker gates project vs archive</span>
-      <span class="inv-item">All user interaction via AskUserQuestion</span>
-    </div>
-  </div>
 </div>
+
+<script type="module">
+  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+
+  mermaid.initialize({
+    startOnLoad: true,
+    theme: 'base',
+    look: 'classic',
+    themeVariables: {
+      background: '#111827',
+      primaryColor: '#1a2235',
+      primaryBorderColor: '#22d3ee',
+      primaryTextColor: '#e2e8f0',
+      secondaryColor: '#0d1220',
+      secondaryBorderColor: '#a78bfa',
+      secondaryTextColor: '#e2e8f0',
+      tertiaryColor: '#0f1a18',
+      tertiaryBorderColor: '#34d399',
+      tertiaryTextColor: '#e2e8f0',
+      lineColor: '#38bdf8',
+      edgeLabelBackground: '#111827',
+      clusterBkg: '#1a2235',
+      clusterBorder: '#38bdf8',
+      titleColor: '#e2e8f0',
+      fontSize: '14px',
+      fontFamily: "'Inter', system-ui, sans-serif",
+      nodeTextColor: '#e2e8f0',
+    }
+  });
+</script>
+
+<script>
+  function updateZoomState(wrap) {
+    var target = wrap.querySelector('.mermaid');
+    var zoom = parseFloat(target.dataset.zoom || '1');
+    wrap.classList.toggle('is-zoomed', zoom > 1);
+  }
+  function zoomDiagram(btn, factor) {
+    var wrap = btn.closest('.mermaid-wrap');
+    var target = wrap.querySelector('.mermaid');
+    var current = parseFloat(target.dataset.zoom || '1');
+    var next = Math.min(Math.max(current * factor, 0.3), 5);
+    target.dataset.zoom = next;
+    target.style.transform = 'scale(' + next + ')';
+    updateZoomState(wrap);
+  }
+  function resetZoom(btn) {
+    var wrap = btn.closest('.mermaid-wrap');
+    var target = wrap.querySelector('.mermaid');
+    target.dataset.zoom = '1';
+    target.style.transform = 'scale(1)';
+    updateZoomState(wrap);
+  }
+
+  document.querySelectorAll('.mermaid-wrap').forEach(function(wrap) {
+    wrap.addEventListener('wheel', function(e) {
+      if (!e.ctrlKey && !e.metaKey) return;
+      e.preventDefault();
+      var target = wrap.querySelector('.mermaid');
+      var current = parseFloat(target.dataset.zoom || '1');
+      var factor = e.deltaY < 0 ? 1.1 : 0.9;
+      var next = Math.min(Math.max(current * factor, 0.3), 5);
+      target.dataset.zoom = next;
+      target.style.transform = 'scale(' + next + ')';
+      updateZoomState(wrap);
+    }, { passive: false });
+
+    var startX, startY, scrollL, scrollT;
+    wrap.addEventListener('mousedown', function(e) {
+      if (e.target.closest('.zoom-controls')) return;
+      var target = wrap.querySelector('.mermaid');
+      if (parseFloat(target.dataset.zoom || '1') <= 1) return;
+      wrap.classList.add('is-panning');
+      startX = e.clientX; startY = e.clientY;
+      scrollL = wrap.scrollLeft; scrollT = wrap.scrollTop;
+    });
+    window.addEventListener('mousemove', function(e) {
+      if (!wrap.classList.contains('is-panning')) return;
+      wrap.scrollLeft = scrollL - (e.clientX - startX);
+      wrap.scrollTop = scrollT - (e.clientY - startY);
+    });
+    window.addEventListener('mouseup', function() {
+      wrap.classList.remove('is-panning');
+    });
+  });
+</script>
+
 </body>
 </html>

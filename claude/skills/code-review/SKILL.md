@@ -1,6 +1,7 @@
 ---
 name: code-review
 description: Mandatory code reviews via /code-review before commits and deploys
+requires: [base]
 ---
 
 # Code Review Skill

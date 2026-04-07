@@ -1,7 +1,6 @@
 ---
 name: security-review
 description: Use this skill when adding authentication, handling user input, working with secrets, creating API endpoints, or implementing payment/sensitive features. Provides comprehensive security checklist and patterns.
-requires: [security]
 ---
 
 # Security Review Skill
@@ -22,13 +21,13 @@ This skill ensures all code follows security best practices and identifies poten
 
 ### 1. Secrets Management
 
-#### ❌ NEVER Do This
+#### Never Do This
 ```typescript
 const apiKey = "sk-proj-xxxxx"  // Hardcoded secret
 const dbPassword = "password123" // In source code
 ```
 
-#### ✅ ALWAYS Do This
+#### Always Do This
 ```typescript
 const apiKey = process.env.OPENAI_API_KEY
 const dbUrl = process.env.DATABASE_URL
@@ -108,14 +107,14 @@ function validateFileUpload(file: File) {
 
 ### 3. SQL Injection Prevention
 
-#### ❌ NEVER Concatenate SQL
+#### Never Concatenate SQL
 ```typescript
 // DANGEROUS - SQL Injection vulnerability
 const query = `SELECT * FROM users WHERE email = '${userEmail}'`
 await db.query(query)
 ```
 
-#### ✅ ALWAYS Use Parameterized Queries
+#### Always Use Parameterized Queries
 ```typescript
 // Safe - parameterized query
 const { data } = await supabase
@@ -140,10 +139,10 @@ await db.query(
 
 #### JWT Token Handling
 ```typescript
-// ❌ WRONG: localStorage (vulnerable to XSS)
+// Wrong: localStorage (vulnerable to XSS)
 localStorage.setItem('token', token)
 
-// ✅ CORRECT: httpOnly cookies
+// Correct: httpOnly cookies
 res.setHeader('Set-Cookie',
   `token=${token}; HttpOnly; Secure; SameSite=Strict; Max-Age=3600`)
 ```
@@ -300,18 +299,18 @@ app.use('/api/search', searchLimiter)
 
 #### Logging
 ```typescript
-// ❌ WRONG: Logging sensitive data
+// Wrong: Logging sensitive data
 console.log('User login:', { email, password })
 console.log('Payment:', { cardNumber, cvv })
 
-// ✅ CORRECT: Redact sensitive data
+// Correct: Redact sensitive data
 console.log('User login:', { email, userId })
 console.log('Payment:', { last4: card.last4, userId })
 ```
 
 #### Error Messages
 ```typescript
-// ❌ WRONG: Exposing internal details
+// Wrong: Exposing internal details
 catch (error) {
   return NextResponse.json(
     { error: error.message, stack: error.stack },
@@ -319,7 +318,7 @@ catch (error) {
   )
 }
 
-// ✅ CORRECT: Generic error messages
+// Correct: Generic error messages
 catch (error) {
   console.error('Internal error:', error)
   return NextResponse.json(
@@ -493,7 +492,3 @@ Before ANY production deployment:
 ---
 
 **Remember**: Security is not optional. One vulnerability can compromise the entire platform. When in doubt, err on the side of caution.
-
-## Diagram
-
-[View diagram](diagram.html)

@@ -1,6 +1,7 @@
 ---
 name: supabase-node
 description: Express/Hono with Supabase and Drizzle ORM
+requires: [supabase]
 ---
 
 # Supabase + Node.js Skill

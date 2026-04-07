@@ -11,8 +11,9 @@ llm_skills/
 │   ├── commands/   # 27 slash commands
 │   └── skills/     # 90 domain-specific knowledge modules
 ├── codex/
-│   └── skills/     # 70 domain-specific knowledge modules
-└── gemini/         # Google Gemini CLI skills (future)
+│   └── skills/     # 90 domain-specific knowledge modules
+└── gemini/
+    └── skills/     # 5 domain-specific knowledge modules
 ```
 
 ---
@@ -40,16 +41,6 @@ Specialized sub-agents invoked via the Task tool. Proactive agents fire automati
 | [`ship-to-uat`](claude/agents/ship-to-uat.md) | — | Creates a PR from `dev` → `uat` for User Acceptance Testing |
 | [`tdd-guide`](claude/agents/tdd-guide.md) | Opus | Enforces write-tests-first — Red/Green/Refactor cycle, 80%+ coverage minimum |
 | [`webui-developer`](claude/agents/webui-developer.md) | Sonnet | React/TypeScript components, Storybook stories, Vitest tests, cross-platform scripts (PowerShell/bash) |
-
----
-
-## Project Commands
-
-Slash commands scoped to this archive — available only when Claude Code is opened inside `llm_skills/`. They live in `.claude/commands/`.
-
-| Command | Description |
-|---------|-------------|
-| [`/skills-manager`](.claude/commands/skills-manager.md) | Full lifecycle management of LLM skills — find, sync, install, update, import, push, search, audit, and backfill diagrams |
 
 ---
 
@@ -108,16 +99,16 @@ Domain-specific knowledge modules loaded into AI context. Claude skills live in 
 | [`using-git-worktrees`](claude/skills/using-git-worktrees/) [(diagram)](claude/skills/using-git-worktrees/diagram.html) | Foundations & Workflow | Isolated git worktrees for feature work — smart directory selection and safety verification | ✓ | ✓ | |
 | [`requesting-code-review`](claude/skills/requesting-code-review/) [(diagram)](claude/skills/requesting-code-review/diagram.html) | Foundations & Workflow | Use when completing tasks or before merging to verify work meets requirements | ✓ | ✓ | |
 | [`ship-to-dev`](claude/skills/ship-to-dev/) [(diagram)](claude/skills/ship-to-dev/diagram.html) | Foundations & Workflow | Automated flow: commit → push → PR to dev → merge → branch cleanup | ✓ | ✓ | |
-| [`release-to-main`](claude/skills/release-to-main/) [(diagram)](claude/skills/release-to-main/diagram.html) | Foundations & Workflow | Merge dev into main for a production release — rebasing, semantic versioning from conventional commits, release tagging, and syncing dev back | ✓ | | |
+| [`release-to-main`](claude/skills/release-to-main/) [(diagram)](claude/skills/release-to-main/diagram.html) | Foundations & Workflow | Merge dev into main for a production release — rebasing, semantic versioning from conventional commits, release tagging, and syncing dev back | ✓ | ✓ | |
 | [`commit-hygiene`](claude/skills/commit-hygiene/) [(diagram)](claude/skills/commit-hygiene/diagram.html) | Foundations & Workflow | Atomic commits, PR size limits, commit thresholds, stacked PRs | ✓ | ✓ | |
-| [`git-cleanup`](claude/skills/git-cleanup/) [(diagram)](claude/skills/git-cleanup/diagram.html) | Foundations & Workflow | Audits and removes stale git worktrees and branches (local + remote origin) that have been merged into `dev` — squash-merge aware, dirty-check protected | ✓ | | |
-| [`guide-assistant`](claude/skills/guide-assistant/) [(diagram)](claude/skills/guide-assistant/diagram.html) | Foundations & Workflow | Personal assistant for walking the user step-by-step through any markdown file, manual, guide, runbook, or instruction document | ✓ | | |
-| [`feature-start`](claude/skills/feature-start/) [(diagram)](claude/skills/feature-start/diagram.html) | Foundations & Workflow | Use when starting any HomeRadar feature — before reading code, writing plans, or creating a worktree — ships with `/feature-start` | ✓ | | |
-| [`fix-start`](claude/skills/fix-start/) [(diagram)](claude/skills/fix-start/diagram.html) | Foundations & Workflow | Use when starting any HomeRadar bug fix or regression investigation, before writing any code — ships with `/fix-start` | ✓ | | |
-| [`pre-pr`](claude/skills/pre-pr/) [(diagram)](claude/skills/pre-pr/diagram.html) | Foundations & Workflow | Use before opening any HomeRadar pull request — three self-gates must all pass — ships with `/pre-pr` | ✓ | | |
-| [`retro-fit-spec`](claude/skills/retro-fit-spec/) [(diagram)](claude/skills/retro-fit-spec/diagram.html) | Foundations & Workflow | Use when editing a HomeRadar feature spec that has no CAP-IDs in its Capabilities section — ships with `/retro-fit-spec` | ✓ | | |
-| [`spec-align`](claude/skills/spec-align/) [(diagram)](claude/skills/spec-align/diagram.html) | Foundations & Workflow | Use when the user provides a HomeRadar feature spec name and wants the codebase brought into full alignment with that spec — gap analysis through implementation, tests, and merge — ships with `/spec-align` | ✓ | | |
-| [`add-feature`](claude/skills/add-feature/) [(diagram)](claude/skills/add-feature/diagram.html) | Foundations & Workflow | Conversational 7-phase workflow to produce a thorough feature specification saved to /docs/features/ — ships with `/add-feature` | ✓ | | |
+| [`git-cleanup`](claude/skills/git-cleanup/) [(diagram)](claude/skills/git-cleanup/diagram.html) | Foundations & Workflow | Audits and removes stale git worktrees and branches (local + remote origin) that have been merged into `dev` — squash-merge aware, dirty-check protected | ✓ | ✓ | |
+| [`guide-assistant`](claude/skills/guide-assistant/) [(diagram)](claude/skills/guide-assistant/diagram.html) | Foundations & Workflow | Personal assistant for walking the user step-by-step through any markdown file, manual, guide, runbook, or instruction document | ✓ | ✓ | |
+| [`feature-start`](claude/skills/feature-start/) [(diagram)](claude/skills/feature-start/diagram.html) | Foundations & Workflow | Use when starting any HomeRadar feature — before reading code, writing plans, or creating a worktree — ships with `/feature-start` | ✓ | ✓ | |
+| [`fix-start`](claude/skills/fix-start/) [(diagram)](claude/skills/fix-start/diagram.html) | Foundations & Workflow | Use when starting any HomeRadar bug fix or regression investigation, before writing any code — ships with `/fix-start` | ✓ | ✓ | |
+| [`pre-pr`](claude/skills/pre-pr/) [(diagram)](claude/skills/pre-pr/diagram.html) | Foundations & Workflow | Use before opening any HomeRadar pull request — three self-gates must all pass — ships with `/pre-pr` | ✓ | ✓ | |
+| [`retro-fit-spec`](claude/skills/retro-fit-spec/) [(diagram)](claude/skills/retro-fit-spec/diagram.html) | Foundations & Workflow | Use when editing a HomeRadar feature spec that has no CAP-IDs in its Capabilities section — ships with `/retro-fit-spec` | ✓ | ✓ | |
+| [`spec-align`](claude/skills/spec-align/) [(diagram)](claude/skills/spec-align/diagram.html) | Foundations & Workflow | Use when the user provides a HomeRadar feature spec name and wants the codebase brought into full alignment with that spec — gap analysis through implementation, tests, and merge — ships with `/spec-align` | ✓ | ✓ | |
+| [`add-feature`](claude/skills/add-feature/) [(diagram)](claude/skills/add-feature/diagram.html) | Foundations & Workflow | Conversational 7-phase workflow to produce a thorough feature specification saved to /docs/features/ — ships with `/add-feature` | ✓ | ✓ | |
 | [`typescript`](claude/skills/typescript/) [(diagram)](claude/skills/typescript/diagram.html) | Languages & Runtimes | TypeScript strict mode with eslint and jest | ✓ | ✓ | |
 | [`python`](claude/skills/python/) [(diagram)](claude/skills/python/diagram.html) | Languages & Runtimes | Python development with ruff, mypy, pytest — TDD and type safety | ✓ | ✓ | |
 | [`nodejs-backend`](claude/skills/nodejs-backend/) [(diagram)](claude/skills/nodejs-backend/diagram.html) | Languages & Runtimes | Node.js backend patterns with Express/Fastify, repository pattern | ✓ | ✓ | |
@@ -125,9 +116,9 @@ Domain-specific knowledge modules loaded into AI context. Claude skills live in 
 | [`react-native`](claude/skills/react-native/) [(diagram)](claude/skills/react-native/diagram.html) | Frontend Frameworks | React Native and Expo patterns, platform-specific code, list performance, animations, and navigation best practices | ✓ | ✓ | |
 | [`flutter`](claude/skills/flutter/) [(diagram)](claude/skills/flutter/diagram.html) | Frontend Frameworks | Flutter with Riverpod, Freezed, go_router, and mocktail testing | ✓ | ✓ | |
 | [`pwa-development`](claude/skills/pwa-development/) [(diagram)](claude/skills/pwa-development/diagram.html) | Frontend Frameworks | Progressive Web Apps — service workers, caching strategies, offline support, Workbox | ✓ | ✓ | |
-| [`chrome-extension-builder`](claude/skills/chrome-extension-builder/) [(diagram)](claude/skills/chrome-extension-builder/diagram.html) | Frontend Frameworks | Scaffold production-ready Chrome MV3 extensions using WXT + React + TypeScript + shadcn-UI — content scripts, background service workers, side panels, popups, native messaging, and Google Docs/Overleaf integrations | ✓ | ✓ | |
-| [`composition-patterns`](claude/skills/composition-patterns/) [(diagram)](claude/skills/composition-patterns/diagram.html) | Frontend Frameworks | React composition patterns that scale — for refactoring components with boolean prop proliferation and building flexible component libraries | ✓ | | |
-| [`react-best-practices`](claude/skills/react-best-practices/) [(diagram)](claude/skills/react-best-practices/diagram.html) | Frontend Frameworks | React and Next.js performance optimization guidelines from Vercel Engineering — components, data fetching, bundle optimization | ✓ | | |
+| [`chrome-extension-builder`](claude/skills/chrome-extension-builder/) [(diagram)](claude/skills/chrome-extension-builder/diagram.html) | Frontend Frameworks | Scaffold production-ready Chrome MV3 extensions using WXT + React + TypeScript + shadcn-UI — content scripts, background service workers, side panels, popups, native messaging, and Google Docs/Overleaf integrations | ✓ | ✓ | ✓ |
+| [`composition-patterns`](claude/skills/composition-patterns/) [(diagram)](claude/skills/composition-patterns/diagram.html) | Frontend Frameworks | React composition patterns that scale — for refactoring components with boolean prop proliferation and building flexible component libraries | ✓ | ✓ | |
+| [`react-best-practices`](claude/skills/react-best-practices/) [(diagram)](claude/skills/react-best-practices/diagram.html) | Frontend Frameworks | React and Next.js performance optimization guidelines from Vercel Engineering — components, data fetching, bundle optimization | ✓ | ✓ | |
 | [`android-java`](claude/skills/android-java/) [(diagram)](claude/skills/android-java/diagram.html) | Mobile (Native) | Android Java development with MVVM, ViewBinding, and Espresso testing | ✓ | ✓ | |
 | [`android-kotlin`](claude/skills/android-kotlin/) [(diagram)](claude/skills/android-kotlin/diagram.html) | Mobile (Native) | Android Kotlin with Coroutines, Jetpack Compose, Hilt, and MockK testing | ✓ | ✓ | |
 | [`ui-mobile`](claude/skills/ui-mobile/) [(diagram)](claude/skills/ui-mobile/diagram.html) | Mobile (Native) | Mobile UI patterns — React Native, iOS/Android, touch targets | ✓ | ✓ | |
@@ -135,9 +126,9 @@ Domain-specific knowledge modules loaded into AI context. Claude skills live in 
 | [`ui-testing`](claude/skills/ui-testing/) [(diagram)](claude/skills/ui-testing/diagram.html) | UI & Design | Visual testing — catch invisible buttons, broken layouts, contrast issues | ✓ | ✓ | |
 | [`design-taste-frontend`](claude/skills/design-taste-frontend/) [(diagram)](claude/skills/design-taste-frontend/diagram.html) | UI & Design | Senior UI/UX guidance — metric-based rules, CSS hardware acceleration, balanced design engineering | ✓ | ✓ | |
 | [`frontend-design`](claude/skills/frontend-design/) [(diagram)](claude/skills/frontend-design/diagram.html) | UI & Design | Production-grade frontend interfaces — polished, distinctive, avoiding generic AI aesthetics | ✓ | ✓ | |
-| [`logo-restylizer`](claude/skills/logo-restylizer/) [(diagram)](claude/skills/logo-restylizer/diagram.html) | UI & Design | Restylize, retheme, or transform an existing logo or icon into a new visual variant — dark/light/neon/flat versions, color changes, style shifts | ✓ | | |
+| [`logo-restylizer`](claude/skills/logo-restylizer/) [(diagram)](claude/skills/logo-restylizer/diagram.html) | UI & Design | Restylize, retheme, or transform an existing logo or icon into a new visual variant — dark/light/neon/flat versions, color changes, style shifts | ✓ | ✓ | |
 | [`user-journeys`](claude/skills/user-journeys/) [(diagram)](claude/skills/user-journeys/diagram.html) | UI & Design | UX flows — journey mapping, UX validation, error recovery | ✓ | ✓ | |
-| [`web-design-guidelines`](claude/skills/web-design-guidelines/) [(diagram)](claude/skills/web-design-guidelines/diagram.html) | UI & Design | Review UI code for Web Interface Guidelines compliance — accessibility, UX audits, best practices | ✓ | | |
+| [`web-design-guidelines`](claude/skills/web-design-guidelines/) [(diagram)](claude/skills/web-design-guidelines/diagram.html) | UI & Design | Review UI code for Web Interface Guidelines compliance — accessibility, UX audits, best practices | ✓ | ✓ | |
 | [`doc-coauthoring`](claude/skills/doc-coauthoring/) [(diagram)](claude/skills/doc-coauthoring/diagram.html) | UI & Design | Structured co-authoring workflow for documentation, proposals, and technical specs | ✓ | ✓ | |
 | [`explain-code`](claude/skills/explain-code/) [(diagram)](claude/skills/explain-code/diagram.html) | UI & Design | Explains code with visual diagrams and analogies | ✓ | ✓ | |
 | [`supabase`](claude/skills/supabase/) [(diagram)](claude/skills/supabase/diagram.html) | Databases & Storage | Core Supabase CLI, migrations, RLS, Edge Functions | ✓ | ✓ | |
@@ -155,14 +146,14 @@ Domain-specific knowledge modules loaded into AI context. Claude skills live in 
 | [`codex-review`](claude/skills/codex-review/) [(diagram)](claude/skills/codex-review/diagram.html) | Code Quality | OpenAI Codex CLI code review with GPT-5.2-Codex, CI/CD integration | ✓ | ✓ | |
 | [`gemini-review`](claude/skills/gemini-review/) [(diagram)](claude/skills/gemini-review/diagram.html) | Code Quality | Google Gemini CLI code review with Gemini 2.5 Pro and 1M token context | ✓ | ✓ | |
 | [`playwright-testing`](claude/skills/playwright-testing/) [(diagram)](claude/skills/playwright-testing/diagram.html) | Code Quality | E2E testing with Playwright — Page Objects, cross-browser, CI/CD integration | ✓ | ✓ | |
-| [`tdd-workflow`](claude/skills/tdd-workflow/) [(diagram)](claude/skills/tdd-workflow/diagram.html) | Code Quality | Enforce TDD when writing features, fixing bugs, or refactoring — Red/Green/Refactor with 80%+ coverage including unit, integration, and E2E | ✓ | ✓ | |
+| [`tdd-workflow`](claude/skills/tdd-workflow/) [(diagram)](claude/skills/tdd-workflow/diagram.html) | Code Quality | Enforce TDD when writing features, fixing bugs, or refactoring — Red/Green/Refactor with 80%+ coverage including unit, integration, and E2E | ✓ | ✓ | ✓ |
 | [`security`](claude/skills/security/) [(diagram)](claude/skills/security/diagram.html) | Security & Credentials | OWASP security patterns, secrets management, security testing | ✓ | ✓ | |
 | [`credentials`](claude/skills/credentials/) [(diagram)](claude/skills/credentials/diagram.html) | Security & Credentials | Centralized API key management from Access.txt | ✓ | ✓ | |
-| [`security-review`](claude/skills/security-review/) [(diagram)](claude/skills/security-review/diagram.html) | Security & Credentials | Comprehensive security checklist when adding auth, handling user input, working with secrets, API endpoints, or payments | ✓ | ✓ | |
+| [`security-review`](claude/skills/security-review/) [(diagram)](claude/skills/security-review/diagram.html) | Security & Credentials | Comprehensive security checklist when adding auth, handling user input, working with secrets, API endpoints, or payments | ✓ | ✓ | ✓ |
 | [`agentic-development`](claude/skills/agentic-development/) [(diagram)](claude/skills/agentic-development/diagram.html) | AI & LLM | Build AI agents with Pydantic AI (Python) and Claude SDK (Node.js) | ✓ | ✓ | |
 | [`llm-patterns`](claude/skills/llm-patterns/) [(diagram)](claude/skills/llm-patterns/diagram.html) | AI & LLM | AI-first application patterns, LLM testing, prompt management | ✓ | ✓ | |
 | [`ai-models`](claude/skills/ai-models/) [(diagram)](claude/skills/ai-models/diagram.html) | AI & LLM | Latest AI models reference — Claude, OpenAI, Gemini, Eleven Labs, Replicate | ✓ | ✓ | |
-| [`project-manager`](claude/skills/project-manager/) [(diagram)](claude/skills/project-manager/diagram.html) | AI & LLM | Automated project implementation orchestrator — drives feature-driven development from initial prompt through completed code via typed agents, phased plans, and markdown state files — ships with 5 sub-skills (`reinit`, `continue-tasks`, `update-tasks`, `review-tasks`, `analyze-features`) and 6 commands (`/add-feature`, `/continue-tasks`, `/analyze-features`, `/reinit`, `/update-tasks`, `/review-tasks`) | ✓ | ✓ | |
+| [`project-manager`](claude/skills/project-manager/) [(diagram)](claude/skills/project-manager/diagram.html) | AI & LLM | Automated project implementation orchestrator — drives feature-driven development from initial prompt through completed code via typed agents, phased plans, and markdown state files — ships with 5 sub-skills (`reinit`, `continue-tasks`, `update-tasks`, `review-tasks`, `analyze-features`) and 6 commands (`/add-feature`, `/continue-tasks`, `/analyze-features`, `/reinit`, `/update-tasks`, `/review-tasks`) | ✓ | ✓ | ✓ |
 | [`shopify-apps`](claude/skills/shopify-apps/) [(diagram)](claude/skills/shopify-apps/diagram.html) | Commerce & Payments | Shopify app development — Remix, Admin API, checkout extensions | ✓ | ✓ | |
 | [`woocommerce`](claude/skills/woocommerce/) [(diagram)](claude/skills/woocommerce/diagram.html) | Commerce & Payments | WooCommerce REST API — products, orders, customers, webhooks | ✓ | ✓ | |
 | [`medusa`](claude/skills/medusa/) [(diagram)](claude/skills/medusa/diagram.html) | Commerce & Payments | Medusa headless commerce — modules, workflows, API routes, admin UI | ✓ | ✓ | |
@@ -177,15 +168,15 @@ Domain-specific knowledge modules loaded into AI context. Claude skills live in 
 | [`aeo-optimization`](claude/skills/aeo-optimization/) [(diagram)](claude/skills/aeo-optimization/diagram.html) | SEO & Web Presence | AI Engine Optimization — semantic triples, page templates, content clusters for AI citations | ✓ | ✓ | |
 | [`project-tooling`](claude/skills/project-tooling/) [(diagram)](claude/skills/project-tooling/diagram.html) | Tooling & DevOps | gh, vercel, supabase, render CLI and deployment platform setup | ✓ | ✓ | |
 | [`workspace`](claude/skills/workspace/) [(diagram)](claude/skills/workspace/diagram.html) | Tooling & DevOps | Multi-repo and monorepo awareness — topology analysis, API contract tracking, cross-repo context | ✓ | ✓ | |
-| [`add-remote-installer`](claude/skills/add-remote-installer/) [(diagram)](claude/skills/add-remote-installer/diagram.html) | Tooling & DevOps | Add a remote install script (install.ps1) and self-update capability to a PowerShell repository — detects GitHub remote, locates primary app script, applies remote-installer skill | ✓ | | |
-| [`publish-github`](claude/skills/publish-github/) [(diagram)](claude/skills/publish-github/diagram.html) | Tooling & DevOps | End-to-end workflow for publishing a local project as a new GitHub repository — gitleaks secrets-detection hook, .gitignore/.gitattributes, main/dev branch setup, and branch protection rules | ✓ | | |
-| [`remote-installer`](claude/skills/remote-installer/) [(diagram)](claude/skills/remote-installer/diagram.html) | Tooling & DevOps | Domain expertise for implementing a remote PowerShell install script and self-update check — auto-elevation, GitHub Releases API version resolution, safe download ordering, .env backup/merge | ✓ | | |
-| [`skills-manager`](claude/skills/skills-manager/) [(diagram)](claude/skills/skills-manager/diagram.html) | Tooling & DevOps | Full lifecycle management of LLM skills — find, sync, install, update, import, push, search, audit, and backfill diagrams; lifecycle status, versioning, and dependency resolution; all interactions via AskUserQuestion — ships with `/find-skills`, `/sync-skill`, `/install-skill`, `/update-skill`, `/import-skill`, `/backfill-diagrams`, `/search-skill`, `/audit-skills`, `/push-skill` | ✓ | ✓ | |
-| [`start-app`](claude/skills/start-app/) [(diagram)](claude/skills/start-app/diagram.html) | Tooling & DevOps | Discovers startup scripts, selects the right one, executes it, validates success, and recovers from failures — ships with `/start-app` | ✓ | | |
-| [`vercel-deploy-claimable`](claude/skills/vercel-deploy-claimable/) [(diagram)](claude/skills/vercel-deploy-claimable/diagram.html) | Tooling & DevOps | Deploy applications to Vercel — preview URLs and claimable deployment links, no authentication required | ✓ | | |
+| [`add-remote-installer`](claude/skills/add-remote-installer/) [(diagram)](claude/skills/add-remote-installer/diagram.html) | Tooling & DevOps | Add a remote install script (install.ps1) and self-update capability to a PowerShell repository — detects GitHub remote, locates primary app script, applies remote-installer skill | ✓ | ✓ | |
+| [`publish-github`](claude/skills/publish-github/) [(diagram)](claude/skills/publish-github/diagram.html) | Tooling & DevOps | End-to-end workflow for publishing a local project as a new GitHub repository — gitleaks secrets-detection hook, .gitignore/.gitattributes, main/dev branch setup, and branch protection rules | ✓ | ✓ | |
+| [`remote-installer`](claude/skills/remote-installer/) [(diagram)](claude/skills/remote-installer/diagram.html) | Tooling & DevOps | Domain expertise for implementing a remote PowerShell install script and self-update check — auto-elevation, GitHub Releases API version resolution, safe download ordering, .env backup/merge | ✓ | ✓ | |
+| [`skills-manager`](claude/skills/skills-manager/) [(diagram)](claude/skills/skills-manager/diagram.html) | Tooling & DevOps | Full lifecycle management of LLM skills — find, sync, install, update, import, push, search, audit, and backfill diagrams; lifecycle status, versioning, and dependency resolution; all interactions via AskUserQuestion — ships with `/find-skills`, `/sync-skill`, `/install-skill`, `/update-skill`, `/import-skill`, `/backfill-diagrams`, `/search-skill`, `/audit-skills`, `/push-skill` | ✓ | ✓ | ✓ |
+| [`start-app`](claude/skills/start-app/) [(diagram)](claude/skills/start-app/diagram.html) | Tooling & DevOps | Discovers startup scripts, selects the right one, executes it, validates success, and recovers from failures — ships with `/start-app` | ✓ | ✓ | |
+| [`vercel-deploy-claimable`](claude/skills/vercel-deploy-claimable/) [(diagram)](claude/skills/vercel-deploy-claimable/diagram.html) | Tooling & DevOps | Deploy applications to Vercel — preview URLs and claimable deployment links, no authentication required | ✓ | ✓ | |
 | [`youtube-prd-forensics`](claude/skills/youtube-prd-forensics/) [(diagram)](claude/skills/youtube-prd-forensics/diagram.html) | Research & OSINT | Create or update a detailed PRD from a YouTube demo video using evidence-first analysis — timestamps, keyframes, transcript, and embedded screenshots | ✓ | ✓ | |
-| [`worldview-layer-scaffold`](claude/skills/worldview-layer-scaffold/) [(diagram)](claude/skills/worldview-layer-scaffold/diagram.html) | Research & OSINT | Scaffold a new real-time data layer for the WorldView GEOINT dashboard — DATA LAYERS panel row, health/freshness tracking, CesiumJS rendering | ✓ | | |
-| [`worldview-shader-preset`](claude/skills/worldview-shader-preset/) [(diagram)](claude/skills/worldview-shader-preset/diagram.html) | Research & OSINT | Scaffold a new post-processing visual style preset for the WorldView GEOINT dashboard — STYLE PRESETS toolbar, adjustable parameters, scene sequencer integration | ✓ | | |
+| [`worldview-layer-scaffold`](claude/skills/worldview-layer-scaffold/) [(diagram)](claude/skills/worldview-layer-scaffold/diagram.html) | Research & OSINT | Scaffold a new real-time data layer for the WorldView GEOINT dashboard — DATA LAYERS panel row, health/freshness tracking, CesiumJS rendering | ✓ | ✓ | |
+| [`worldview-shader-preset`](claude/skills/worldview-shader-preset/) [(diagram)](claude/skills/worldview-shader-preset/diagram.html) | Research & OSINT | Scaffold a new post-processing visual style preset for the WorldView GEOINT dashboard — STYLE PRESETS toolbar, adjustable parameters, scene sequencer integration | ✓ | ✓ | |
 | [`visual-explainer`](claude/skills/visual-explainer/) [(diagram)](claude/skills/visual-explainer/diagram.html) | UI & Design | Generate beautiful self-contained HTML pages for diagrams, architecture overviews, diff reviews, plan reviews, project recaps, and data tables — never falls back to ASCII art | ✓ | ✓ | |
 
 ---
@@ -197,6 +188,6 @@ Domain-specific knowledge modules loaded into AI context. Claude skills live in 
 | Agents | 15 |
 | Commands | 27 |
 | Skills (Claude) | 90 |
-| Skills (Codex) | 70 |
-| Skills (Gemini) | 0 |
-| **Total Skills** | **160** |
+| Skills (Codex) | 90 |
+| Skills (Gemini) | 5 |
+| **Total Skills** | **185** |
