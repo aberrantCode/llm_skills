@@ -7,40 +7,42 @@ Consolidated archive of custom agents, commands, and skills for Claude Code, Ope
 ```
 llm_skills/
 ├── claude/
-│   ├── agents/     # 15 sub-agents invoked via the Task tool
+│   ├── instructions/     # 15 agent instructions (invoked via Task tool)
 │   ├── commands/   # 27 slash commands
 │   └── skills/     # 90 domain-specific knowledge modules
 ├── codex/
+│   ├── instructions/     # Agent instructions for Codex CLI
 │   └── skills/     # 90 domain-specific knowledge modules
 └── gemini/
+    ├── instructions/     # Agent instructions for Gemini CLI
     └── skills/     # 5 domain-specific knowledge modules
 ```
 
 ---
 
-## Agents
+## Instructions
 
-Specialized sub-agents invoked via the Task tool. Proactive agents fire automatically when conditions are met.
+Agent instructions that configure specialized sub-agents. Proactive agents fire automatically when conditions are met.
 
-> All agents are Claude-based and live in `claude/agents/`.
+> All instructions are currently Claude-based and live in `claude/instructions/`.
 
 | Agent | Model | Description |
 |-------|-------|-------------|
-| [`architect`](claude/agents/architect.md) | Opus | Software architecture specialist — system design, scalability, ADRs, trade-off evaluation |
-| [`backend-api-developer`](claude/agents/backend-api-developer.md) | Sonnet | FastAPI routes, SQLModel/Pydantic models, Alembic migrations, pytest, ruff/black/mypy |
-| [`build-error-resolver`](claude/agents/build-error-resolver.md) | Opus | Fixes TypeScript and build errors with minimal diffs — no architectural changes, just green builds |
-| [`code-reviewer`](claude/agents/code-reviewer.md) | Opus | Quality, security, and maintainability review — must be used after every code change |
-| [`doc-updater`](claude/agents/doc-updater.md) | Opus | Generates `docs/CODEMAPS/*`, updates READMEs and guides from source-of-truth |
-| [`docs-test-engineer`](claude/agents/docs-test-engineer.md) | Sonnet | Documentation (README, API docs, specs) and test suites for Python/FastAPI and React/TypeScript |
-| [`e2e-runner`](claude/agents/e2e-runner.md) | Opus | Playwright E2E tests — manages test journeys, quarantines flaky tests, uploads screenshots/videos/traces |
-| [`non-blocking-loading`](claude/agents/non-blocking-loading.md) | — | Applies skeleton UI / non-blocking loading pattern instead of full-screen spinners |
-| [`planner`](claude/agents/planner.md) | Opus | Creates detailed implementation plans with phases, dependencies, and risk assessment |
-| [`refactor-cleaner`](claude/agents/refactor-cleaner.md) | Opus | Dead code removal using knip/depcheck/ts-prune — categorizes by risk, verifies with tests after each batch |
-| [`security-reviewer`](claude/agents/security-reviewer.md) | Opus | Flags secrets, SSRF, injection, unsafe crypto, and OWASP Top 10 — runs before committing sensitive code |
-| [`ship-to-prod`](claude/agents/ship-to-prod.md) | — | Creates a PR from `uat` → `main` with safety checks, deployment runbook, and rollback plan |
-| [`ship-to-uat`](claude/agents/ship-to-uat.md) | — | Creates a PR from `dev` → `uat` for User Acceptance Testing |
-| [`tdd-guide`](claude/agents/tdd-guide.md) | Opus | Enforces write-tests-first — Red/Green/Refactor cycle, 80%+ coverage minimum |
-| [`webui-developer`](claude/agents/webui-developer.md) | Sonnet | React/TypeScript components, Storybook stories, Vitest tests, cross-platform scripts (PowerShell/bash) |
+| [`architect`](claude/instructions/architect.md) | Opus | Software architecture specialist — system design, scalability, ADRs, trade-off evaluation |
+| [`backend-api-developer`](claude/instructions/backend-api-developer.md) | Sonnet | FastAPI routes, SQLModel/Pydantic models, Alembic migrations, pytest, ruff/black/mypy |
+| [`build-error-resolver`](claude/instructions/build-error-resolver.md) | Opus | Fixes TypeScript and build errors with minimal diffs — no architectural changes, just green builds |
+| [`code-reviewer`](claude/instructions/code-reviewer.md) | Opus | Quality, security, and maintainability review — must be used after every code change |
+| [`doc-updater`](claude/instructions/doc-updater.md) | Opus | Generates `docs/CODEMAPS/*`, updates READMEs and guides from source-of-truth |
+| [`docs-test-engineer`](claude/instructions/docs-test-engineer.md) | Sonnet | Documentation (README, API docs, specs) and test suites for Python/FastAPI and React/TypeScript |
+| [`e2e-runner`](claude/instructions/e2e-runner.md) | Opus | Playwright E2E tests — manages test journeys, quarantines flaky tests, uploads screenshots/videos/traces |
+| [`non-blocking-loading`](claude/instructions/non-blocking-loading.md) | — | Applies skeleton UI / non-blocking loading pattern instead of full-screen spinners |
+| [`planner`](claude/instructions/planner.md) | Opus | Creates detailed implementation plans with phases, dependencies, and risk assessment |
+| [`refactor-cleaner`](claude/instructions/refactor-cleaner.md) | Opus | Dead code removal using knip/depcheck/ts-prune — categorizes by risk, verifies with tests after each batch |
+| [`security-reviewer`](claude/instructions/security-reviewer.md) | Opus | Flags secrets, SSRF, injection, unsafe crypto, and OWASP Top 10 — runs before committing sensitive code |
+| [`ship-to-prod`](claude/instructions/ship-to-prod.md) | — | Creates a PR from `uat` → `main` with safety checks, deployment runbook, and rollback plan |
+| [`ship-to-uat`](claude/instructions/ship-to-uat.md) | — | Creates a PR from `dev` → `uat` for User Acceptance Testing |
+| [`tdd-guide`](claude/instructions/tdd-guide.md) | Opus | Enforces write-tests-first — Red/Green/Refactor cycle, 80%+ coverage minimum |
+| [`webui-developer`](claude/instructions/webui-developer.md) | Sonnet | React/TypeScript components, Storybook stories, Vitest tests, cross-platform scripts (PowerShell/bash) |
 
 ---
 
@@ -185,7 +187,7 @@ Domain-specific knowledge modules loaded into AI context. Claude skills live in 
 
 | Type | Count |
 |------|-------|
-| Agents | 15 |
+| Instructions | 15 |
 | Commands | 27 |
 | Skills (Claude) | 90 |
 | Skills (Codex) | 90 |

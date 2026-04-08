@@ -9,15 +9,19 @@ Manages domain-specific knowledge modules for Claude Code, OpenAI Codex CLI, and
 
 ```
 claude/
-  agents/                     — 15 sub-agents (invoked via Task tool)
+  instructions/                     — 15 agent instructions (invoked via Task tool)
   commands/                   — 27 global slash commands
   skills/<name>/
     SKILL.md                  — main skill content
     diagram.html              — visual diagram (generated)
     sub-skills/               — optional delegate sub-skills
     commands/                 — optional companion slash commands
-codex/skills/<name>/SKILL.md
-gemini/skills/<name>/SKILL.md
+codex/
+  instructions/                     — agent instructions for Codex CLI
+  skills/<name>/SKILL.md
+gemini/
+  instructions/                     — agent instructions for Gemini CLI
+  skills/<name>/SKILL.md
 .claude/commands/             — repo-local slash commands (skills-manager)
 logs/timing.jsonl             — ship-to-dev timing log
 ```
