@@ -1,0 +1,63 @@
+{
+  "skill_name": "what-next",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Hey, I'm coming back to this project after a two-week break. I honestly can't remember where we left off — what should I work on next?",
+      "expected_output": "Skill walks the decision tree. If docs/what-next.md exists and fingerprints match, uses the cache. Otherwise analyses the repo, detects PM framework, reads the task store, prioritises with weighted heuristic, presents top 3 via AskUserQuestion. No prose prompts, no silent rewrites.",
+      "files": [],
+      "assertions": [
+        {"text": "AskUserQuestion tool is invoked at least once (never prose prompts)", "check": "transcript-contains-AskUserQuestion"},
+        {"text": "docs/what-next.md is read or written", "check": "touches-cache-file"},
+        {"text": "When top three are presented, the reason each ranked that way is included in the option description", "check": "option-descriptions-include-ranking-reason"},
+        {"text": "No task is started without user confirmation", "check": "no-agent-spawn-before-user-choice"}
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "/what-next",
+      "expected_output": "In a repo with docs/features/*.md and docs/plans/*.md present, the skill detects the project-manager convention, declines to create backlog.md, and AskUserQuestion whether to invoke /continue-tasks or /review-tasks. docs/what-next.md records pm_framework: project-manager.",
+      "files": [
+        "docs/features/auth.md",
+        "docs/features/payments.md",
+        "docs/plans/auth-plan.md",
+        "docs/plans/payments-plan.md"
+      ],
+      "assertions": [
+        {"text": "project-manager framework is detected (pm_framework: project-manager in cache)", "check": "cache-has-pm-framework-project-manager"},
+        {"text": "backlog.md is NOT created when project-manager is already present", "check": "no-backlog-md-created"},
+        {"text": "User is asked whether to delegate to /continue-tasks or /review-tasks", "check": "options-mention-continue-or-review-tasks"}
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "/what-next please help me figure out what to do in this repo",
+      "expected_output": "In a bare repo with no PM artefacts, the skill analyses structure, detects no framework, and AskUserQuestion with four bootstrap options: /project-manager setup, create backlog.md, run code analysis, manual input. On backlog creation, area-scoped IDs are derived from top-level folders and the user is shown the inferred prefix map for confirmation.",
+      "files": [
+        "src/auth/login.ts",
+        "src/ui/button.tsx",
+        "src/api/orders.ts",
+        "package.json"
+      ],
+      "assertions": [
+        {"text": "Four bootstrap options are offered: /project-manager, backlog.md, code analysis, manual", "check": "all-four-bootstrap-options-present"},
+        {"text": "Inferred area map includes AUTH, UI, API prefixes (from src/auth, src/ui, src/api)", "check": "area-map-includes-expected-prefixes"},
+        {"text": "User is shown the area map for confirmation before first backlog item is written", "check": "area-map-confirmation-asked"}
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "/what-next update",
+      "expected_output": "Update Flow: forces repo re-analysis even if fingerprints match. Reconciles backlog against current repo — tasks whose referenced files no longer exist are marked 'stale' (not closed). A short diff summary is printed before presenting top three.",
+      "files": [
+        "backlog.md",
+        "docs/what-next.md"
+      ],
+      "assertions": [
+        {"text": "Fingerprints are re-computed and written regardless of match", "check": "fingerprints-refreshed"},
+        {"text": "A diff summary (areas added/removed, tasks added/archived) is printed", "check": "diff-summary-present"},
+        {"text": "Stale tasks (referencing deleted files) are not auto-closed", "check": "stale-tasks-preserved-not-closed"}
+      ]
+    }
+  ]
+}

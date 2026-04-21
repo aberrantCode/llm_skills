@@ -359,6 +359,10 @@
           "description": "Generate beautiful, self-contained HTML pages that visually explain systems, code changes, plans, and data. Use when the user asks for a diagram, architecture overview, diff review, plan review, project recap, comparison table, or any visual explanation of technical concepts. Also use proactively when you are about to render a complex ASCII table (4+ rows or 3+ columns) \u2014 present it as a styled HTML page instead.",
           "category": "DevOps & Tooling"
         },
+        "what-next": {
+          "description": "Decide what to work on next in the current repo. Analyses structure, detects the project-management framework, prioritises pending tasks with a weighted heuristic, and when the user picks from the top three, hands the chosen task to the right specialist agent. Caches findings to docs/what-next.md so subsequent runs skip re-analysis. Delegates to the project-manager skill when its convention is already in place. Use whenever the user asks 'what next?', 'what should I work on?', 'where did we leave off?', or invokes /what-next or /what-next-update.",
+          "category": "Foundations & Workflow"
+        },
         "web-content": {
           "description": "SEO and AI discovery (GEO) - schema, ChatGPT/Perplexity optimization",
           "category": "Content & Marketing"
