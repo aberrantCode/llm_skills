@@ -89,6 +89,16 @@ Run these inspections (parallel where possible):
 4. **Areas for task-ID prefixes** — enumerate meaningful top-level or `src/*` folders. Convert
    each to a 2–4-letter prefix (`src/auth` → `AUTH`, `packages/ui` → `UI`,
    `api/payments` → `PAY`). See `references/area-inference.md` for the heuristic.
+5. **Infrastructure gaps worth flagging** — quick existence checks that affect *task sequencing*
+   (not a full lint pass; only things that would change what the user should do next):
+   - No test runner wired up (no `scripts.test` in `package.json`, no `pytest` config, no `go test`
+     targets in a Makefile, etc.) → observation: "no test runner configured".
+   - No CI config (`.github/workflows/`, `.gitlab-ci.yml`, `.circleci/config.yml`) → observation:
+     "no CI — manual validation only".
+   - No linter/formatter config when one is conventional for the stack → observation: "no
+     lint/format config".
+   Record any hits as a short `observations:` list in `docs/what-next.md`. Step 7 will surface
+   one of these as a hint next to the top-three prompt when relevant.
 
 Record everything in memory; it will be persisted to `docs/what-next.md` at Step 9.
 
@@ -113,17 +123,38 @@ Scan file-based markers in this order. The **first** match wins unless otherwise
 
 ### Important: Delegation Rule (Priority 1)
 
-If the framework is `project-manager`, **do not read backlog.md, do not build a backlog.md, and do
-not create area-scoped IDs**. Instead:
+If the framework is `project-manager`, operate *on top of* project-manager's state — do not create
+a parallel `backlog.md` and do not invent area-scoped IDs. The `project-manager` skill is the
+authoritative, battle-tested workflow for execution; `/what-next` makes it easier to choose *which*
+task to hand off next.
 
-1. Read `docs/plans/*.md` to count `todo`, `in-progress`, `done`, `blocked` tasks.
-2. AskUserQuestion whether to invoke `/continue-tasks` (the project-manager orchestrator) or run
-   `/review-tasks` for a read-only snapshot.
-3. Record `pm_framework: project-manager` in `docs/what-next.md` and stop — the orchestration
-   loop owns task execution from here.
+Flow:
 
-The reason: the `project-manager` skill is an authoritative, battle-tested workflow. Creating a
-parallel `backlog.md` on top of it would split the truth and create reconciliation bugs.
+1. Read every `docs/plans/*.md`. Parse each phase table row-by-row. Classify by the `Status:`
+   column (`todo` | `in-progress` | `done` | `blocked`). Record totals per status.
+2. Apply Step 6's weighted heuristic to the `todo` tasks, using the plan's phase order + priority
+   + any `{blocks: ...}` tags to compute scores. Take the top 3 concrete todos (across all plans).
+   These tasks already have IDs like `auth P1-T3` — reuse them verbatim.
+3. Compose the Step 7 `AskUserQuestion` with these five options (in order):
+   - `{top-1 ID}: {short title}` — "{reason it ranked #1}"
+   - `{top-2 ID}: {short title}` — "{reason}"
+   - `{top-3 ID}: {short title}` — "{reason}"
+   - `Run /review-tasks for a full snapshot` — read-only PM status report
+   - `Invoke /continue-tasks to run the full orchestration loop` — hand control to project-manager
+4. On user choice:
+   - **Top-N task** → mark that row `in-progress` in its plan file (same mutation project-manager
+     would have made), then hand off to the right specialist agent per Step 8. Do not build a
+     backlog.md.
+   - **/review-tasks** → print the structured report (feature count, plan count, per-feature
+     status table) without spawning anything.
+   - **/continue-tasks** → print a one-line confirmation recommending the user invoke it.
+     Do not auto-spawn the project-manager orchestration loop from inside `/what-next`.
+5. Record `pm_framework: project-manager` in `docs/what-next.md`.
+
+Why this shape: just saying "go run /continue-tasks" hides the decision the user is actually
+making. Surfacing the top-3 todos first lets them prioritise cheaply, then chose the execution
+path (direct specialist vs. full PM loop). The "no competing backlog" invariant is preserved —
+the plans remain the single source of truth and mutation happens in place.
 
 ---
 
@@ -227,6 +258,12 @@ The weights are **defaults** — if the cached `what-next.md` overrides them in 
 ## Step 7 — Present Top Three via AskUserQuestion
 
 Always use the `AskUserQuestion` tool. Never print the question as prose.
+
+If Step 2 recorded any `observations:` (no test runner, no CI, etc.), include the most relevant
+one as a **single-sentence hint above the question text**, phrased as an FYI, not a new option.
+Example: *"FYI no test runner is configured — some of these tasks may need test setup first."*
+One hint maximum — more than that becomes noise. Skip the hint if all observations are unrelated
+to the top-three tasks.
 
 ```
 AskUserQuestion(
