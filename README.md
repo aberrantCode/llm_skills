@@ -30,7 +30,7 @@ llm_skills/
 ├── claude/
 │   ├── instructions/     # 15 agent instructions
 │   ├── commands/         # 27 slash commands
-│   └── skills/           # 90 domain-specific knowledge modules
+│   └── skills/           # 91 domain-specific knowledge modules
 ├── codex/
 │   ├── instructions/     # Agent instructions for Codex CLI
 │   └── skills/           # 90 domain-specific knowledge modules
@@ -42,7 +42,7 @@ llm_skills/
 
 | Type | Claude | Codex | Gemini | Total |
 |------|:------:|:-----:|:------:|------:|
-| Skills | 90 | 90 | 5 | 185 |
+| Skills | 91 | 90 | 5 | 186 |
 | Instructions | 15 | — | — | 15 |
 | Commands | 27 | — | — | 27 |
 
@@ -123,10 +123,10 @@ Domain-specific knowledge modules loaded into AI context. Each skill lives in `{
 | Third-Party Integrations | 5 | klaviyo, reddit-api, ms-teams-apps, posthog-analytics |
 | SEO & Web Presence | 3 | site-architecture, web-content, aeo-optimization |
 | Tooling & DevOps | 8 | project-tooling, publish-github, skills-manager, start-app |
-| Research & OSINT | 3 | youtube-prd-forensics, worldview-layer-scaffold |
+| Research & OSINT | 4 | youtube-extraction, youtube-prd-forensics, worldview-layer-scaffold |
 
 <details>
-<summary><strong>Full skill list (90 Claude skills)</strong></summary>
+<summary><strong>Full skill list (91 Claude skills)</strong></summary>
 
 | Skill | Category | Description | Claude | Codex | Gemini |
 |-------|----------|-------------|:------:|:-----:|:------:|
@@ -218,6 +218,7 @@ Domain-specific knowledge modules loaded into AI context. Each skill lives in `{
 | [`skills-manager`](claude/skills/skills-manager/) | Tooling & DevOps | Full skill lifecycle — find, sync, install, audit | ✓ | ✓ | ✓ |
 | [`start-app`](claude/skills/start-app/) | Tooling & DevOps | Discover and run the correct startup command | ✓ | ✓ | |
 | [`vercel-deploy-claimable`](claude/skills/vercel-deploy-claimable/) | Tooling & DevOps | Deploy to Vercel with claimable preview URLs | ✓ | ✓ | |
+| [`youtube-extraction`](claude/skills/youtube-extraction/) [(diagram)](claude/skills/youtube-extraction/diagram.html) | Research & OSINT | Reconstruct files, transcripts, and artifacts from a YouTube video — ships with `/recreate-files` | ✓ | | |
 | [`youtube-prd-forensics`](claude/skills/youtube-prd-forensics/) | Research & OSINT | Create PRDs from YouTube demo videos | ✓ | ✓ | |
 | [`worldview-layer-scaffold`](claude/skills/worldview-layer-scaffold/) | Research & OSINT | Scaffold WorldView GEOINT data layers | ✓ | ✓ | |
 | [`worldview-shader-preset`](claude/skills/worldview-shader-preset/) | Research & OSINT | Scaffold WorldView post-processing presets | ✓ | ✓ | |
