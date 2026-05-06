@@ -42,7 +42,7 @@ llm_skills/
 
 | Type | Claude | Codex | Gemini | Total |
 |------|:------:|:-----:|:------:|------:|
-| Skills | 91 | 90 | 5 | 186 |
+| Skills | 100 | 90 | 5 | 195 |
 | Instructions | 15 | — | — | 15 |
 | Commands | 27 | — | — | 27 |
 
@@ -111,7 +111,7 @@ Domain-specific knowledge modules loaded into AI context. Each skill lives in `{
 | Category | Count | Examples |
 |----------|:-----:|---------|
 | Foundations & Workflow | 23 | base, tdd-workflow, ship-to-dev, release-to-main, git-cleanup, **what-next** |
-| Languages & Runtimes | 3 | typescript, python, nodejs-backend |
+| Languages | Languages & Runtimes | 3 | Runtimes | 4 | typescript, python, nodejs-backend |
 | Frontend Frameworks | 8 | react-web, flutter, chrome-extension-builder |
 | Mobile (Native) | 3 | android-java, android-kotlin, ui-mobile |
 | UI & Design | 9 | ui-web, frontend-design, visual-explainer |
@@ -122,11 +122,11 @@ Domain-specific knowledge modules loaded into AI context. Each skill lives in `{
 | Commerce & Payments | 4 | shopify-apps, medusa, web-payments, woocommerce |
 | Third-Party Integrations | 5 | klaviyo, reddit-api, ms-teams-apps, posthog-analytics |
 | SEO & Web Presence | 3 | site-architecture, web-content, aeo-optimization |
-| Tooling & DevOps | 8 | project-tooling, publish-github, skills-manager, start-app |
-| Research & OSINT | 4 | youtube-extraction, youtube-prd-forensics, worldview-layer-scaffold |
+| Tooling | Tooling & DevOps | 8 | DevOps | 9 | project-tooling, publish-github, skills-manager, start-app |
+| Research | Research & OSINT | 4 | OSINT | 12 | youtube-extraction, youtube-prd-forensics, worldview-layer-scaffold |
 
 <details>
-<summary><strong>Full skill list (91 Claude skills)</strong></summary>
+<summary><strong>Full skill list (100 Claude skills)</strong></summary>
 
 | Skill | Category | Description | Claude | Codex | Gemini |
 |-------|----------|-------------|:------:|:-----:|:------:|
@@ -155,6 +155,7 @@ Domain-specific knowledge modules loaded into AI context. Each skill lives in `{
 | [`code-deduplication`](claude/skills/code-deduplication/) | Foundations & Workflow | Prevent semantic duplication with capability index | ✓ | ✓ | |
 | [`typescript`](claude/skills/typescript/) | Languages & Runtimes | TypeScript strict mode with eslint and jest | ✓ | ✓ | |
 | [`python`](claude/skills/python/) | Languages & Runtimes | Python with ruff, mypy, pytest — TDD and type safety | ✓ | ✓ | |
+| [`marko`](claude/skills/marko/) | Languages & Runtimes | Template engine and component system for node.js | ✓ | ✓ |  |
 | [`nodejs-backend`](claude/skills/nodejs-backend/) | Languages & Runtimes | Node.js backend patterns with Express/Fastify | ✓ | ✓ | |
 | [`react-web`](claude/skills/react-web/) | Frontend Frameworks | React web with hooks, React Query, Zustand | ✓ | ✓ | |
 | [`react-native`](claude/skills/react-native/) | Frontend Frameworks | React Native and Expo patterns, performance, animations | ✓ | ✓ | |
@@ -218,11 +219,19 @@ Domain-specific knowledge modules loaded into AI context. Each skill lives in `{
 | [`skills-manager`](claude/skills/skills-manager/) | Tooling & DevOps | Full skill lifecycle — find, sync, install, audit | ✓ | ✓ | ✓ |
 | [`start-app`](claude/skills/start-app/) | Tooling & DevOps | Discover and run the correct startup command | ✓ | ✓ | |
 | [`vercel-deploy-claimable`](claude/skills/vercel-deploy-claimable/) | Tooling & DevOps | Deploy to Vercel with claimable preview URLs | ✓ | ✓ | |
+| [`usage-limit-reducer`](claude/skills/usage-limit-reducer/) | Tooling & DevOps | Optimize resource usage and reduce API rate limit consumption | ✓ |  |  |
 | [`youtube-extraction`](claude/skills/youtube-extraction/) [(diagram)](claude/skills/youtube-extraction/diagram.html) | Research & OSINT | Reconstruct files, transcripts, and artifacts from a YouTube video — ships with `/recreate-files` | ✓ | | |
 | [`youtube-prd-forensics`](claude/skills/youtube-prd-forensics/) | Research & OSINT | Create PRDs from YouTube demo videos | ✓ | ✓ | |
 | [`worldview-layer-scaffold`](claude/skills/worldview-layer-scaffold/) | Research & OSINT | Scaffold WorldView GEOINT data layers | ✓ | ✓ | |
+| [`video-acquisition`](claude/skills/video-acquisition/) | Research & OSINT | Download and manage video files with metadata | ✓ |  |  |
 | [`worldview-shader-preset`](claude/skills/worldview-shader-preset/) | Research & OSINT | Scaffold WorldView post-processing presets | ✓ | ✓ | |
+| [`transcript-acquisition`](claude/skills/transcript-acquisition/) | Research & OSINT | Fetch and process video transcripts from multiple sources | ✓ |  |  |
 
+| [`frame-extraction`](claude/skills/frame-extraction/) | Research & OSINT | Extract frames and images from video content | ✓ |  |  |
+| [`frame-content-recognition`](claude/skills/frame-content-recognition/) | Research & OSINT | Identify and classify visual content in video frames | ✓ |  |  |
+| [`file-reconstruction`](claude/skills/file-reconstruction/) | Research & OSINT | Reconstruct files from extracted or partial data | ✓ |  |  |
+| [`extraction-reporting`](claude/skills/extraction-reporting/) | Research & OSINT | Generate comprehensive reports from extracted content | ✓ |  |  |
+| [`comment-harvesting`](claude/skills/comment-harvesting/) | Research & OSINT | Extract and process comments from video platforms | ✓ |  |  |
 </details>
 
 ---
