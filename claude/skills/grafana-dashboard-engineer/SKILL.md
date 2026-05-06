@@ -56,29 +56,32 @@ The Grafana Dashboard Engineer skill embues Claude Code with production-grade ob
 - Application must be running or have metrics/logs available
 
 **Flow:**
-1. Accept application name or system to monitor (e.g., "proxmox", "docker", "emby")
-2. Check for existing application template
+1. **Detect project structure** — Check for Ansible roles, grafana directories, Docker Compose, etc.
+   - Display detected location to user (e.g., "Detected Ansible structure. Dashboard will go in roles/grafana/files/dashboards/")
+   - If Ansible detected, ask for category (security, firewall, observability, etc.)
+2. Accept application name or system to monitor (e.g., "proxmox", "docker", "emby")
+3. Check for existing application template
    - If found: Present template with all available metrics and ask for confirmation
    - If not found: Research via web search + repo inspection, generate comprehensive template
-3. Gather requirements via AskUserQuestion:
+4. Gather requirements via AskUserQuestion:
    - What's the primary use case? (Performance? Availability? Cost? Logs?)
    - Who's the audience? (DevOps, Developers, Executives, On-call?)
    - What dashboard sophistication? (Simple, Comprehensive, Advanced with Alerts, Executive-ready?)
    - Any custom metrics, alert thresholds, or specific drill-downs needed?
    - Refresh cadence and related dashboards in this project?
-4. Design dashboard wireframe and present layout options
-5. Build dashboard JSON with PromQL/LogQL queries
-6. Create feature branch worktree with dashboard definition
-7. Test queries against running Grafana instance
-8. Generate comprehensive markdown documentation:
+5. Design dashboard wireframe and present layout options
+6. Build dashboard JSON with PromQL/LogQL queries
+7. Create feature branch worktree with dashboard definition
+8. Test queries against running Grafana instance
+9. Generate comprehensive markdown documentation:
    - Extract all metrics and queries from dashboard JSON
    - Document intent, structure, and use cases (from requirement gathering)
    - Create metric definitions with interpretation guidance
    - Generate alert rules table
    - Write usage guide and troubleshooting section
-   - Save to `/docs/dashboards/<dashboard-name>.md`
-9. Offer deployment to live Grafana for user confirmation
-10. Prepare documentation + dashboard JSON for ship-to-dev
+   - Save to appropriate location based on project structure
+10. Offer deployment to live Grafana for user confirmation
+11. Prepare documentation + dashboard JSON for ship-to-dev
 
 **Example:**
 ```
@@ -106,21 +109,25 @@ Claude: Dashboard ready for review. Deploy to live Grafana?
 **Purpose:** Modify an existing dashboard with change tracking.
 
 **Flow:**
-1. Fetch dashboard from repo and live Grafana API
-2. Parse change request (add panels, update queries, change thresholds, etc.)
-3. Validate changes against templates and best practices
-4. Show diff between current and proposed state
-5. Create worktree branch for modifications
-6. Test queries in Grafana before committing
-7. Update dashboard JSON with modifications
-8. Update corresponding `/docs/dashboards/<dashboard-name>.md`:
+1. **Detect project structure** and locate existing dashboard
+   - Search in order: Ansible roles → grafana/ → Docker compose → default
+   - Confirm location with user (e.g., "Found fail2ban-security-ops in roles/grafana/files/dashboards/security/")
+2. Fetch dashboard from repo and live Grafana API
+3. Parse change request (add panels, update queries, change thresholds, etc.)
+4. Validate changes against templates and best practices
+5. Show diff between current and proposed state
+6. Create worktree branch for modifications
+7. Test queries in Grafana before committing
+8. Update dashboard JSON with modifications
+9. Update corresponding documentation:
    - Modify metric definitions if queries changed
    - Update alert rules table if thresholds changed
    - Add new sections for new panels
    - Update changelog entry with change description
    - Set `last_modified` to current date
-9. Test both dashboard and documentation in context
-10. Offer ship-to-dev after user confirms
+   - Keep documentation in same project structure as dashboard JSON
+10. Test both dashboard and documentation in context
+11. Offer ship-to-dev after user confirms
 
 **Example:**
 ```
@@ -199,12 +206,17 @@ Claude: Auditing Proxmox dashboard...
 Summary: 16 panels, 14 queries, 2 alerts | Last updated: 3 days ago
 ```
 
-### /list-dashboards [--filter application|status|category]
+### /list-dashboards [--filter application|status|category|location]
 
-**Purpose:** Inventory all dashboards with health status and metadata.
+**Purpose:** Inventory all dashboards with health status and metadata across all project locations.
+
+**Scanning:**
+- Scans all known dashboard locations: `roles/grafana/files/dashboards/`, `grafana/dashboards/`, `monitoring/grafana/dashboards/`
+- Shows dashboard location (Ansible role, project-root, Docker location, etc.)
+- Groups by location for easy reference
 
 **Output:**
-- Dashboard name and application/category
+- Dashboard name, application/category, and location
 - Status (✅ valid, ⚠️ warnings, 🔴 errors, 🔄 drift detected)
 - Panel/query/alert counts
 - Last modified date
@@ -325,30 +337,124 @@ Initial templates created for common homelab/infrastructure systems:
 
 ## Storage & Versioning
 
-### Repository Structure
+### Project Structure Detection
 
+The skill automatically detects the project's expected structure and places dashboards accordingly. Detection flow:
+
+1. **Check for Ansible roles structure** (`roles/` directory exists)
+   - If Grafana role exists at `roles/grafana/files/dashboards/`:
+     - Dashboards → `roles/grafana/files/dashboards/<category>/<name>.json`
+     - Documentation → `roles/grafana/files/dashboards/<name>.README.md`
+     - Categories: security, firewall, dns, observability, identity, caching, etc.
+
+2. **Check for project-root grafana directory**
+   - If `grafana/dashboards/` exists:
+     - Dashboards → `grafana/dashboards/<name>.json`
+     - Documentation → `grafana/docs/<name>.md`
+     - This is the "lightweight" structure for non-Ansible projects
+
+3. **Check for Docker/Compose structure**
+   - If `docker-compose.yml` and no roles/ directory:
+     - Dashboards → `monitoring/grafana/dashboards/<name>.json`
+     - Documentation → `docs/dashboards/<name>.md`
+
+4. **Fallback to standard location**
+   - Dashboards → `grafana/dashboards/<name>.json`
+   - Documentation → `grafana/docs/<name>.md`
+   - Creates directories if they don't exist
+
+### Example: Repository Structures
+
+**Ansible-based (AC_OPBTA pattern):**
 ```
 <project>/
-├── .claude/skills/
-│   └── grafana-dashboard-engineer/
-│       ├── SKILL.md (this file)
-│       ├── PROXMOX.md (template)
-│       ├── DOCKER.md (template)
-│       └── ... [other templates]
-├── docs/
-│   └── dashboards/
-│       ├── proxmox-infrastructure.md
-│       ├── docker-containers.md
-│       └── ... [dashboard documentation]
+├── roles/
+│   └── grafana/
+│       └── files/dashboards/
+│           ├── security/
+│           │   └── fail2ban-security-ops.json
+│           ├── firewall/
+│           │   └── network-health.json
+│           ├── fail2ban-security-ops.README.md
+│           └── network-health.README.md
+├── grafana/
+│   ├── dashboards/
+│   │   └── [project-specific dashboards]
+│   └── docs/
+│       └── [project-specific dashboard docs]
+```
+
+**Lightweight (non-Ansible):**
+```
+<project>/
 ├── grafana/
 │   ├── dashboards/
 │   │   ├── proxmox-infrastructure.json
 │   │   ├── docker-containers.json
 │   │   └── ... [one file per dashboard]
+│   ├── docs/
+│   │   ├── proxmox-infrastructure.md
+│   │   ├── docker-containers.md
+│   │   └── ... [dashboard documentation]
 │   └── .archive/
-│       ├── deleted-dashboard-2026-05-01.json
 │       └── ... [deleted dashboard backups]
+├── docs/
+│   └── dashboards/
+│       ├── proxmox-infrastructure.md
+│       └── ... [alternative doc location]
 ```
+
+**Docker Compose (monitoring-specific):**
+```
+<project>/
+├── docker-compose.yml
+├── monitoring/
+│   └── grafana/
+│       └── dashboards/
+│           ├── app-dashboard.json
+│           └── ... [dashboards]
+├── docs/
+│   └── dashboards/
+│       ├── app-dashboard.md
+│       └── ... [dashboard docs]
+```
+
+### Structure Detection Algorithm
+
+When `/new-dashboard` or `/update-dashboard` is invoked, the skill runs:
+
+```
+1. Check if roles/grafana/files/dashboards/ exists
+   ├─ YES: Ansible project detected
+   │  └─ Ask: What category? (security, firewall, dns, observability, identity, caching, etc.)
+   │     → Store in roles/grafana/files/dashboards/<category>/<name>.json
+   │     → Document as roles/grafana/files/dashboards/<name>.README.md
+   │
+   └─ NO: Continue to step 2
+
+2. Check if grafana/dashboards/ exists
+   ├─ YES: Lightweight grafana structure detected
+   │  └─ Store in grafana/dashboards/<name>.json
+   │     Document in grafana/docs/<name>.md
+   │
+   └─ NO: Continue to step 3
+
+3. Check if docker-compose.yml exists AND no roles/ directory
+   ├─ YES: Docker Compose structure detected
+   │  └─ Store in monitoring/grafana/dashboards/<name>.json
+   │     Document in docs/dashboards/<name>.md
+   │
+   └─ NO: Continue to step 4
+
+4. Default: Lightweight structure
+   └─ Create grafana/dashboards/ if needed
+      Store in grafana/dashboards/<name>.json
+      Document in grafana/docs/<name>.md
+```
+
+**User Override:**
+- If user specifies a path during `/new-dashboard --path <custom/path>`, use that explicitly
+- Display detected location to user before confirming
 
 ### Dashboard Frontmatter
 
@@ -570,17 +676,25 @@ export GRAFANA_API_KEY="glsa_xxxxxxxxxxxxx"
 
 ### Local Testing & Preview
 
-1. Create worktree branch: `feat/dashboard-[appname]-[date]`
-2. Generate dashboard JSON and store in `grafana/dashboards/` directory
-3. Generate markdown documentation in `/docs/dashboards/<dashboard-name>.md`:
+1. **Detect project structure** and determine target location
+2. Create worktree branch: `feat/dashboard-[appname]-[date]`
+3. Generate dashboard JSON and store in detected location:
+   - Ansible: `roles/grafana/files/dashboards/<category>/<name>.json`
+   - Project-root: `grafana/dashboards/<name>.json`
+   - Docker: `monitoring/grafana/dashboards/<name>.json`
+   - Custom: user-specified path
+4. Generate markdown documentation in paired location:
+   - Ansible: `roles/grafana/files/dashboards/<name>.README.md`
+   - Project-root: `grafana/docs/<name>.md`
+   - Docker: `docs/dashboards/<name>.md`
    - Include intent, structure, use cases from requirements gathering
    - Document all metrics with queries, units, and interpretation guidance
    - Create alert rules reference table
    - Add usage guide and troubleshooting section
-4. Test queries against running Grafana instance (validate all return data)
-5. Verify documentation accuracy by reviewing against live dashboard
-6. Show user preview of both dashboard and documentation
-7. User confirms dashboard is working, useful, and well-documented
+5. Test queries against running Grafana instance (validate all return data)
+6. Verify documentation accuracy by reviewing against live dashboard
+7. Show user preview of both dashboard and documentation (with locations highlighted)
+8. User confirms dashboard is working, useful, well-documented, and in the right place
 
 ### Deployment to Live Grafana
 
@@ -589,6 +703,95 @@ Once user confirms dashboard is working:
 2. User tests dashboard in live environment
 3. Validates queries, alert thresholds, and usability
 4. Confirms before proceeding to ship-to-dev
+
+---
+
+## Dashboard Location & Structure Detection
+
+### How the Skill Finds the Right Place
+
+Every time you run `/new-dashboard` or `/update-dashboard`, the skill:
+
+1. Examines your project structure to determine the "dashboard home"
+2. Shows you the detected location before proceeding
+3. Allows manual override with `--path` flag if needed
+
+This ensures dashboards are stored alongside related configs, templates, and Ansible roles where they belong.
+
+### Structure Priority (in order of detection)
+
+**1. Ansible Roles (Priority High)**
+```bash
+# Detected when: roles/grafana/files/dashboards/ exists
+# Placement: roles/grafana/files/dashboards/<category>/<name>.json
+# Documentation: roles/grafana/files/dashboards/<name>.README.md
+# When to use: Infrastructure-heavy projects with Ansible orchestration
+```
+
+**2. Project-Root Grafana Directory (Priority Medium)**
+```bash
+# Detected when: grafana/dashboards/ exists AND no Ansible roles/
+# Placement: grafana/dashboards/<name>.json
+# Documentation: grafana/docs/<name>.md
+# When to use: Projects with dedicated grafana/ structure
+```
+
+**3. Docker Compose Monitoring (Priority Medium)**
+```bash
+# Detected when: docker-compose.yml exists AND no roles/
+# Placement: monitoring/grafana/dashboards/<name>.json
+# Documentation: docs/dashboards/<name>.md
+# When to use: Docker-based applications with monitoring stack
+```
+
+**4. Fallback (Always Works)**
+```bash
+# Detected when: none of the above exist
+# Placement: grafana/dashboards/<name>.json
+# Documentation: grafana/docs/<name>.md
+# Creates directories automatically
+```
+
+### Manual Override
+
+If auto-detection doesn't match your project structure, override explicitly:
+
+```bash
+/new-dashboard fail2ban --path roles/grafana/files/dashboards/security
+# Directly specify where to store the dashboard
+```
+
+### Category Selection (Ansible-Only)
+
+When Ansible structure is detected, the skill asks:
+
+```
+Which category? 
+  □ security
+  □ firewall
+  □ dns
+  □ observability
+  □ identity
+  □ caching
+  □ infrastructure
+  □ application
+  □ database
+  □ custom
+```
+
+Dashboards are stored in `roles/grafana/files/dashboards/<category>/<name>.json` for easy Ansible role organization.
+
+### Documentation Placement
+
+Documentation always follows the dashboard:
+
+| Dashboard Location | Documentation Location |
+|---|---|
+| `roles/grafana/files/dashboards/<cat>/<name>.json` | `roles/grafana/files/dashboards/<name>.README.md` |
+| `grafana/dashboards/<name>.json` | `grafana/docs/<name>.md` |
+| `monitoring/grafana/dashboards/<name>.json` | `docs/dashboards/<name>.md` |
+
+Documentation files are named to be discoverable near the dashboards (especially `.README.md` for Ansible roles, which convention tools recognize).
 
 ### Ship-to-Dev Workflow
 
@@ -610,8 +813,9 @@ Includes:
 - [X] panels covering [main categories]
 - [Y] PromQL/LogQL queries
 - [Z] alert rules with thresholds
-- Markdown documentation in /docs/dashboards/[app-name].md
+- Markdown documentation
 
+Location: [roles/grafana/files/dashboards/[category]/[name].json OR grafana/dashboards/[name].json]
 Complexity: [Simple|Comprehensive|Advanced]
 Application: [app-name]
 Categories: Infrastructure, Performance Metrics
@@ -625,6 +829,7 @@ Test Plan:
 - [x] Documentation reflects dashboard state
 - [x] All metrics documented with interpretation guidance
 - [x] Usage guide is clear and helpful
+- [x] Dashboard placed in correct project location
 ```
 
 ---
@@ -793,64 +998,96 @@ The skill is aware of your environment from the repository:
 
 ## Example Workflows
 
-### Scenario 1: Adding EMBY Media Server Dashboard
+### Scenario 1: Adding Fail2ban Dashboard to Ansible Project
 
 ```
-User: /new-dashboard emby
-Claude: Searching for EMBY template... Not found. Researching...
-Claude: Found EMBY in your docker-compose. Generating template...
-Claude: Here's what we can monitor for EMBY:
-  □ Playback stats (users, concurrent streams, content)
-  □ Server performance (CPU, memory, cache efficiency)
-  □ Library health (file counts, organization, errors)
-  □ Transcoding load (concurrent sessions, CPU cost)
-User: All, especially transcoding
+User: /new-dashboard fail2ban
+Claude: Detected Ansible project structure (roles/grafana/files/dashboards/).
+Claude: Which category should this dashboard go in?
+  □ security (✓ recommended for fail2ban)
+  □ firewall
+  □ identity
+  □ infrastructure
+  □ other
+User: security
+Claude: Searching for fail2ban template... Not found. Researching...
+Claude: Generated fail2ban template covering:
+  □ Failed login attempts by source
+  □ Banned IPs and ban duration
+  □ Active jails and protection status
+  □ Recidivism patterns
+User: All, plus alert on ban rate spikes
 Claude: Few quick questions...
-  - Who uses this dashboard? (You, other family members, support team?)
-  - What's most important? (Performance? Availability? Cost?)
-Claude: Building EMBY dashboard with transcoding focus...
-[Creates worktree, generates JSON, tests in live Grafana]
-Claude: Preview ready. This shows transcoding activity, library stats, and performance.
+  - Who uses this? (Security team, ops, both?)
+  - Real-time alerts or review dashboard?
+Claude: Building fail2ban dashboard...
+[Creates worktree, generates fail2ban-security-ops.json in roles/grafana/files/dashboards/security/]
+[Generates fail2ban-security-ops.README.md in roles/grafana/files/dashboards/]
+Claude: Preview ready. Location: roles/grafana/files/dashboards/security/
+Claude: Dashboard shows ban activity, threat patterns, and protection status.
 User: Perfect, deploy it
-Claude: Dashboard deployed. Ready to ship to dev?
+Claude: Dashboard deployed to live Grafana. Ready to ship to dev?
 User: Yes
-[Creates PR with dashboard + docs, merges after approval]
+[Creates PR with dashboard + docs in Ansible structure, merges after approval]
 ```
 
-### Scenario 2: Optimizing Proxmox Dashboard After Incident
+### Scenario 2: Adding Dashboard to Lightweight Grafana Project
 
 ```
-User: /update-dashboard proxmox "add network I/O per VM, CPU alert was 95% but we hit limits at 85%"
-Claude: Fetching current dashboard...
+User: /new-dashboard proxmox
+Claude: Detected lightweight grafana structure (grafana/dashboards/).
+Claude: Searching for Proxmox template... Found!
+Claude: Here's what we can monitor:
+  □ VM performance (CPU, memory, disk, network)
+  □ Container stats (LXC metrics)
+  □ Storage and I/O
+  □ Cluster health
+User: All
+Claude: Few quick questions...
+[Quick Q&A]
+Claude: Building Proxmox dashboard...
+[Creates worktree, generates proxmox-infrastructure.json in grafana/dashboards/]
+[Generates proxmox-infrastructure.md in grafana/docs/]
+Claude: Preview ready. Location: grafana/dashboards/
+Claude: Ready to deploy?
+User: Yes
+[Deploys, ships to dev]
+```
+
+### Scenario 3: Updating Fail2ban Dashboard (Ansible Project)
+
+```
+User: /update-dashboard fail2ban "add geographic heatmap, lower alert threshold from 100 to 50 bans/hour"
+Claude: Detected Ansible project. Found fail2ban in roles/grafana/files/dashboards/security/
 Claude: Proposed changes:
-  + Add network I/O heatmap (sorted by usage)
-  ~ Lower CPU alert from 95% to 85%
+  + Add geographic heatmap of ban sources
+  ~ Lower ban rate alert: 100/hr → 50/hr
 Claude: Testing queries in live Grafana... ✅ Valid
 User: Deploy
-[Deploys to live Grafana]
+[Deploys to live Grafana, updates documentation with new metrics and alert threshold]
 User: Looks good
 Claude: Shipping to dev...
-[Creates PR with change explanation and test results]
+[Creates PR with updated dashboard and README.md]
 ```
 
-### Scenario 3: Discovering Monitoring Gaps
+### Scenario 4: Discovering Monitoring Gaps
 
 ```
 User: /list-dashboards --filter status:warning
 Claude: Found 2 dashboards with warnings:
 
-1. docker-containers ⚠️ Loki query failing
-2. opnsense-firewall ⚠️ Drift detected (3 live changes)
+1. roles/grafana/files/dashboards/security/ - fail2ban ⚠️ Queries slow
+2. grafana/dashboards/ - docker-containers 🔄 Drift detected (3 live changes)
 
-User: /audit-dashboard opnsense-firewall
-Claude: Auditing OPNsense dashboard...
-🔴 3 live edits not in repo (drift detected)
-⚠️ Missing WAN interface packet loss tracking
-⚠️ CPU alert threshold might be too high
-Claude: Want to fix these?
-User: Yes, add WAN tracking
+User: /audit-dashboard fail2ban
+Claude: Auditing fail2ban dashboard...
+⚠️ 2 PromQL queries could be optimized (missing rate())
+⚠️ Missing documentation for custom variables
+🔴 Ban rate threshold (50/hr) seems low—queries only return 10-20 events/hour
+Claude: Want to optimize?
+User: Yes
 Claude: Building update...
-[Updates dashboard, deploys, ships to dev]
+[Optimizes queries, adjusts thresholds, updates README.md, ships to dev]
 ```
 
 ---
