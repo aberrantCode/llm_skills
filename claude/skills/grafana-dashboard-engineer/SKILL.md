@@ -65,12 +65,20 @@ The Grafana Dashboard Engineer skill embues Claude Code with production-grade ob
    - Who's the audience? (DevOps, Developers, Executives, On-call?)
    - What dashboard sophistication? (Simple, Comprehensive, Advanced with Alerts, Executive-ready?)
    - Any custom metrics, alert thresholds, or specific drill-downs needed?
+   - Refresh cadence and related dashboards in this project?
 4. Design dashboard wireframe and present layout options
 5. Build dashboard JSON with PromQL/LogQL queries
 6. Create feature branch worktree with dashboard definition
 7. Test queries against running Grafana instance
-8. Offer deployment to live Grafana for user confirmation
-9. Generate documentation and prepare for ship-to-dev
+8. Generate comprehensive markdown documentation:
+   - Extract all metrics and queries from dashboard JSON
+   - Document intent, structure, and use cases (from requirement gathering)
+   - Create metric definitions with interpretation guidance
+   - Generate alert rules table
+   - Write usage guide and troubleshooting section
+   - Save to `/docs/dashboards/<dashboard-name>.md`
+9. Offer deployment to live Grafana for user confirmation
+10. Prepare documentation + dashboard JSON for ship-to-dev
 
 **Example:**
 ```
@@ -104,8 +112,15 @@ Claude: Dashboard ready for review. Deploy to live Grafana?
 4. Show diff between current and proposed state
 5. Create worktree branch for modifications
 6. Test queries in Grafana before committing
-7. Update dashboard JSON and documentation
-8. Offer ship-to-dev after user confirms
+7. Update dashboard JSON with modifications
+8. Update corresponding `/docs/dashboards/<dashboard-name>.md`:
+   - Modify metric definitions if queries changed
+   - Update alert rules table if thresholds changed
+   - Add new sections for new panels
+   - Update changelog entry with change description
+   - Set `last_modified` to current date
+9. Test both dashboard and documentation in context
+10. Offer ship-to-dev after user confirms
 
 **Example:**
 ```
@@ -320,15 +335,16 @@ Initial templates created for common homelab/infrastructure systems:
 │       ├── PROXMOX.md (template)
 │       ├── DOCKER.md (template)
 │       └── ... [other templates]
+├── docs/
+│   └── dashboards/
+│       ├── proxmox-infrastructure.md
+│       ├── docker-containers.md
+│       └── ... [dashboard documentation]
 ├── grafana/
 │   ├── dashboards/
 │   │   ├── proxmox-infrastructure.json
 │   │   ├── docker-containers.json
 │   │   └── ... [one file per dashboard]
-│   ├── docs/
-│   │   ├── proxmox-infrastructure.md
-│   │   ├── docker-containers.md
-│   │   └── ... [dashboard documentation]
 │   └── .archive/
 │       ├── deleted-dashboard-2026-05-01.json
 │       └── ... [deleted dashboard backups]
@@ -357,6 +373,173 @@ Each dashboard JSON includes metadata:
   ...standard Grafana dashboard JSON...
 }
 ```
+
+---
+
+### Dashboard Documentation (Markdown)
+
+Each dashboard automatically generates corresponding documentation in `/docs/dashboards/<dashboard-name>.md`. This markdown file serves as the source of truth for understanding and maintaining the dashboard.
+
+#### Documentation Structure
+
+```markdown
+---
+title: [Dashboard Name]
+application: [app-name]
+category: [category]
+created_date: [YYYY-MM-DD]
+last_modified: [YYYY-MM-DD]
+managed_by: grafana-dashboard-engineer-skill
+---
+
+## Overview
+[1-2 sentence description of what this dashboard monitors and why it matters]
+
+## Intent & Use Cases
+- **Primary Use Case**: What is this dashboard primarily used for?
+- **Audience**: Who uses this dashboard? (DevOps, Developers, On-call, Executives?)
+- **Refresh Cadence**: How often should this be checked? (Real-time, hourly, daily?)
+- **Related Dashboards**: Links to complementary dashboards
+
+## Dashboard Structure
+
+### Overview Section
+[Description of top-level health panels and what they indicate]
+
+### Performance Metrics
+[Description of performance-related panels, what good/bad looks like]
+
+### Availability & Health
+[Description of availability indicators and alert thresholds]
+
+### Custom Sections
+[Any application-specific sections with context]
+
+## Metric Definitions
+
+### CPU Usage
+- **Query**: [PromQL query]
+- **Unit**: Percentage (%)
+- **What it measures**: Description of what this metric shows
+- **Interpretation**:
+  - Green (< 50%): Healthy, plenty of headroom
+  - Yellow (50-80%): Approaching limits, monitor trend
+  - Red (> 80%): Critical, action needed
+- **Common causes when high**: [List of likely causes]
+- **Action items when high**: [What to do]
+
+### Memory Usage
+- **Query**: [PromQL query]
+- **Unit**: Bytes / Percentage
+- **What it measures**: Description
+- **Interpretation**: Green/Yellow/Red thresholds
+- **Common causes when high**: [Causes]
+- **Action items when high**: [Actions]
+
+### [Additional metrics...]
+
+## Alert Rules
+
+| Alert Name | Condition | Threshold | Duration | Severity |
+|---|---|---|---|---|
+| High CPU Usage | CPU > X% | 85% | 5min | Critical |
+| Memory Saturation | Memory > Y% | 90% | 10min | Warning |
+
+## Usage Guide
+
+### How to Read This Dashboard
+1. Start with the top-left Overview section to understand overall health
+2. Drill down into Performance Metrics to diagnose issues
+3. Check Alert Rules section for current active alerts
+4. Use related dashboards for context
+
+### Common Questions & Answers
+
+**Q: What does this metric mean?**
+A: [Answer with reference to Metric Definitions section]
+
+**Q: Why is my alert firing?**
+A: [Common causes and troubleshooting steps]
+
+**Q: How do I fix [common issue]?**
+A: [Troubleshooting steps and references]
+
+## Troubleshooting
+
+### Dashboard shows no data
+- Check datasource connectivity (Prometheus/Loki status)
+- Verify application is running and exporting metrics
+- Check time range selection (may be outside data retention window)
+
+### Queries are slow
+- Review PromQL optimization in Metric Definitions
+- Check if high-cardinality labels are causing issues
+- Consider increasing query time range
+
+### Alert is misconfigured
+- Verify threshold makes sense for your environment
+- Check alert notification channels are configured
+- Review runbook for escalation procedures
+
+## Related Dashboards
+- [Dashboard Name](link) — Context about related dashboard
+
+## Maintenance & Updates
+
+- **Last verified**: [Date when queries were tested against live data]
+- **Update frequency**: [How often this dashboard should be reviewed]
+- **Owner**: [Team or person responsible]
+- **Changelog**:
+  - [2026-05-06] Initial dashboard creation
+  - [YYYY-MM-DD] Description of changes
+
+## References
+- [Official documentation link](https://...)
+- [Grafana community dashboard](https://...)
+- [Related runbooks/playbooks](link)
+```
+
+#### Documentation Generation Workflow
+
+When running `/new-dashboard` or `/update-dashboard`:
+
+1. **Gather Intent Information** via AskUserQuestion:
+   - Primary use case and audience
+   - Refresh cadence and expected users
+   - Related dashboards in the project
+2. **Extract Metrics from Dashboard JSON**:
+   - Parse all PromQL/LogQL queries
+   - Identify metric names and units
+   - Determine alert thresholds
+3. **Generate Metric Definitions Section**:
+   - For each metric, document:
+     - The PromQL/LogQL query used
+     - Unit of measurement
+     - What it measures and why it matters
+     - Interpretation guidance (healthy vs critical ranges)
+     - Common causes when values are concerning
+     - Action items for remediation
+4. **Create Alert Rules Table**:
+   - Extract all alert conditions
+   - Organize by severity and metric
+   - Document trigger thresholds and durations
+5. **Write Usage Guide**:
+   - Explain logical flow through dashboard
+   - Common questions and troubleshooting
+   - Links to related dashboards
+6. **Save to `/docs/dashboards/`**:
+   - File naming: `<dashboard-name>.md` (same as JSON file, different extension)
+   - Include full frontmatter with metadata
+   - Always sync with dashboard updates
+
+#### Keeping Documentation in Sync
+
+- Whenever `/update-dashboard` modifies queries, thresholds, or panels:
+  1. Update corresponding `.md` file with new metric definitions
+  2. Add changelog entry at bottom
+  3. Update `last_modified` date in frontmatter
+- Documentation is version-controlled alongside dashboard JSON
+- Documentation and dashboard JSON should never drift
 
 ---
 
@@ -389,10 +572,15 @@ export GRAFANA_API_KEY="glsa_xxxxxxxxxxxxx"
 
 1. Create worktree branch: `feat/dashboard-[appname]-[date]`
 2. Generate dashboard JSON and store in `grafana/dashboards/` directory
-3. Generate documentation in `grafana/docs/` directory
+3. Generate markdown documentation in `/docs/dashboards/<dashboard-name>.md`:
+   - Include intent, structure, use cases from requirements gathering
+   - Document all metrics with queries, units, and interpretation guidance
+   - Create alert rules reference table
+   - Add usage guide and troubleshooting section
 4. Test queries against running Grafana instance (validate all return data)
-5. Show user preview before committing
-6. User confirms dashboard is working and useful
+5. Verify documentation accuracy by reviewing against live dashboard
+6. Show user preview of both dashboard and documentation
+7. User confirms dashboard is working, useful, and well-documented
 
 ### Deployment to Live Grafana
 
@@ -407,21 +595,22 @@ Once user confirms dashboard is working:
 After user approves:
 1. Commit changes to feature branch (atomic commit per dashboard)
 2. Create PR to `dev` branch with comprehensive description
-3. Include test plan verifying dashboard functionality
+3. Include test plan verifying dashboard functionality and documentation completeness
 4. Merge after approval
 5. Cleanup feature branch
-6. Dashboard now available to entire team
+6. Dashboard and documentation now available to entire team
 
 **Commit Message Format:**
 ```
 feat: Add [Application] dashboard
 
-Adds comprehensive monitoring dashboard for [Application Name].
+Adds comprehensive monitoring dashboard and documentation for [Application Name].
 
 Includes:
 - [X] panels covering [main categories]
 - [Y] PromQL/LogQL queries
 - [Z] alert rules with thresholds
+- Markdown documentation in /docs/dashboards/[app-name].md
 
 Complexity: [Simple|Comprehensive|Advanced]
 Application: [app-name]
@@ -433,6 +622,9 @@ Test Plan:
 - [x] Alert thresholds verified as reasonable
 - [x] Dashboard renders correctly on mobile
 - [x] Drill-down panels work as expected
+- [x] Documentation reflects dashboard state
+- [x] All metrics documented with interpretation guidance
+- [x] Usage guide is clear and helpful
 ```
 
 ---
