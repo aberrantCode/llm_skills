@@ -1,0 +1,32 @@
+# Roadmap — {{PROJECT_NAME}}
+
+> Auto-renderable from `docs/features/` and `docs/plans/`. Run `/review-tasks` to refresh this section, or use `/continue-tasks` to advance the live state.
+
+**Last refreshed:** {{TODAY}}
+
+---
+
+## Overall Progress
+
+| Metric                | Value      |
+|-----------------------|------------|
+| Feature specs         | 0          |
+| Specs with plans      | 0          |
+| Tasks total           | 0          |
+| Tasks done            | 0          |
+| Overall completion    | 0%         |
+| Open issues           | 0          |
+
+---
+
+## Features
+
+| Feature | CAP prefix | Spec status | Plan | Progress | Owner |
+|---------|------------|-------------|------|----------|-------|
+| _(populated by `/review-tasks`)_ | | | | | |
+
+---
+
+## Next Recommended Action
+
+_(populated by `/review-tasks`)_

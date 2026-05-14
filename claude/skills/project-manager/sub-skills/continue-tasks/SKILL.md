@@ -1,6 +1,6 @@
 ---
 name: continue-tasks
-description: Run the full HomeRadar project orchestration loop — picks up the next todo task, spawns the appropriate agent, and iterates until all tasks are complete
+description: Run the full project orchestration loop — pick up the next todo task, spawn the appropriate agent, monitor its completion sentinel, and iterate until all tasks complete or the failure budget is exhausted
 ---
 
 # Continue Tasks
