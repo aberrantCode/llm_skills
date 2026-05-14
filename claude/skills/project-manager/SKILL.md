@@ -2,14 +2,17 @@
 name: project-manager
 description: >
   Automated project implementation orchestrator that drives feature-driven development from a single
-  initial prompt through to completed code. Use this skill when the user invokes /continue-tasks,
-  /review-tasks, /update-tasks, /init-features, or /reinit. Also trigger proactively when
-  docs/INITIAL_PROMPT.md exists and the user says anything like "move forward", "keep building",
-  "what's next", "continue the implementation", or "start working on the project". This skill
-  manages the full lifecycle: extracting feature specs via interview, generating phased implementation
-  plans, spawning typed agents to execute tasks, monitoring completion sentinels, recovering from
-  failures, and archiving finished work — all driven by markdown files that act as the shared state
-  between orchestrator and worker agents.
+  initial prompt through to completed code. Use this skill when the user invokes /init-project,
+  /init-features, /add-feature, /continue-tasks, /review-tasks, /update-tasks, /analyze-features,
+  or /reinit. Also trigger proactively when docs/INITIAL_PROMPT.md exists and the user says
+  anything like "move forward", "keep building", "what's next", "continue the implementation",
+  or "start working on the project", AND when the user says "set up project management",
+  "bootstrap a new project", "initialize the project workflow", or "make sure agents follow the
+  project plan". This skill manages the full lifecycle: scaffolding a new project with enforcement
+  artifacts, extracting feature specs via interview, generating phased implementation plans,
+  spawning typed agents to execute tasks, monitoring completion sentinels, recovering from
+  failures, and archiving finished work — all driven by markdown files that act as the shared
+  state between orchestrator and worker agents.
 requires: [base]
 ---
 
@@ -38,11 +41,48 @@ docs/
 ```
 
 Read `references/feature-spec-template.md`, `references/plan-template.md`, and
-`references/task-file-template.md` for the exact file formats to use.
+`references/task-file-template.md` for the exact file formats to use. These templates ship with
+the skill and are also copied into target projects by `/init-project` (as `docs/features/template.md`,
+`docs/plans/template.md`, and `docs/tasks/template.md`).
 
 ---
 
 ## Commands
+
+### `/init-project` — Bootstrap a New Project
+
+Use when the project does not yet have the `docs/` scaffolding, AGENTS.md, hooks, PR template, or
+ROADMAP. Idempotent. Detailed flow lives in `sub-skills/init-project/SKILL.md`. The four enforcement
+layers installed are:
+
+1. **AGENTS.md + CLAUDE.md fragment** — soft guidance every agent reads
+2. **`scripts/guard-pm-flow.ps1` + Git `pre-commit` hook** — blocks commits to source files when
+   no active task file exists
+3. **`.claude/settings.json` PreToolUse hook** — advisory warning inside Claude Code
+4. **`.github/pull_request_template.md` + `ROADMAP.md`** — human review layer
+
+Run **before** `/init-features`. After `/init-project` completes, the user fills in
+`docs/INITIAL_PROMPT.md` and then runs `/init-features` to seed feature specs.
+
+---
+
+### `/init-features` — Feature Interview
+
+Use when `docs/INITIAL_PROMPT.md` exists but `docs/features/` is empty or incomplete. Extracts 3-6
+functional areas from the prompt, interviews the user one area at a time via `AskUserQuestion`, and
+writes one feature spec per area to `docs/features/`. Detailed flow lives in
+`sub-skills/init-features/SKILL.md`.
+
+---
+
+### `/add-feature` — Add a Single Feature Spec
+
+Use when `docs/features/` is already populated and a new feature is needed. Runs requirement
+gathering, overlap detection against existing specs, template population, optional diagram
+generation, and feature-index/CAP-ID-registry updates. Detailed flow lives in
+`sub-skills/add-feature/SKILL.md`.
+
+---
 
 ### `/continue-tasks` — Full Orchestration Loop
 
@@ -268,6 +308,24 @@ directory should contain at most one file per active work stream.
 
 **Specs before plans, plans before tasks.** Never generate a task for a feature without an approved
 spec. Never spawn an agent for a task that isn't in a plan. The pipeline flows in one direction.
+
+---
+
+## Pipeline Order
+
+```
+/init-project        →  scaffold the repo (docs/, AGENTS.md, hooks, PR template)
+/init-features       →  capture feature specs from INITIAL_PROMPT.md
+/add-feature         →  add a new spec at any later point
+/analyze-features    →  audit specs for template/CAP-ID/plan-coverage gaps
+/continue-tasks      →  generate plans, spawn agents, iterate
+/update-tasks        →  reconcile active task files with plan statuses
+/review-tasks        →  read-only progress snapshot
+/reinit              →  archive legacy state, normalize, then run /continue-tasks
+```
+
+The first three commands are *one-time-per-feature* (or one-time-per-project); the rest are
+*repeatable* and idempotent.
 
 ## Diagram
 

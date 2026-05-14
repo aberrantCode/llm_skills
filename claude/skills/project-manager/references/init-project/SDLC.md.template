@@ -1,0 +1,63 @@
+# Software Development Lifecycle — {{PROJECT_NAME}}
+
+> Defines how work moves from idea to merged code in this repository. Owned by the project-manager skill; do not edit by hand unless updating the Feature Abbreviation Registry (see below).
+
+---
+
+## Phases
+
+```
+INITIAL_PROMPT.md   →   feature specs   →   plans   →   tasks (active)   →   tasks (archive)
+                        (scope authority)   (checklist)   (one per agent)     (completed)
+```
+
+| Phase | Owner            | Trigger                          | Output                          |
+|-------|------------------|----------------------------------|---------------------------------|
+| Capture | User + `init-features`   | `INITIAL_PROMPT.md` exists | `docs/features/*.md`           |
+| Approve | User             | Review                           | `status: approved` in spec      |
+| Plan    | `continue-tasks` | Approved spec without plan       | `docs/plans/<slug>-plan.md`    |
+| Execute | Agent (per task) | `Status: todo` in plan           | Code change + `## Completion` |
+| Verify  | `code-reviewer`  | `Status: in-progress` finishes   | Plan task → `done`             |
+| Merge   | User             | All P0 tasks done                | PR merged to `dev`              |
+
+---
+
+## Feature Abbreviation Registry
+
+Two-letter prefixes used in CAP-IDs (`[XX-CAP-NN]`). Each row must be unique. Add a row when you create a new feature spec.
+
+| Prefix | Feature slug             | Description                                |
+|--------|--------------------------|--------------------------------------------|
+| _(no features yet)_ |  |  |
+
+---
+
+## Status Vocabulary
+
+| Status        | Used by         | Meaning                                                  |
+|---------------|-----------------|----------------------------------------------------------|
+| `draft`       | Feature spec    | Not yet approved; do not generate a plan                 |
+| `approved`    | Feature spec    | Ready for plan generation                                |
+| `implemented` | Feature spec    | All P0 capabilities verified                             |
+| `deprecated`  | Feature spec    | No longer in scope; preserved for history                |
+| `todo`        | Plan task       | Eligible for `/continue-tasks` pickup                    |
+| `in-progress` | Plan task       | Task file exists in `docs/tasks/active/`                 |
+| `done`        | Plan task       | Completion sentinel observed; task archived              |
+| `blocked`     | Plan task       | Failure escalated to user; do not auto-retry             |
+
+---
+
+## Priority Vocabulary
+
+| Tag    | Meaning                                                |
+|--------|--------------------------------------------------------|
+| `[P0]` | Launch-blocking. Must be in the first merged version.  |
+| `[P1]` | High value. Targeted for next iteration after launch.  |
+| `[P2]` | Nice to have. Backlog candidate.                       |
+| `[P3]` | Speculative / research. Not yet committed.             |
+
+---
+
+## Failure Budget
+
+The Error Recovery Loop (in `project-manager:continue-tasks`) tolerates up to **5 failures per plan** before escalating to the user. Each failure adds 1-3 corrective tasks rather than retrying the failed task blindly. After 5 failures, the plan is paused and a detailed issue is written to `docs/issues/`.
