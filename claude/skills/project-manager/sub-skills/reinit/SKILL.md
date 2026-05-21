@@ -29,7 +29,10 @@ Move these files to `docs/tasks/archive/`:
 Preserve completion sentinels exactly as written, including malformed or blocked ones. If collisions
 occur, use the same date-prefix rule as plans.
 
-## Step 3 - Normalize Feature Specs
+## Step 3 - Audit Feature Specs (Report by Default)
+
+Reinit is recovery tooling. Mass-rewriting specs in place is surprising and hard to undo,
+so this step audits and reports first, and only rewrites with explicit user consent.
 
 For each `.md` file in `docs/features/` except `README.md` and `template.md`:
 
@@ -41,10 +44,30 @@ For each `.md` file in `docs/features/` except `README.md` and `template.md`:
    `## Metadata`, `## Executive Overview`, `## Problem Statement`, `## Use Cases`,
    `## Capabilities`, `## Acceptance Criteria`, `## Out of Scope`, `## Edge Cases`,
    `## Known Issues & Limitations`, `## Open Questions`, `## Change History`.
-4. If the file conforms, report `ok` and do not rewrite it.
-5. If it does not conform, rewrite it using `docs/features/template.md`.
+4. Classify the file as `ok` (fully conforming) or `non-conforming`. Record the specific gaps
+   (missing frontmatter fields, missing sections) for the report.
 
-Normalization rules:
+Do **not** rewrite anything yet. After auditing all specs, print the audit table:
+
+| File | Result | Missing frontmatter | Missing sections |
+|------|--------|---------------------|------------------|
+| auth.md | ok | — | — |
+| billing.md | non-conforming | `priority`, `owner` | `## Use Cases`, `## Edge Cases` |
+
+If every spec is `ok`, continue to Step 4.
+
+If one or more specs are `non-conforming`, use `AskUserQuestion` to choose how to proceed.
+Default (first / recommended) option must be `report-only`:
+
+- **report-only** — leave all specs untouched and continue to Step 4. The user will fix them
+  manually. Downstream `/continue-tasks` will simply skip non-`approved` specs, so this is safe.
+- **rewrite-selected** — present the list of non-conforming files via `AskUserQuestion`
+  (`multiSelect: true`) and normalize only the chosen ones using the rules below.
+- **rewrite-all** — normalize every non-conforming spec using the rules below.
+
+Only files explicitly selected by the user are rewritten. `ok` files are never rewritten.
+
+Normalization rules (apply only to user-selected rewrites):
 
 - Never discard content. Every sentence, table, list, code block, and edge-case note from the
   original must appear in the rewritten file.
@@ -67,12 +90,13 @@ Normalization rules:
 
 ## Step 4 - Report
 
-Print a summary table:
+Print a final summary table that reflects the actual disposition of each spec:
 
 | File | Result | Notes |
 |------|--------|-------|
 | auth.md | ok | already conforming |
-| billing.md | normalized | added frontmatter, moved legacy notes |
+| billing.md | normalized | user-selected rewrite; added frontmatter, moved legacy notes |
+| legacy.md | reported only | non-conforming; user opted not to rewrite |
 
 Also report archived plan/task files and any specs that still need `/analyze-features` before they
 can be approved.
